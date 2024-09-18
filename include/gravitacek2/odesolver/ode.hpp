@@ -10,6 +10,6 @@ namespace gr2
     public:
         ODE(const int &n);
         int get_n() const;
-        virtual int function(const gr2::REAL &t, const gr2::REAL y[], gr2::REAL dydt[]) = 0;
+        virtual void function(const gr2::REAL &t, const gr2::REAL y[], gr2::REAL dydt[]) = 0;
     };
 }

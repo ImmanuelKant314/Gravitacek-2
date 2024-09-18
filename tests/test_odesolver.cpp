@@ -16,11 +16,10 @@ TEST(odesolver_test, damped_harmonic_oscillator)
                 this->xi = xi;
             }
 
-            virtual int function(const gr2::REAL &t, const gr2::REAL y[], gr2::REAL dydt[]) override
+            virtual void function(const gr2::REAL &t, const gr2::REAL y[], gr2::REAL dydt[]) override
             {
                 dydt[0] = y[1];
                 dydt[1] = 2*xi*omega_0*y[1] + omega_0*omega_0*y[0];
-                return 1;
             }
     };
 
