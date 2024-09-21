@@ -1,0 +1,63 @@
+#include "gravitacek2/odesolver/stepper.hpp"
+
+namespace gr2
+{
+    Stepper::Stepper():t(0), n(0), yt(nullptr), dydt(nullptr), dydt2(nullptr), ode(nullptr)
+    {}
+
+    Stepper::~Stepper()
+    {
+        delete[] yt, dydt, dydt2;
+    }
+
+    void Stepper::set_ODE(ODE& ode)
+    {
+        int old_n = n;
+        n = ode.get_n();
+        this->ode = &ode;
+
+        // if new ODE has different number of equations
+        // create new arrays
+        if (old_n != n)
+        {
+            delete[] yt, dydt, dydt2;
+            yt = new REAL[n];
+            yt2 = new REAL[n];
+            dydt = new REAL[n];
+            dydt2 = new REAL[n];
+        }
+    }
+
+    void Stepper::step(const REAL &t, REAL y[], const REAL &h, REAL err[], const REAL dydt_in[], REAL dydt_out[])
+    {
+        // save time internaly
+        this->t = t;
+
+        // if dydt_in given, justcopy
+        // else calculate it
+        if (dydt_in)
+            for (int i = 0; i < n; i++)
+                dydt[i] = dydt_in[i];
+        else
+            ode->function(t, y, dydt2);
+
+        // copy y to double calculation
+        for (int i = 0; i < n; i++)
+            yt2[i] = y[i];
+
+        // do two half steps
+        this->step(this->t, y, h/2, dydt_in=dydt2);
+        this->step(this->t+h/2, y, h/2);
+
+        // do one full step
+        this->step(this->t, yt2, h, dydt_in=dydt2);
+
+        // calculate absolute error
+        for(int i = 0; i < ode->get_n(); i++)
+            err[i] = (y[i] - yt2[i]);
+
+        // if dydt_out given, calculate
+        this->ode->function(this->t+h, y, dydt_out);
+    }
+
+}

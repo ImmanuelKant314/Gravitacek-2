@@ -1,38 +1,120 @@
+#include <cmath>
+
 #include "gtest/gtest.h"
 #include "gravitacek2/odesolver/ode.hpp"
+#include "gravitacek2/odesolver/stepper.hpp"
+#include "gravitacek2/odesolver/steper_types.hpp"
 
-TEST(odesolver_test, damped_harmonic_oscillator)
+gr2::REAL exactDampedHarmonicOscillator(gr2::REAL t, gr2::REAL omega0, gr2::REAL xi, gr2::REAL x0, gr2::REAL v0)
 {
-    class DampedHarmonicOscillator : public gr2::ODE
-    {
-        protected:
-            gr2::REAL omega_0;
-            gr2::REAL xi;
+    // calculation of omega
+    gr2::REAL omega = sqrtl(omega0*omega0 - xi*xi);
 
-        public:
-            DampedHarmonicOscillator(const gr2::REAL &omega_0, const gr2::REAL &xi):gr2::ODE(2) 
-            {
-                this->omega_0 = omega_0;
-                this->xi = xi;
-            }
+    // calculation of coefficients
+    gr2::REAL A = (v0+xi*x0)/omega;
+    gr2::REAL B = x0;
 
-            virtual void function(const gr2::REAL &t, const gr2::REAL y[], gr2::REAL dydt[]) override
-            {
-                dydt[0] = y[1];
-                dydt[1] = 2*xi*omega_0*y[1] + omega_0*omega_0*y[0];
-            }
-    };
-
-    DampedHarmonicOscillator osc = DampedHarmonicOscillator(1.5, 2);
-    gr2::REAL y[] = {0.5, 1.5};
-    gr2::REAL dydt[2];
-    osc.function(0, y, dydt);
-
-    gr2::REAL eps = 1e-15;
-    ASSERT_LE(std::abs(dydt[0]-1.5), eps);
-    ASSERT_LE(std::abs(dydt[1]-10.125), eps);
+    // final value
+    return expl(-xi*t)*(A*sinl(omega*t) + B*cosl(omega*t));
 }
 
+class DampedHarmonicOscillator : public gr2::ODE
+{
+    protected:
+        gr2::REAL omega0;
+        gr2::REAL xi;
+
+    public:
+        DampedHarmonicOscillator(const gr2::REAL &omega0, const gr2::REAL &xi):gr2::ODE(2) 
+        {
+            this->omega0 = omega0;
+            this->xi = xi;
+        }
+
+        virtual void function(const gr2::REAL &t, const gr2::REAL y[], gr2::REAL dydt[]) override
+        {
+            dydt[0] = y[1];
+            dydt[1] = -2*xi*y[1] - omega0*omega0*y[0];
+        }
+};
+
+TEST(odesolver_test, damped_harmonic_oscillator_ode)
+{
+    // parameters and variables
+    gr2::REAL omega0 = 1.5, xi = 1.0;
+    gr2::REAL x0 = 0.5, v0 = 1.5;
+    gr2::REAL y[] = {x0, v0};
+    gr2::REAL dydt[2];
+    gr2::REAL eps = 1e-15;
+
+    // ODE
+    DampedHarmonicOscillator osc = DampedHarmonicOscillator(omega0, xi);
+
+    // test function
+    osc.function(0, y, dydt);
+    ASSERT_NEAR(dydt[0], v0, eps); 
+    ASSERT_NEAR(dydt[1], -2*xi*v0-omega0*omega0*x0, eps);
+
+    // test get_n
+    ASSERT_EQ(osc.get_n(), 2);
+}
+
+TEST(odesolver_test, damped_harmonic_oscillator_stepper)
+{
+    // parameters and variables
+    gr2::REAL omega0 = 2.0, xi = 0.5;
+    gr2::REAL x0 = 1.5, v0 = 0.5;
+    gr2::REAL y[] = {x0, v0};
+    gr2::REAL dydt[2];
+    gr2::REAL h = 0.001;
+    gr2::REAL eps = 1e-7;
+
+    // ODE
+    DampedHarmonicOscillator osc = DampedHarmonicOscillator(omega0, xi);
+
+    // Stepper
+    gr2::RK4 stepper = gr2::RK4();
+    stepper.set_ODE(osc);
+
+    // test order
+    ASSERT_EQ(stepper.get_order(), 4);
+
+    // test step
+    for (int i = 0; i < int(7/h); i++)
+    {
+        ASSERT_NEAR(y[0], exactDampedHarmonicOscillator(h*i, omega0, xi, x0, v0), eps);
+        stepper.step(i*h, y, h);
+    }
+}
+
+TEST(odesolver_test, damped_harmonic_oscillator_stepper_with_err)
+{
+    // parameters and variables
+    gr2::REAL omega0 = 2.0, xi = 0.5;
+    gr2::REAL x0 = 1.5, v0 = 0.5;
+    gr2::REAL y[] = {x0, v0};
+    gr2::REAL dydt[2];
+    gr2::REAL err[2];
+    gr2::REAL h = 0.002;
+    gr2::REAL eps = 1e-7;
+
+    // ODE
+    DampedHarmonicOscillator osc = DampedHarmonicOscillator(omega0, xi);
+
+    // Stepper
+    gr2::RK4 stepper = gr2::RK4();
+    stepper.set_ODE(osc);
+
+    // test order
+    ASSERT_EQ(stepper.get_order(), 4);
+
+    // test step
+    for (int i = 0; i < int(7/h); i++)
+    {
+        ASSERT_NEAR(y[0], exactDampedHarmonicOscillator(h*i, omega0, xi, x0, v0), eps);
+        stepper.step(i*h, y, h, err);
+    }
+}
 int main(int argc, char **argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
