@@ -1,4 +1,4 @@
-#include "ode.hpp"
+#include "gravitacek2/odesolver/ode.hpp"
 
 namespace gr2
 {

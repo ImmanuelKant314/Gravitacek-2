@@ -4,6 +4,8 @@
 #include "gravitacek2/odesolver/ode.hpp"
 #include "gravitacek2/odesolver/stepper.hpp"
 #include "gravitacek2/odesolver/steper_types.hpp"
+#include "gravitacek2/odesolver/stepcontroller.hpp"
+#include "gravitacek2/odesolver/stepcontroller_types.hpp"
 
 gr2::REAL exactDampedHarmonicOscillator(gr2::REAL t, gr2::REAL omega0, gr2::REAL xi, gr2::REAL x0, gr2::REAL v0)
 {
@@ -37,6 +39,46 @@ class DampedHarmonicOscillator : public gr2::ODE
             dydt[1] = -2*xi*y[1] - omega0*omega0*y[0];
         }
 };
+
+TEST(odesolver_test, standardtestcontroller)
+{
+    int n = 2, k = 4;
+    gr2::REAL eps_abs = 1e-10, eps_rel = 2e-10, a_y = 1, a_dydt = 1;
+    gr2::REAL h_old = 1e-3, h_new;
+
+    gr2::REAL y[2] = {0.5, 0.5};
+    gr2::REAL dydt[2] = {0.1, 0.1};
+    gr2::REAL err[2];
+
+    gr2::REAL eps = 1e-5;
+
+    gr2::StandardStepController stepcontroller = gr2::StandardStepController(n, k, eps_abs, eps_rel, a_y, a_dydt);
+
+    // large error
+    err[0] = err[1] = 1e-3;
+    h_new = stepcontroller.hadjust(y, err, dydt, h_old);
+    EXPECT_NEAR(h_new/h_old, 1.0/5, eps);
+
+    // little bit larger error
+    err[0] = err[1] = 1.2e-10;
+    h_new = stepcontroller.hadjust(y, err, dydt, h_old);
+    EXPECT_NEAR(h_new/h_old, 0.907671, eps);
+
+    // normal error 
+    err[0] = err[1] = 1e-10;
+    h_new = stepcontroller.hadjust(y, err, dydt, h_old);
+    EXPECT_NEAR(h_new/h_old, 1.0, eps);
+
+    // little bit small error
+    err[0] = err[1] = 0.4e-10;
+    h_new = stepcontroller.hadjust(y, err, dydt, h_old);
+    EXPECT_NEAR(h_new/h_old, 1.14107, eps);
+
+    // small error
+    err[0] = err[1] = 1e-15;
+    h_new = stepcontroller.hadjust(y, err, dydt, h_old);
+    EXPECT_NEAR(h_new/h_old, 5, eps);
+}
 
 TEST(odesolver_test, damped_harmonic_oscillator_ode)
 {
