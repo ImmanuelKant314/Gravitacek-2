@@ -9,6 +9,6 @@ namespace gr2
         int n;
     public:
         StepController(const int &n);
-        virtual REAL hadjust(const REAL y[], const REAL err[], const REAL dydt[], const REAL &h) = 0;
+        virtual real hadjust(const real y[], const real err[], const real dydt[], const real &h) = 0;
     };
 }

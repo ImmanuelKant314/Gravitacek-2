@@ -15,8 +15,8 @@ namespace gr2
     {
     protected:
         ODE *ode;
-        REAL *yt, *yt2, *dydt, *dydt2;
-        REAL t;
+        real *yt, *yt2, *dydt, *dydt2;
+        real t;
         int n;
     public:
         /**
@@ -67,7 +67,7 @@ namespace gr2
          * @param dytd_in 
          * @param dydt_out
          */
-        virtual void step(const REAL &t, REAL y[], const REAL &h, const REAL dydt_in[] = nullptr, REAL dydt_out[] = nullptr) = 0;
+        virtual void step(const real &t, real y[], const real &h, const real dydt_in[] = nullptr, real dydt_out[] = nullptr) = 0;
 
         /**
          * @brief Calculate next step with error estimate.
@@ -92,7 +92,7 @@ namespace gr2
          * @param dydt_in 
          * @param dydt_out
          */
-        virtual void step(const REAL &t, REAL y[], const REAL &h, REAL err[], const REAL dydt_in[] = nullptr, REAL dydt_out[] = nullptr);
+        virtual void step(const real &t, real y[], const real &h, real err[], const real dydt_in[] = nullptr, real dydt_out[] = nullptr);
 
         /**
          * @brief Get the order of integration

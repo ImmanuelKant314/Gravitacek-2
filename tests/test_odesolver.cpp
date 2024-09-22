@@ -7,14 +7,14 @@
 #include "gravitacek2/odesolver/stepcontroller.hpp"
 #include "gravitacek2/odesolver/stepcontroller_types.hpp"
 
-gr2::REAL exactDampedHarmonicOscillator(gr2::REAL t, gr2::REAL omega0, gr2::REAL xi, gr2::REAL x0, gr2::REAL v0)
+gr2::real exactDampedHarmonicOscillator(gr2::real t, gr2::real omega0, gr2::real xi, gr2::real x0, gr2::real v0)
 {
     // calculation of omega
-    gr2::REAL omega = sqrtl(omega0*omega0 - xi*xi);
+    gr2::real omega = sqrtl(omega0*omega0 - xi*xi);
 
     // calculation of coefficients
-    gr2::REAL A = (v0+xi*x0)/omega;
-    gr2::REAL B = x0;
+    gr2::real A = (v0+xi*x0)/omega;
+    gr2::real B = x0;
 
     // final value
     return expl(-xi*t)*(A*sinl(omega*t) + B*cosl(omega*t));
@@ -23,17 +23,17 @@ gr2::REAL exactDampedHarmonicOscillator(gr2::REAL t, gr2::REAL omega0, gr2::REAL
 class DampedHarmonicOscillator : public gr2::ODE
 {
     protected:
-        gr2::REAL omega0;
-        gr2::REAL xi;
+        gr2::real omega0;
+        gr2::real xi;
 
     public:
-        DampedHarmonicOscillator(const gr2::REAL &omega0, const gr2::REAL &xi):gr2::ODE(2) 
+        DampedHarmonicOscillator(const gr2::real &omega0, const gr2::real &xi):gr2::ODE(2) 
         {
             this->omega0 = omega0;
             this->xi = xi;
         }
 
-        virtual void function(const gr2::REAL &t, const gr2::REAL y[], gr2::REAL dydt[]) override
+        virtual void function(const gr2::real &t, const gr2::real y[], gr2::real dydt[]) override
         {
             dydt[0] = y[1];
             dydt[1] = -2*xi*y[1] - omega0*omega0*y[0];
@@ -43,14 +43,14 @@ class DampedHarmonicOscillator : public gr2::ODE
 TEST(odesolver_test, standardtestcontroller)
 {
     int n = 2, k = 4;
-    gr2::REAL eps_abs = 1e-10, eps_rel = 2e-10, a_y = 1, a_dydt = 1;
-    gr2::REAL h_old = 1e-3, h_new;
+    gr2::real eps_abs = 1e-10, eps_rel = 2e-10, a_y = 1, a_dydt = 1;
+    gr2::real h_old = 1e-3, h_new;
 
-    gr2::REAL y[2] = {0.5, 0.5};
-    gr2::REAL dydt[2] = {0.1, 0.1};
-    gr2::REAL err[2];
+    gr2::real y[2] = {0.5, 0.5};
+    gr2::real dydt[2] = {0.1, 0.1};
+    gr2::real err[2];
 
-    gr2::REAL eps = 1e-5;
+    gr2::real eps = 1e-5;
 
     gr2::StandardStepController stepcontroller = gr2::StandardStepController(n, k, eps_abs, eps_rel, a_y, a_dydt);
 
@@ -83,11 +83,11 @@ TEST(odesolver_test, standardtestcontroller)
 TEST(odesolver_test, damped_harmonic_oscillator_ode)
 {
     // parameters and variables
-    gr2::REAL omega0 = 1.5, xi = 1.0;
-    gr2::REAL x0 = 0.5, v0 = 1.5;
-    gr2::REAL y[] = {x0, v0};
-    gr2::REAL dydt[2];
-    gr2::REAL eps = 1e-15;
+    gr2::real omega0 = 1.5, xi = 1.0;
+    gr2::real x0 = 0.5, v0 = 1.5;
+    gr2::real y[] = {x0, v0};
+    gr2::real dydt[2];
+    gr2::real eps = 1e-15;
 
     // ODE
     DampedHarmonicOscillator osc = DampedHarmonicOscillator(omega0, xi);
@@ -104,12 +104,12 @@ TEST(odesolver_test, damped_harmonic_oscillator_ode)
 TEST(odesolver_test, damped_harmonic_oscillator_stepper)
 {
     // parameters and variables
-    gr2::REAL omega0 = 2.0, xi = 0.5;
-    gr2::REAL x0 = 1.5, v0 = 0.5;
-    gr2::REAL y[] = {x0, v0};
-    gr2::REAL dydt[2];
-    gr2::REAL h = 0.001;
-    gr2::REAL eps = 1e-7;
+    gr2::real omega0 = 2.0, xi = 0.5;
+    gr2::real x0 = 1.5, v0 = 0.5;
+    gr2::real y[] = {x0, v0};
+    gr2::real dydt[2];
+    gr2::real h = 0.001;
+    gr2::real eps = 1e-7;
 
     // ODE
     DampedHarmonicOscillator osc = DampedHarmonicOscillator(omega0, xi);
@@ -132,13 +132,13 @@ TEST(odesolver_test, damped_harmonic_oscillator_stepper)
 TEST(odesolver_test, damped_harmonic_oscillator_stepper_with_err)
 {
     // parameters and variables
-    gr2::REAL omega0 = 2.0, xi = 0.5;
-    gr2::REAL x0 = 1.5, v0 = 0.5;
-    gr2::REAL y[] = {x0, v0};
-    gr2::REAL dydt[2];
-    gr2::REAL err[2];
-    gr2::REAL h = 0.002;
-    gr2::REAL eps = 1e-7;
+    gr2::real omega0 = 2.0, xi = 0.5;
+    gr2::real x0 = 1.5, v0 = 0.5;
+    gr2::real y[] = {x0, v0};
+    gr2::real dydt[2];
+    gr2::real err[2];
+    gr2::real h = 0.002;
+    gr2::real eps = 1e-7;
 
     // ODE
     DampedHarmonicOscillator osc = DampedHarmonicOscillator(omega0, xi);

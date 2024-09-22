@@ -16,10 +16,10 @@ namespace gr2
         if (old_n != n)
         {
             delete[] k1, k2, k3, k4;
-            k1 = new REAL[n];
-            k2 = new REAL[n];
-            k3 = new REAL[n];
-            k4 = new REAL[n];
+            k1 = new real[n];
+            k2 = new real[n];
+            k3 = new real[n];
+            k4 = new real[n];
         }
     }
 
@@ -27,7 +27,7 @@ namespace gr2
     {
     }
 
-    void RK4::step(const REAL &t, REAL y[], const REAL &h, const REAL dydt_in[], REAL dydt_out[]) 
+    void RK4::step(const real &t, real y[], const real &h, const real dydt_in[], real dydt_out[]) 
     {
         int i;
 

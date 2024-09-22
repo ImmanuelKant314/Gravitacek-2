@@ -21,14 +21,14 @@ namespace gr2
         if (old_n != n)
         {
             delete[] yt, dydt, dydt2;
-            yt = new REAL[n];
-            yt2 = new REAL[n];
-            dydt = new REAL[n];
-            dydt2 = new REAL[n];
+            yt = new real[n];
+            yt2 = new real[n];
+            dydt = new real[n];
+            dydt2 = new real[n];
         }
     }
 
-    void Stepper::step(const REAL &t, REAL y[], const REAL &h, REAL err[], const REAL dydt_in[], REAL dydt_out[])
+    void Stepper::step(const real &t, real y[], const real &h, real err[], const real dydt_in[], real dydt_out[])
     {
         // save time internaly
         this->t = t;

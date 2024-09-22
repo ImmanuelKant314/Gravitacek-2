@@ -7,11 +7,11 @@ namespace gr2
     {
     protected:
         int k;
-        REAL eps_abs, eps_rel, a_y, a_dydt, S, factor;
-        REAL *ratios;
+        real eps_abs, eps_rel, a_y, a_dydt, S, factor;
+        real *ratios;
     public:
-        StandardStepController(const int &n, const int &k, const REAL &eps_abs, const REAL &eps_rel, const REAL &a_y, const REAL &a_dydt, const REAL &S = 0.95, const REAL &factor = 5);
+        StandardStepController(const int &n, const int &k, const real &eps_abs, const real &eps_rel, const real &a_y, const real &a_dydt, const real &S = 0.95, const real &factor = 5);
         ~StandardStepController();
-        virtual REAL hadjust(const REAL y[], const REAL err[], const REAL dydt[], const REAL &h) override;
+        virtual real hadjust(const real y[], const real err[], const real dydt[], const real &h) override;
     };
 } 

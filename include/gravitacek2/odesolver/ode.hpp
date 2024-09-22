@@ -46,6 +46,6 @@ namespace gr2
          * @param y coordinate values
          * @param dydt array for returning values of derivation of \f$\vec{y}\f$ with respect to \f$t\f$
          */
-        virtual void function(const gr2::REAL &t, const gr2::REAL y[], gr2::REAL dydt[]) = 0;
+        virtual void function(const real &t, const real y[], real dydt[]) = 0;
     };
 }

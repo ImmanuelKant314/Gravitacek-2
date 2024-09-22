@@ -29,13 +29,13 @@ namespace gr2
     class RK4 : public Stepper
     {
     protected:
-        REAL *k1, *k2, *k3, *k4;
+        real *k1, *k2, *k3, *k4;
     public:
         RK4();
         ~RK4();
         virtual void set_ODE(ODE& ode);
         virtual void reset();
-        virtual void step(const REAL &t, REAL y[], const REAL &h, const REAL dydt_in[] = nullptr, REAL dydt_out[] = nullptr) override;
+        virtual void step(const real &t, real y[], const real &h, const real dydt_in[] = nullptr, real dydt_out[] = nullptr) override;
         virtual int get_order() const override;
     };
 }

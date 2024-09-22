@@ -5,10 +5,10 @@
 
 namespace gr2
 {
-    StandardStepController::StandardStepController(const int& n, const int& k, const REAL &eps_abs, const REAL &eps_rel, const REAL &a_y, const REAL &a_dydt, const REAL &S, const REAL &factor):StepController(n)
+    StandardStepController::StandardStepController(const int& n, const int& k, const real &eps_abs, const real &eps_rel, const real &a_y, const real &a_dydt, const real &S, const real &factor):StepController(n)
     {
         this->k = k;
-        this->ratios = new REAL[n];
+        this->ratios = new real[n];
         this->eps_abs = eps_abs;
         this->eps_rel = eps_rel;
         this->a_y = a_y;
@@ -22,10 +22,10 @@ namespace gr2
         delete[] ratios;
     }
 
-    REAL StandardStepController::hadjust(const REAL y[], const REAL err[], const REAL dydt[], const REAL &h)
+    real StandardStepController::hadjust(const real y[], const real err[], const real dydt[], const real &h)
     {
-        REAL max_ratio = 0;
-        REAL h_new = h;
+        real max_ratio = 0;
+        real h_new = h;
         for (int i = 0; i < n; i++)
         {
             ratios[i] = err[i]/(eps_abs + eps_rel*(a_y*abs(y[i]) + a_dydt*abs(dydt[i])));
