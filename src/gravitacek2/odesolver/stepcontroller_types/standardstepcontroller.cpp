@@ -22,10 +22,10 @@ namespace gr2
         delete[] ratios;
     }
 
-    real StandardStepController::hadjust(const real y[], const real err[], const real dydt[], const real &h)
+    bool StandardStepController::hadjust(const real y[], const real err[], const real dydt[], real &h)
     {
         real max_ratio = 0;
-        real h_new = h;
+        real h_new; 
         for (int i = 0; i < n; i++)
         {
             ratios[i] = err[i]/(eps_abs + eps_rel*(a_y*abs(y[i]) + a_dydt*abs(dydt[i])));
@@ -37,12 +37,17 @@ namespace gr2
             h_new = h*S*powl(max_ratio, -1.0/k);
             if (h_new*factor < h)
                 h_new = h/factor;
+            h = h_new;
+            return false;
         }
         else if(max_ratio < 0.5)
+        {
             h_new = h*S*powl(max_ratio, -1.0/(k+1));
             if (h_new > h*factor)
                 h_new = h*factor;
-
-        return h_new;
+            h = h_new;
+            return true;
+        }
+        return true;
     }
 }

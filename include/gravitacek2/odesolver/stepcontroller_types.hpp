@@ -51,6 +51,6 @@ namespace gr2
          */
         StandardStepController(const int &n, const int &k, const real &eps_abs, const real &eps_rel, const real &a_y, const real &a_dydt, const real &S = 0.95, const real &factor = 5);
         ~StandardStepController();
-        virtual real hadjust(const real y[], const real err[], const real dydt[], const real &h) override;
+        virtual bool hadjust(const real y[], const real err[], const real dydt[], real &h) override;
     };
 } 

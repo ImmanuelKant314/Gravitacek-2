@@ -25,9 +25,9 @@ namespace gr2
          * @param y coordinate values
          * @param err estimates for coordinate values
          * @param dydt derivatives of y with respect to t
-         * @param h previous step size
-         * @return real new step size
+         * @param h value of h, used as input and output
+         * @return true if error is was small enought, false if it is necessary to repeat the step
          */
-        virtual real hadjust(const real y[], const real err[], const real dydt[], const real &h) = 0;
+        virtual bool hadjust(const real y[], const real err[], const real dydt[], real &h) = 0;
     };
 }
