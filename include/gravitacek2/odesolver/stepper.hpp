@@ -14,10 +14,13 @@ namespace gr2
     class Stepper
     {
     protected:
-        ODE *ode;
-        real *yt, *yt2, *dydt, *dydt2;
-        real t;
-        int n;
+        ODE *ode;       // solved system of differential equations
+        real *yt;       // array for storing current value of \f$\vec{y}\f$
+        real *yt2;      // array for storing second estimate of \f$\vec{y}\f$ to calculate error
+        real *dydt;     // array for storing current value of \f$\frac{\mathrm{d}\vec{y}}{\mathrm{d} t}\f$
+        real *dydt2;    // array for storing value of \f$\frac{\mathrm{d}\vec{y}}{\mathrm{d} t}\f$ for improving performance
+        real t;         // value of time variable
+        int n;          // number of solved differential equations
     public:
         /**
          * @brief Construct a new Stepper object.

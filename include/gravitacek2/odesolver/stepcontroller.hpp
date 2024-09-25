@@ -4,13 +4,13 @@
 namespace gr2
 {
     /**
-     * @brief Abstract class for changing stepsize.
+     * @brief Abstract class for changing step size.
      * 
      */
     class StepController
     {
     protected:
-        int n; // number of ODEs
+        int n; // number of solved ordinary differential equations
     public:
         /**
          * @brief Construct a new StepController object.

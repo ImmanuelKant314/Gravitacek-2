@@ -21,7 +21,7 @@ namespace gr2
     class ODE
     {
     protected:
-        int n;
+        int n; // number of ordinary differential equations
     public:
         /**
          * @brief Construct a new ODE object
