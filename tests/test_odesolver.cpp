@@ -40,7 +40,7 @@ class DampedHarmonicOscillator : public gr2::ODE
         }
 };
 
-TEST(odesolver_test, standardtestcontroller)
+TEST(step_controller, standard_step_controller)
 {
     int n = 2, k = 4;
     gr2::real eps_abs = 1e-10, eps_rel = 2e-10, a_y = 1, a_dydt = 1;
@@ -89,6 +89,54 @@ TEST(odesolver_test, standardtestcontroller)
     test = stepcontroller.hadjust(y, err, dydt, h_new);
     EXPECT_TRUE(test);
     EXPECT_NEAR(h_new/h_old, 5, eps);
+}
+
+TEST(step_controller, step_controller_nr)
+{
+    // ========== Parameters for controller ========== 
+    int n = 2, k = 4;
+    gr2::real atol = 1e-10, rtol = 2e-10;
+    gr2::real h_old = 1e-4, h_new;
+
+    gr2::StepControllerNR stepcontroller = gr2::StepControllerNR(n, k, atol, rtol);
+
+    // ========== Test example ========== 
+    gr2::real y[2] = {0.5, 0.5};
+    gr2::real dydt[2] = {0.1, 0.1};
+    gr2::real err[2];
+
+    // ========== Variables for test ========== 
+    gr2::real eps = 1e-3;
+    bool test;
+
+    // ========== Testing ========== 
+    // big error
+    err[0] = err[1] = 1e-3;
+    h_new = h_old; 
+    test = stepcontroller.hadjust(y, err, dydt, h_new);
+    EXPECT_FALSE(test);
+    EXPECT_NEAR(h_new/h_old, 1.0/5, eps);
+
+    // little big error
+    err[0] = err[1] = 1e-9;
+    h_new = h_old; 
+    test = stepcontroller.hadjust(y, err, dydt, h_new);
+    EXPECT_FALSE(test);
+    EXPECT_NEAR(h_new/h_old, 0.63530, eps);
+
+    // little small error
+    err[0] = err[1] = 1e-11;
+    h_new = h_old; 
+    test = stepcontroller.hadjust(y, err, dydt, h_new);
+    EXPECT_TRUE(test);
+    EXPECT_NEAR(h_new/h_old, 2.0090, eps);
+
+    // small error
+    err[0] = err[1] = 1e-15;
+    h_new = h_old; 
+    test = stepcontroller.hadjust(y, err, dydt, h_new);
+    EXPECT_TRUE(test);
+    EXPECT_NEAR(h_new/h_old, 10, eps);
 }
 
 TEST(odesolver_test, damped_harmonic_oscillator_ode)

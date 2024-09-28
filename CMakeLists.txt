@@ -26,7 +26,8 @@ add_library(odesolver
             ${ODESOLVER_DIR}/stepper.cpp
             ${ODESOLVER_DIR}/stepcontroller.cpp
             ${ODESOLVER_DIR}/stepper_types/rk4.cpp
-            ${ODESOLVER_DIR}/stepcontroller_types/standardstepcontroller.cpp)
+            ${ODESOLVER_DIR}/stepcontroller_types/standardstepcontroller.cpp
+            ${ODESOLVER_DIR}/stepcontroller_types/stepcontrollernr.cpp)
 
 # include directiories
 target_include_directories(setup PUBLIC ${PROJECT_SOURCE_DIR}/include)
