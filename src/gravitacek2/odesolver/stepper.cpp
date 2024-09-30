@@ -28,7 +28,7 @@ namespace gr2
         }
     }
 
-    void Stepper::step(const real &t, real y[], const real &h, real err[], const real dydt_in[], real dydt_out[])
+    void Stepper::step_err(const real &t, real y[], const real &h, real err[], const real dydt_in[], real dydt_out[])
     {
         // save time internaly
         this->t = t;
@@ -51,13 +51,14 @@ namespace gr2
 
         // do one full step
         this->step(this->t, yt2, h, dydt_in=dydt2);
-
+        
         // calculate absolute error
-        for(int i = 0; i < ode->get_n(); i++)
+        for(int i = 0; i < n; i++)
             err[i] = (y[i] - yt2[i]);
 
         // if dydt_out given, calculate
-        this->ode->function(this->t+h, y, dydt_out);
+        if (dydt_out)
+            this->ode->function(this->t+h, y, dydt_out);
     }
 
 }

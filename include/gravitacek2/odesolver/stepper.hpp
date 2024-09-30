@@ -95,7 +95,7 @@ namespace gr2
          * @param dydt_in 
          * @param dydt_out
          */
-        virtual void step(const real &t, real y[], const real &h, real err[], const real dydt_in[] = nullptr, real dydt_out[] = nullptr);
+        virtual void step_err(const real &t, real y[], const real &h, real err[], const real dydt_in[] = nullptr, real dydt_out[] = nullptr);
 
         /**
          * @brief Get the order of integration

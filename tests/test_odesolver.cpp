@@ -242,7 +242,8 @@ TEST(odesolver_test, damped_harmonic_oscillator_stepper_with_err)
     for (int i = 0; i < int(7/h); i++)
     {
         ASSERT_NEAR(y[0], exactDampedHarmonicOscillator(h*i, omega0, xi, x0, v0), eps);
-        stepper.step(i*h, y, h, err);
+        stepper.step_err(i*h, y, h, err);
+        std::cout << err[0] << ", " << err[1] << std::endl;
     }
 }
 int main(int argc, char **argv)
