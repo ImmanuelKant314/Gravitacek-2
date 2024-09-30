@@ -2,6 +2,7 @@
 
 #include "gtest/gtest.h"
 #include "gravitacek2/odesolver/ode.hpp"
+#include "gravitacek2/odesolver/event.hpp"
 #include "gravitacek2/odesolver/stepper.hpp"
 #include "gravitacek2/odesolver/steper_types.hpp"
 #include "gravitacek2/odesolver/stepcontroller.hpp"
@@ -38,6 +39,22 @@ class DampedHarmonicOscillator : public gr2::ODE
             dydt[0] = y[1];
             dydt[1] = -2*xi*y[1] - omega0*omega0*y[0];
         }
+};
+
+class ZeroY : public gr2::Event
+{
+    protected:
+        gr2::real *last_y;
+    public:
+        ZeroY(gr2::real *last_y) : gr2::Event(gr2::EventType::data){this->last_y = last_y;}
+        virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real err[], const gr2::real dydt[], const gr2::real &h) override
+        {
+            return y[1];
+        };
+        virtual void save(const gr2::real &t, const gr2::real y[], const gr2::real err[], const gr2::real dydt[], const gr2::real &h)
+        {
+            this->last_y[0] = y[1];
+        };
 };
 
 TEST(step_controller, standard_step_controller)
@@ -137,6 +154,18 @@ TEST(step_controller, step_controller_nr)
     test = stepcontroller.hadjust(y, err, dydt, h_new);
     EXPECT_TRUE(test);
     EXPECT_NEAR(h_new/h_old, 10, eps);
+}
+
+TEST(events, zero_y)
+{
+    gr2::real y[2] = {1.0, 2.0};
+    gr2::real last_y;
+    ZeroY event = ZeroY(&last_y);
+
+    EXPECT_EQ(event.get_type(), gr2::EventType::data);
+    EXPECT_EQ(y[1], event.value(0, y, nullptr, nullptr, 0));
+    event.save(0, y, nullptr, nullptr, 0);
+    EXPECT_EQ(last_y, y[1]);
 }
 
 TEST(odesolver_test, damped_harmonic_oscillator_ode)

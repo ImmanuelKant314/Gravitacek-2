@@ -23,6 +23,7 @@ add_library(setup STATIC ${PROJECT_SOURCE_DIR}/src/gravitacek2/setup.cpp)
 add_library(odesolver 
             STATIC 
             ${ODESOLVER_DIR}/ode.cpp
+            ${ODESOLVER_DIR}/event.cpp
             ${ODESOLVER_DIR}/stepper.cpp
             ${ODESOLVER_DIR}/stepcontroller.cpp
             ${ODESOLVER_DIR}/stepper_types/rk4.cpp
