@@ -52,11 +52,12 @@ namespace gr2
         virtual real value(const real &t, const real y[], const real err[], const real dydt[], const real &h) = 0;
 
         /**
-         * @brief Save necessary values.
+         * @brief Apply event.
          * 
-         * When time and coordinates of event are found, important values should 
-         * be saved.
-         * 
+         * When time and coordinates of event are found, event is applied. This 
+         * can save values or alter integration of ordinary differential 
+         * equation.
+         *  
          * @param t time variable
          * @param y coordinate variables
          * @param err error of current step
@@ -64,6 +65,6 @@ namespace gr2
          * @param h step size
          * @return value of internal function
          */
-        virtual void save(const real &t, const real y[], const real err[], const real dydt[], const real &h) = 0;
+        virtual void apply(real &t, real y[], real err[], real dydt[], real &h) = 0;
     };
 }
