@@ -49,7 +49,7 @@ namespace gr2
          * @param h step size
          * @return value of internal function
          */
-        virtual real value(const real &t, const real y[], const real err[], const real dydt[], const real &h) = 0;
+        virtual real value(const real &t, const real y[], const real dydt[]) = 0;
 
         /**
          * @brief Apply event.
@@ -65,6 +65,6 @@ namespace gr2
          * @param h step size
          * @return value of internal function
          */
-        virtual void apply(real &t, real y[], real err[], real dydt[], real &h) = 0;
+        virtual void apply(real &t, real y[], real dydt[]) = 0;
     };
 }
