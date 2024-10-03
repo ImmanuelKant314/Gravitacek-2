@@ -8,10 +8,9 @@
 #include <cmath>
 
 // ========== macros ========== 
-#define MAX_ITERATIONS_HADJUST 20
+#define MAX_ITERATIONS_HADJUST 10
 #define MAX_ITERATIONS_SOLVE_EVENT 20
-#define EVENT_PRECISION 1e-12
-#define BIAS 1.0
+#define EVENT_PRECISION 1e-15
 
 namespace gr2
 {
@@ -28,9 +27,11 @@ namespace gr2
         this->yt = nullptr;
         this->yt2 = nullptr;
         this->yt3 = nullptr;
+
         this->dydt = nullptr;
         this->dydt2 = nullptr;
         this->dydt3 = nullptr;
+
         this->err = nullptr;
         this->err2 = nullptr;
         this->err3 = nullptr;
@@ -49,39 +50,48 @@ namespace gr2
             throw std::invalid_argument("no integrator with given name found");
     }
 
-    bool Integrator::solve_event(Event *event, real& previous_value_of_event)
+    bool Integrator::solve_event(Event *event, const real& previous_value_of_event)
     {
+        // prepare values
         int i;
+
+        // coppy array yt2 to yt3 and h2 to h3
         for (i = 0; i< this->ode->get_n(); i++)
         {
             yt3[i] = yt2[i];
         }
         h3 = h2;
+        t3 = t2;
 
-        real current_value_of_event = event->value(this->t + h3, yt3, dydt3);
+        // calculate current value of event
+        real current_value_of_event = event->value(t3, yt3, dydt3);
 
-        // check if event triggers, if not, return false
-        if (current_value_of_event*previous_value_of_event > 0 || previous_value_of_event == 0)
-        {
-            previous_value_of_event = current_value_of_event;
+        // check if event is triggered
+        // if event is not triggered return true
+        // else if current value of event is close enough, return true
+        if (current_value_of_event*previous_value_of_event > 0 || current_value_of_event != 0)
             return false;
-        }
-        else if (previous_value_of_event == 0)
-        {
-            previous_value_of_event = current_value_of_event;
+        else if (fabs(previous_value_of_event) < EVENT_PRECISION) 
             return true;
-        }
 
+        // prepare values for secant method
         real a = previous_value_of_event, b = current_value_of_event;
         real h_a = 0, h_b = h3;
 
+        // ========== Secant method ==========
         for (i = 0; i < MAX_ITERATIONS_SOLVE_EVENT; i++)
         {
-            h3 = (h_a*b-h_b*a)/(b-a)*BIAS;
+            h3 = (h_a*b-h_b*a)/(b-a); // new value of step size
+            t3 = t + h3;
+            // copy starting value of yt to yt3
             for (int j = 0; j < this->ode->get_n(); j++)
                 yt3[j] = yt[j];
+
+            // take step and calculate new value of event
             this->stepper->step_err(t, yt3, h3, err3, dydt, dydt3);
-            current_value_of_event = event->value(this->t + h3, yt3, dydt3);
+            current_value_of_event = event->value(t3, yt3, dydt3);
+
+            // reduce interval for h
             if (current_value_of_event*previous_value_of_event > 0)
             {
                 h_a = h3;
@@ -91,9 +101,10 @@ namespace gr2
             {
                 h_b = h3;
                 b = current_value_of_event;
+                // if new value of event is close enought, stop for-cycle
                 if( fabs(current_value_of_event) < EVENT_PRECISION)
                 {
-                    i = MAX_ITERATIONS_SOLVE_EVENT + 1;
+                    return true;
                 }
             }
         }
@@ -101,7 +112,6 @@ namespace gr2
         if (i == MAX_ITERATIONS_SOLVE_EVENT)
             throw std::runtime_error("precise time of event could not be found");
 
-        previous_value_of_event = current_value_of_event;
         return true;
     }
         
@@ -118,7 +128,7 @@ namespace gr2
         this->basic_setup();
         this->ode = &ode;
         this->init_stepper(stepper_name);
-
+        this->stepper->set_ODE(ode);
         delete this->stepcontroller;
         this->stepcontroller = new StepControllerNR(ode.get_n(), 0, atol, rtol);
     }
@@ -157,6 +167,7 @@ namespace gr2
         int i;
         Event *current_event = nullptr;
         int n = this->ode->get_n();
+
         this->yt = new real[n];
         this->yt2 = new real[n];
         this->yt3 = new real[n];
@@ -168,10 +179,11 @@ namespace gr2
         this->err3 = new real[n];
 
         // copy values internaly
-        for (int i = 0; i < this->ode->get_n(); i++)
+        for (int i = 0; i < n; i++)
             this->yt[i] = this->yt2[i] = y_start[i];
         this->t = t_start;
         this->h = this->h2 = this->h3 = h_start;
+        t2 = t3 = t + h2;
 
         // number of events
         number_of_events_data = events_data.size();
@@ -194,7 +206,6 @@ namespace gr2
         // cycle for calculating new values of y
         while (t < t_end)
         {   
-            // std::cout << t << std::endl;
             // taky a step
             this->stepper->step_err(t, yt2, h, err2);
 
@@ -206,11 +217,12 @@ namespace gr2
             {
                 if(this->solve_event(events_modifying[i], events_modifying_values[i]))
                 {
-                    for (int i = 0; i < this->ode->get_n(); i++)
+                    for (int i = 0; i < n; i++)
                     {
                         yt2[i] = yt3[i];
                     }
                     h2 = h3;
+                    t2 = t3;
                     current_event = events_modifying[i];
                 }
             }
@@ -225,6 +237,7 @@ namespace gr2
                         yt2[i] = yt3[i];
                     }
                     h2 = h3;
+                    t2 = t3;
                     current_event = events_terminal[i];
                 }
             }
@@ -236,45 +249,55 @@ namespace gr2
                 {
                     if(this->stepcontroller->hadjust(this->yt2, this->err2, this->dydt, this->h2))
                         break;
-                    for (int j = 0; j < ode->get_n(); j++)
+                    for (int j = 0; j < n; j++)
                         yt2[j] = yt[j];
                     this->stepper->step_err(t, yt2, h2, err2, dydt, dydt2);
+                    t2 = t + h2;
                 }
             }
 
+            // if too much iteration for hadjust, throw exception
             if (i >= MAX_ITERATIONS_HADJUST)
                 throw std::runtime_error("optimal step size was not found, MAX_ITERATIONS_HADJUST reached");
 
             for (int i = 0; i < number_of_events_data; i++)
             {
                 if(this->solve_event(events_data[i], events_data_values[i]))
-                    events_data[i]->apply(t, yt3, dydt3);
+                    events_data[i]->apply(t3, yt3, dydt3);
             }
 
             // "commit" to the step
-            for (int i = 0; i < ode->get_n(); i++)
+            for (int i = 0; i < n; i++)
             {
                 yt[i] = yt2[i];
                 dydt[i] = dydt2[i];
             }
-            t += h2;
+            t = t2;
             if (this->stepcontroller)
                 h = h2;
             h2 = h;
             h3 = h;
+            t2 = t3 = t + h;
 
             // apply event
             if (current_event)
                 current_event->apply(t, yt, dydt);
 
             if (current_event && current_event->get_type() == EventType::terminal)
-            {
                 break;
-            }
+
+            // calculate new values of events
+            for (int i = 0; i < number_of_events_data; i++)
+                events_data_values[i] = events_data[i]->value(t, yt, dydt);
+            for (int i = 0; i < number_of_events_modifying; i++)
+                events_modifying_values[i] = events_modifying[i]->value(t, yt, dydt);
+            for (int i = 0; i < number_of_events_terminal; i++)
+                events_terminal_values[i] = events_terminal[i]->value(t, yt, dydt);
         }
 
         // delete events
         delete[] events_data_values, events_modifying_values, events_terminal_values;
+        // delete other arrays
         delete[] yt, yt2, yt3, dydt, dydt2, dydt3, err, err2, err3;
     }
 }

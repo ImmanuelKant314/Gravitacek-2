@@ -3,6 +3,7 @@
 #include "gravitacek2/odesolver/integrator.hpp"
 
 #include <cmath>
+#include <iostream>
 
 gr2::real exactDampedHarmonicOscillator(gr2::real t, gr2::real omega0, gr2::real xi, gr2::real x0, gr2::real v0)
 {
@@ -66,15 +67,17 @@ class DataMonitoring : public gr2::Event
         }
         virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
         {
+            return 0;
+        }
+        virtual void apply(gr2::real &t, gr2::real y[], gr2::real dydt[])
+        {
             times.push_back(t);
             pos.push_back(y[0]);
             vel.push_back(y[1]);
-            return 1;
-        }
-        virtual void apply(gr2::real &t, gr2::real y[], gr2::real dydt[]){};
+        };
 };
 
-TEST(integrator, bouncing_dumped_oscilator)
+TEST(integrator, bouncing_dumped_oscilator_constant_step)
 {
     gr2::real omega0 = 1.5, xi = 1.0;
     gr2::real x0 = 0.5, v0 = 1.5;
@@ -93,11 +96,40 @@ TEST(integrator, bouncing_dumped_oscilator)
     integrator.add_event(&data);
     integrator.add_event(&bounce);
 
+    std::cout << "Začátek integrace" << std::endl;
+    integrator.integrate(y0, t_start, t_end, h0);
+    std::cout << "Data" << std::endl;
+
+    for (int i = 0; i < data.times.size(); i++)
+    {
+        EXPECT_NEAR(data.pos[i], exactDampedHarmonicOscillator(data.times[i], omega0, xi, x0, v0), eps);
+    }
+}
+
+TEST(integrator, bouncing_dumped_oscilator_variable_step)
+{
+    gr2::real omega0 = 1.5, xi = 1.0;
+    gr2::real x0 = 0.5, v0 = 1.5;
+    gr2::real y0[] = {x0, v0};
+
+    gr2::real eps = 1e-7;
+    gr2::real t_start = 0, t_end = 10;
+    gr2::real h0 = 0.01;
+    gr2::real atol = 1e-8, rtol = 1e-8;
+
+    DataMonitoring data = DataMonitoring();
+    Bounce bounce = Bounce();
+
+    DampedHarmonicOscillator osc = DampedHarmonicOscillator(omega0, xi);
+    gr2::Integrator integrator = gr2::Integrator(osc, "RK4", atol, rtol);
+
+    integrator.add_event(&data);
+    integrator.add_event(&bounce);
+
     integrator.integrate(y0, t_start, t_end, h0);
 
     for (int i = 0; i < data.times.size(); i++)
     {
-        std::cout << data.times[i] << "; " << data.pos[i] << "; " << data.vel[i] << std::endl;
         EXPECT_NEAR(data.pos[i], exactDampedHarmonicOscillator(data.times[i], omega0, xi, x0, v0), eps);
     }
 }

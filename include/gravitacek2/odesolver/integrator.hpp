@@ -32,23 +32,35 @@ namespace gr2
         int number_of_events_modifying;
         int number_of_events_terminal;
 
-        // ========== Scalar values ========== 
-        real t;                         // current value of time
-        real h;                         // current value of time step
-        real h2;
-        real h3;
+        // ========== Step size ========== 
+        real h;         // current value of time step
+        real h2;        // value of time step for trying new step
+        real h3;        // value of time step for events
 
-        // ========== Arrays of values ========== 
-        real *yt;                       // array for storing current value of y
-        real *yt2;                      // array for trying next step
-        real *yt3;                      // array for trying events
-        real *dydt;                     // array for calculating \f$\frac{\mathrm{d} \vec{y}}{\mathrm{d}}\f$
-        real *dydt2;                    // 
-        real *dydt3;
-        real *err;
-        real *err2;
-        real *err3;
+        // ========== Time variable ========== 
+        real t;         // current value of time
+        real t2;        // value of time for new time step
+        real t3;        // value of time for events
 
+        // ========== Coordinate variables ========== 
+        real *yt;       // array for storing current value of y
+        real *yt2;      // array for trying next step
+        real *yt3;      // array for trying events
+
+        // ========== Derivative values ========== 
+        real *dydt;     // array for calculating \f$\frac{\mathrm{d} \vec{y}}{\mathrm{d}}\f$
+        real *dydt2;    // array for calculating \f$\frac{\mathrm{d} \vec{y}}{\mathrm{d}}\f$ when trying new step
+        real *dydt3;    // array for calculating \f$\frac{\mathrm{d} \vec{y}}{\mathrm{d}}\f$ when calculating events
+
+        // ========== Error values ========== 
+        real *err;      // array for calculating error
+        real *err2;     // array for calculating error when trying new step
+        real *err3;     // array for calculating error in event
+
+        /**
+         * @brief Initializing basic variables.
+         * 
+         */
         void basic_setup();
 
         /**
@@ -57,7 +69,7 @@ namespace gr2
          * @param stepper_name Name of stepper
          */
         void init_stepper(const std::string& stepper_name);
-        bool solve_event(Event *event, real& previous_value_of_event);
+        bool solve_event(Event *event, const real& previous_value_of_event);
 
     public:
         /**
