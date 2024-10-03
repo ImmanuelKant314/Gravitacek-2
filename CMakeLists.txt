@@ -26,6 +26,7 @@ add_library(odesolver
             ${ODESOLVER_DIR}/event.cpp
             ${ODESOLVER_DIR}/stepper.cpp
             ${ODESOLVER_DIR}/stepcontroller.cpp
+            ${ODESOLVER_DIR}/integrator.cpp
             ${ODESOLVER_DIR}/stepper_types/rk4.cpp
             ${ODESOLVER_DIR}/stepcontroller_types/standardstepcontroller.cpp
             ${ODESOLVER_DIR}/stepcontroller_types/stepcontrollernr.cpp)
