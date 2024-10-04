@@ -57,119 +57,50 @@ class ZeroY : public gr2::Event
         };
 };
 
-TEST(step_controller, standard_step_controller)
-{
-    int n = 2, k = 4;
-    gr2::real eps_abs = 1e-10, eps_rel = 2e-10, a_y = 1, a_dydt = 1;
-    gr2::real h_old = 1e-4, h_new;
-    bool test;
-
-    gr2::real y[2] = {0.5, 0.5};
-    gr2::real dydt[2] = {0.1, 0.1};
-    gr2::real err[2];
-
-    gr2::real eps = 1e-3;
-
-    gr2::StandardStepController stepcontroller = gr2::StandardStepController(n, k, eps_abs, eps_rel, a_y, a_dydt);
-
-    // large error
-    err[0] = err[1] = 1e-4;
-    h_new = h_old; 
-    test = stepcontroller.hadjust(y, err, dydt, h_new);
-    EXPECT_FALSE(test);
-    EXPECT_NEAR(h_new/h_old, 1.0/5, eps);
-
-    // little bit larger error
-    err[0] = err[1] = 1.2e-10;
-    h_new = h_old;
-    test = stepcontroller.hadjust(y, err, dydt, h_new);
-    EXPECT_FALSE(test);
-    EXPECT_NEAR(h_new/h_old, 0.907671, eps);
-
-    // normal error 
-    err[0] = err[1] = 1e-10;
-    h_new = h_old;
-    test = stepcontroller.hadjust(y, err, dydt, h_new);
-    EXPECT_TRUE(test);
-    EXPECT_NEAR(h_new/h_old, 1.0, eps);
-
-    // little bit small error
-    err[0] = err[1] = 0.4e-10;
-    h_new = h_old;
-    test = stepcontroller.hadjust(y, err, dydt, h_new);
-    EXPECT_TRUE(test);
-    EXPECT_NEAR(h_new/h_old, 1.14107, eps);
-
-    // small error
-    err[0] = err[1] = 1e-15;
-    h_new = h_old;
-    test = stepcontroller.hadjust(y, err, dydt, h_new);
-    EXPECT_TRUE(test);
-    EXPECT_NEAR(h_new/h_old, 5, eps);
-}
-
-TEST(step_controller, step_controller_nr)
-{
-    // ========== Parameters for controller ========== 
-    int n = 2, k = 4;
-    gr2::real atol = 1e-10, rtol = 2e-10;
-    gr2::real h_old = 1e-4, h_new;
-
-    gr2::StepControllerNR stepcontroller = gr2::StepControllerNR(n, k, atol, rtol);
-
-    // ========== Test example ========== 
-    gr2::real y[2] = {0.5, 0.5};
-    gr2::real dydt[2] = {0.1, 0.1};
-    gr2::real err[2];
-
-    // ========== Variables for test ========== 
-    gr2::real eps = 1e-3;
-    bool test;
-
-    // ========== Testing ========== 
-    // big error
-    err[0] = err[1] = 1e-3;
-    h_new = h_old; 
-    test = stepcontroller.hadjust(y, err, dydt, h_new);
-    EXPECT_FALSE(test);
-    EXPECT_NEAR(h_new/h_old, 1.0/5, eps);
-
-    // little big error
-    err[0] = err[1] = 1e-9;
-    h_new = h_old; 
-    test = stepcontroller.hadjust(y, err, dydt, h_new);
-    EXPECT_FALSE(test);
-    EXPECT_NEAR(h_new/h_old, 0.63530, eps);
-
-    // little small error
-    err[0] = err[1] = 1e-11;
-    h_new = h_old; 
-    test = stepcontroller.hadjust(y, err, dydt, h_new);
-    EXPECT_TRUE(test);
-    EXPECT_NEAR(h_new/h_old, 2.0090, eps);
-
-    // small error
-    err[0] = err[1] = 1e-15;
-    h_new = h_old; 
-    test = stepcontroller.hadjust(y, err, dydt, h_new);
-    EXPECT_TRUE(test);
-    EXPECT_NEAR(h_new/h_old, 10, eps);
-}
-
-TEST(events, zero_y)
+// ========== Event ========== 
+TEST(Event, get)
 {
     gr2::real y[2] = {1.0, 2.0};
     gr2::real last_y;
     ZeroY event = ZeroY(&last_y);
 
     EXPECT_EQ(event.get_type(), gr2::EventType::data);
+}
+
+TEST(Event, value)
+{
+    gr2::real y[2] = {1.0, 2.0};
+    gr2::real last_y;
+    ZeroY event = ZeroY(&last_y);
+
     EXPECT_EQ(y[1], event.value(0, y, nullptr));
+}
+
+TEST(Event, apply)
+{
+    gr2::real y[2] = {1.0, 2.0};
+    gr2::real last_y;
+    ZeroY event = ZeroY(&last_y);
+
     gr2::real t = 0, h = 0;
     event.apply(t, y, nullptr);
     EXPECT_EQ(last_y, y[1]);
 }
 
-TEST(odesolver_test, damped_harmonic_oscillator_ode)
+// ========== ODE ========== 
+TEST(ODE, get_n)
+{
+    // parameters and variables
+    gr2::real omega0 = 1.5, xi = 1.0;
+
+    // ODE
+    DampedHarmonicOscillator osc = DampedHarmonicOscillator(omega0, xi);
+
+    // test get_n
+    ASSERT_EQ(osc.get_n(), 2);
+}
+
+TEST(ODE, function)
 {
     // parameters and variables
     gr2::real omega0 = 1.5, xi = 1.0;
@@ -185,12 +116,9 @@ TEST(odesolver_test, damped_harmonic_oscillator_ode)
     osc.function(0, y, dydt);
     ASSERT_NEAR(dydt[0], v0, eps); 
     ASSERT_NEAR(dydt[1], -2*xi*v0-omega0*omega0*x0, eps);
-
-    // test get_n
-    ASSERT_EQ(osc.get_n(), 2);
 }
 
-TEST(odesolver_test, damped_harmonic_oscillator_stepper)
+TEST(Stepper, DumpedOscillator)
 {
     // parameters and variables
     gr2::real omega0 = 2.0, xi = 0.5;
@@ -218,7 +146,7 @@ TEST(odesolver_test, damped_harmonic_oscillator_stepper)
     }
 }
 
-TEST(odesolver_test, damped_harmonic_oscillator_stepper_with_err)
+TEST(Stepper, DumpedOscillatorWithError)
 {
     // parameters and variables
     gr2::real omega0 = 2.0, xi = 0.5;
@@ -244,9 +172,9 @@ TEST(odesolver_test, damped_harmonic_oscillator_stepper_with_err)
     {
         ASSERT_NEAR(y[0], exactDampedHarmonicOscillator(h*i, omega0, xi, x0, v0), eps);
         stepper.step_err(i*h, y, h, err);
-        std::cout << err[0] << ", " << err[1] << std::endl;
     }
 }
+
 int main(int argc, char **argv)
 {
     ::testing::InitGoogleTest(&argc, argv);

@@ -77,7 +77,7 @@ class DataMonitoring : public gr2::Event
         };
 };
 
-TEST(integrator, bouncing_dumped_oscilator_constant_step)
+TEST(Integrator, BouncingDumpedOscilatorNoStepController)
 {
     gr2::real omega0 = 1.5, xi = 1.0;
     gr2::real x0 = 0.5, v0 = 1.5;
@@ -96,17 +96,16 @@ TEST(integrator, bouncing_dumped_oscilator_constant_step)
     integrator.add_event(&data);
     integrator.add_event(&bounce);
 
-    std::cout << "Začátek integrace" << std::endl;
     integrator.integrate(y0, t_start, t_end, h0);
-    std::cout << "Data" << std::endl;
 
+    ASSERT_GE(data.times.size(), 10); // check if some data are recorded
     for (int i = 0; i < data.times.size(); i++)
     {
         EXPECT_NEAR(data.pos[i], exactDampedHarmonicOscillator(data.times[i], omega0, xi, x0, v0), eps);
     }
 }
 
-TEST(integrator, bouncing_dumped_oscilator_variable_step)
+TEST(Integrator, BouncingDumberOscilatorStepController)
 {
     gr2::real omega0 = 1.5, xi = 1.0;
     gr2::real x0 = 0.5, v0 = 1.5;
@@ -128,6 +127,7 @@ TEST(integrator, bouncing_dumped_oscilator_variable_step)
 
     integrator.integrate(y0, t_start, t_end, h0);
 
+    ASSERT_GE(data.times.size(), 10); // check if some data are recorded
     for (int i = 0; i < data.times.size(); i++)
     {
         EXPECT_NEAR(data.pos[i], exactDampedHarmonicOscillator(data.times[i], omega0, xi, x0, v0), eps);
