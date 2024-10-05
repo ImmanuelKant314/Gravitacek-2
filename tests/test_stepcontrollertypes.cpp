@@ -106,3 +106,9 @@ TEST(StepControllerValues, StepControllerNR)
     EXPECT_TRUE(test);
     EXPECT_NEAR(h_new/h_old, 10, eps);
 }
+
+int main(int argc, char **argv)
+{
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
