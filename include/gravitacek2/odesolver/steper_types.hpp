@@ -21,5 +21,6 @@ namespace gr2
         virtual void reset();
         virtual void step(const real &t, real y[], const real &h, const real dydt_in[] = nullptr, real dydt_out[] = nullptr) override;
         virtual int get_order() const override;
+        virtual int get_err_order() const override;
     };
 }

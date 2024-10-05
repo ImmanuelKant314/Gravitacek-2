@@ -60,4 +60,9 @@ namespace gr2
     {
         return 4;
     }
+
+    int RK4::get_err_order() const
+    {
+        return 5;
+    }
 } 

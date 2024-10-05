@@ -130,7 +130,7 @@ namespace gr2
         this->init_stepper(stepper_name);
         this->stepper->set_ODE(ode);
         delete this->stepcontroller;
-        this->stepcontroller = new StepControllerNR(ode.get_n(), 0, atol, rtol);
+        this->stepcontroller = new StepControllerNR(ode.get_n(), this->stepper->get_err_order(), atol, rtol);
     }
 
     void Integrator::add_event(Event* event)

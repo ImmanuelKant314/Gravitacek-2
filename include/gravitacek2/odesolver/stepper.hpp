@@ -104,8 +104,25 @@ namespace gr2
          * Else it return order of integration for the last step. The order can 
          * vary if the Stepper is adaptive.
          * 
-         * @return int order of integration
+         * Local error of stepper scales as
+         * \f[
+         * \mbox{err} \sim h^{\mbox{order} + 1}.
+         * \f]
+         * 
+         * @return order of integration
          */
         virtual int get_order() const = 0;
+
+        /**
+         * @brief Get the order of error.
+         * 
+         * Error is scaled as
+         * \f[
+         * \mbox{err} \sim h^\mbox{err_order}.
+         * \f]
+         * 
+         * @return order of error
+         */
+        virtual int get_err_order() const = 0;
     };
 }
