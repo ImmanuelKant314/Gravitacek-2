@@ -93,6 +93,46 @@ TEST(OrderOfIntegrator, RK4)
     EXPECT_NEAR(order, stepper.get_order()+1, eps);
 }
 
+TEST(OrderOfIntegrator, RK4Error)
+{
+    // parameters and variables
+    gr2::real omega0 = 1.5, xi = 1.0;
+    gr2::real x0 = 0.5, v0 = 1.5;
+    gr2::real dydt[2];
+    gr2::real eps = 0.25;
+
+    gr2::real min_exp = -3, max_exp = -1;
+    int N = 10;
+    gr2::real x_data[N], y_data[N];
+    gr2::real exp, h, err;
+    gr2::real total_sum_orders = 0;
+    gr2::real y[2], error[2];
+
+    // ODE
+    DampedHarmonicOscillator osc = DampedHarmonicOscillator(omega0, xi);
+
+    // Stepper
+    gr2::RK4 stepper = gr2::RK4();
+    stepper.set_ODE(osc);
+
+    // calculate errors
+    for (int i = 0; i < N; i++)
+    {
+        exp = min_exp + (max_exp-min_exp)/(N-1)*i;
+        h = powl(10, exp);
+        y[0] = x0;
+        y[1] = v0;
+
+        stepper.step_err(0, y, h, error);
+        err = fabs(y[0] - exactDampedHarmonicOscillator(h, omega0, xi, x0, v0));
+        x_data[i] = exp;
+        y_data[i] = log10(err);
+    }
+    gr2::real order, bias;
+    linear_regression(x_data, y_data, N, order, bias);
+    EXPECT_NEAR(order, stepper.get_order()+1, eps);
+}
+
 int main(int argc, char **argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
