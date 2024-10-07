@@ -31,10 +31,19 @@ namespace gr2
     {
         int i;
 
-        // first correction
-        for (i = 0; i < n; i++)
-            yt[i] = y[i];
-        ode->function(t, yt, k1);
+        if (dydt_in)
+        {
+            // copy dydt
+            for (i = 0; i < n; i++)
+                k1[i] = dydt_in[i];
+        }
+        else
+        {
+            // first correction
+            for (i = 0; i < n; i++)
+                yt[i] = y[i];
+            ode->function(t, yt, k1);
+        }
 
         // second correction
         for (i = 0; i < n; i++)
@@ -54,6 +63,11 @@ namespace gr2
         // final result
         for (i = 0; i < n; i++)
             y[i] = y[i] + 1.0 / 6 * h * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]);
+
+        if (dydt_out)
+        {
+            ode->function(t+h, y, dydt_out);
+        }
     }
 
     int RK4::get_order() const

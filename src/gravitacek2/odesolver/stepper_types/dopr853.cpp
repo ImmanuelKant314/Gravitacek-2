@@ -40,7 +40,7 @@ namespace gr2
     {
     }
 
-    void DoPr853::step(const real &t, real y[], const real &h, const real dyh_in[], real dyh_out[]) 
+    void DoPr853::step(const real &t, real y[], const real &h, const real dydt_in[], real dydt_out[]) 
     {
         int i = 0;
         static const real c2 = 0.526001519587677318785587544488e-01;
@@ -139,11 +139,19 @@ namespace gr2
         static const real a1210 = 1.23605671757943030647266201528e1;
         static const real a1211 = 6.43392746015763530355970484046e-1;
 
-        real old_h;
-        // 1. correction
-        for (i = 0; i < n; i++)
-            yt[i] = y[i];
-        ode->function(t, yt, k1);
+        if (dydt_in)
+        {
+            // copy dydt
+            for (i = 0; i < n; i++)
+                k1[i] = dydt_in[i];
+        }
+        else
+        {
+            // first correction
+            for (i = 0; i < n; i++)
+                yt[i] = y[i];
+            ode->function(t, yt, k1);
+        }
 
         // 2. corection
         for (i = 0; i < n; i++)
@@ -205,6 +213,11 @@ namespace gr2
         {
             k_help[i] = (b1 * k1[i] + b6 * k6[i] + b7 * k7[i] + b8 * k8[i] + b9 * k9[i] + b10 * k10[i] + b11 * k11[i] + b12 * k12[i]);
             y[i] = y[i] + h * k_help[i];
+        }
+
+        if (dydt_out)
+        {
+            ode->function(t+h, y, dydt_out);
         }
     }
 
@@ -307,11 +320,19 @@ namespace gr2
         static const real a1210 = 1.23605671757943030647266201528e1;
         static const real a1211 = 6.43392746015763530355970484046e-1;
 
-        real old_h;
-        // 1. correction
-        for (i = 0; i < n; i++)
-            yt[i] = y[i];
-        ode->function(t, yt, k1);
+        if (dydt_in)
+        {
+            // copy dydt
+            for (i = 0; i < n; i++)
+                k1[i] = dydt_in[i];
+        }
+        else
+        {
+            // first correction
+            for (i = 0; i < n; i++)
+                yt[i] = y[i];
+            ode->function(t, yt, k1);
+        }
 
         // 2. corection
         for (i = 0; i < n; i++)
@@ -382,6 +403,11 @@ namespace gr2
             err3 = (k_help[i] - bhh1 * k1[i] - bhh2 * k9[i] - bhh3 * k3[i]) * h;
             err5 = (er1 * k1[i] + er6 * k6[i] + er7 * k7[i] + er8 * k8[i] + er9 * k9[i] + er10 * k10[i] + er11 * k11[i] + er12 * k12[i]) * h;
             err[i] = err5*err5/sqrtl(0.01*err3*err3 + err5*err5);
+        }
+
+        if (dydt_out)
+        {
+            ode->function(t+h, y, dydt_out);
         }
     }
 
