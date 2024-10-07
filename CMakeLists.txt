@@ -28,6 +28,7 @@ add_library(odesolver
             ${ODESOLVER_DIR}/stepcontroller.cpp
             ${ODESOLVER_DIR}/integrator.cpp
             ${ODESOLVER_DIR}/stepper_types/rk4.cpp
+            ${ODESOLVER_DIR}/stepper_types/dopr853.cpp
             ${ODESOLVER_DIR}/stepcontroller_types/standardstepcontroller.cpp
             ${ODESOLVER_DIR}/stepcontroller_types/stepcontrollernr.cpp)
 

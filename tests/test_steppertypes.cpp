@@ -53,6 +53,7 @@ void linear_regression(gr2::real x_data[], gr2::real y_data[], int N, gr2::real 
     b = (sum_y*sum_x2 - sum_x*sum_xy)/(N*sum_x2-sum_x*sum_x);
 }
 
+// ========== RK4 ========== 
 TEST(OrderOfIntegrator, RK4)
 {
     // parameters and variables
@@ -169,9 +170,131 @@ TEST(OrderOfIntegrator, RK4Error)
     }
     gr2::real order, bias;
     linear_regression(x_data, y_data, N, order, bias);
-    std::cout << order << " " << bias << std::endl;
     EXPECT_NEAR(order, stepper.get_err_order(), eps);
 }
+
+// ========== DoPr853 ========== 
+TEST(OrderOfIntegrator, DoPr853)
+{
+    // parameters and variables
+    gr2::real omega0 = 1.5, xi = 1.0;
+    gr2::real x0 = 0.5, v0 = 1.5;
+    gr2::real dydt[2];
+    gr2::real eps = 0.25;
+
+    gr2::real min_exp = -1, max_exp = 1;
+    int N = 10;
+    gr2::real x_data[N], y_data[N];
+    gr2::real exp, h, err;
+    gr2::real total_sum_orders = 0;
+    gr2::real y[2];
+
+    // ODE
+    DampedHarmonicOscillator osc = DampedHarmonicOscillator(omega0, xi);
+
+    // Stepper
+    gr2::DoPr853 stepper = gr2::DoPr853();
+    stepper.set_ODE(osc);
+
+    // calculate errors
+    for (int i = 0; i < N; i++)
+    {
+        exp = min_exp + (max_exp-min_exp)/(N-1)*i;
+        h = powl(10, exp);
+        y[0] = x0;
+        y[1] = v0;
+
+        stepper.step(0, y, h);
+        err = fabs(y[0] - exactDampedHarmonicOscillator(h, omega0, xi, x0, v0));
+        x_data[i] = exp;
+        y_data[i] = log10(err);
+    }
+    gr2::real order, bias;
+    linear_regression(x_data, y_data, N, order, bias);
+    EXPECT_NEAR(order, stepper.get_order()+1, eps);
+}
+
+TEST(OrderOfIntegrator, DoPr853WithError)
+{
+    // parameters and variables
+    gr2::real omega0 = 1.5, xi = 1.0;
+    gr2::real x0 = 0.5, v0 = 1.5;
+    gr2::real dydt[2];
+    gr2::real eps = 0.25;
+
+    gr2::real min_exp = -1, max_exp = 1;
+    int N = 10;
+    gr2::real x_data[N], y_data[N];
+    gr2::real exp, h, err;
+    gr2::real total_sum_orders = 0;
+    gr2::real y[2], error[2];
+
+    // ODE
+    DampedHarmonicOscillator osc = DampedHarmonicOscillator(omega0, xi);
+
+    // Stepper
+    gr2::DoPr853 stepper = gr2::DoPr853();
+    stepper.set_ODE(osc);
+
+    // calculate errors
+    for (int i = 0; i < N; i++)
+    {
+        exp = min_exp + (max_exp-min_exp)/(N-1)*i;
+        h = powl(10, exp);
+        y[0] = x0;
+        y[1] = v0;
+
+        stepper.step_err(0, y, h, error);
+        err = fabs(y[0] - exactDampedHarmonicOscillator(h, omega0, xi, x0, v0));
+        x_data[i] = exp;
+        y_data[i] = log10(err);
+    }
+    gr2::real order, bias;
+    linear_regression(x_data, y_data, N, order, bias);
+    EXPECT_NEAR(order, stepper.get_order()+1, eps);
+}
+
+TEST(OrderOfIntegrator, DoPr853Error)
+{
+    // parameters and variables
+    gr2::real omega0 = 1.5, xi = 1.0;
+    gr2::real x0 = 0.5, v0 = 1.5;
+    gr2::real dydt[2];
+    gr2::real eps = 0.25;
+
+    gr2::real min_exp = -0.5, max_exp = 1;
+    int N = 10;
+    gr2::real x_data[N], y_data[N];
+    gr2::real exp, h, err;
+    gr2::real total_sum_orders = 0;
+    gr2::real y[2], error[2];
+
+    // ODE
+    DampedHarmonicOscillator osc = DampedHarmonicOscillator(omega0, xi);
+
+    // Stepper
+    gr2::DoPr853 stepper = gr2::DoPr853();
+    stepper.set_ODE(osc);
+
+    // calculate errors
+    for (int i = 0; i < N; i++)
+    {
+        exp = min_exp + (max_exp-min_exp)/(N-1)*i;
+        h = powl(10, exp);
+        y[0] = x0;
+        y[1] = v0;
+
+        stepper.step_err(0, y, h, error);
+        x_data[i] = exp;
+        y_data[i] = log10(std::fabs(error[0]));
+
+        std::cout << exp << " " << log10(std::fabs(error[0])) << std::endl;
+    }
+    gr2::real order, bias;
+    linear_regression(x_data, y_data, N, order, bias);
+    EXPECT_NEAR(order, stepper.get_err_order(), eps);
+}
+
 
 int main(int argc, char **argv)
 {
