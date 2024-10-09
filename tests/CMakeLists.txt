@@ -9,12 +9,14 @@ add_executable(test_odesolver test_odesolver.cpp)
 add_executable(test_integrator test_integrator.cpp)
 add_executable(test_stepcontrollertypes test_stepcontrollertypes.cpp)
 add_executable(test_steppertypes test_steppertypes.cpp)
+add_executable(test_spacetimes test_spacetimes.cpp)
 
 # link libraries
 target_link_libraries(test_odesolver PRIVATE gtest gtest_main odesolver setup)
 target_link_libraries(test_integrator PRIVATE gtest gtest_main odesolver setup)
 target_link_libraries(test_stepcontrollertypes PRIVATE gtest gtest_main odesolver setup)
 target_link_libraries(test_steppertypes PRIVATE gtest gtest_main odesolver setup)
+target_link_libraries(test_spacetimes PRIVATE gtest gtest_main geomotion setup)
 
 # add tests
 add_test(
@@ -37,7 +39,18 @@ add_test(
     COMMAND test_steppertypes
 )
 
+add_test(
+    NAME    test_spacetimes
+    COMMAND test_spacetimes
+)
+
+# discover tests
 gtest_discover_tests(test_odesolver)
 gtest_discover_tests(test_integrator)
 gtest_discover_tests(test_stepcontrollertypes)
 gtest_discover_tests(test_steppertypes)
+gtest_discover_tests(test_spacetimes)
+
+# copy data
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/data
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

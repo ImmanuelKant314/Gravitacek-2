@@ -17,6 +17,7 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/tests)
 
 # directory shortcuts
 set(ODESOLVER_DIR ${PROJECT_SOURCE_DIR}/src/gravitacek2/odesolver)
+set(GEOMOTION_DIR ${PROJECT_SOURCE_DIR}/src/gravitacek2/geomotion)
 
 # add libraries
 add_library(setup STATIC ${PROJECT_SOURCE_DIR}/src/gravitacek2/setup.cpp)
@@ -32,13 +33,20 @@ add_library(odesolver
             ${ODESOLVER_DIR}/stepcontroller_types/standardstepcontroller.cpp
             ${ODESOLVER_DIR}/stepcontroller_types/stepcontrollernr.cpp)
 
+add_library(geomotion
+            STATIC 
+            ${GEOMOTION_DIR}/geomotion.cpp
+            ${GEOMOTION_DIR}/spacetimes/schwarzschild.cpp)
+
 # include directiories
 target_include_directories(setup PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_include_directories(odesolver PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(geomotion PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 # link libraries
 target_link_libraries(Gravitacek2 PUBLIC setup)
 target_link_libraries(odesolver PUBLIC setup)
+target_link_libraries(geomotion PUBLIC setup odesolver)
 
 # testing 
 enable_testing()
