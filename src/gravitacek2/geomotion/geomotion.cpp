@@ -2,6 +2,24 @@
 
 namespace gr2
 {
+    bool GeoMotion::necesarry_calculate(const real *y, real *y_save, const int& n)
+    {
+        if (!y_save)
+        {
+            y_save = new real[n];
+            return true;
+        }
+
+        bool test = false;
+        for (int i = 0; i < n; i++)
+        {
+            if (!test && y[i] != y_save[i])
+                test = true;
+            y_save[i] = y[i];
+        }
+        return test;
+    }
+
     GeoMotion::GeoMotion(const int &dim, const int &n) : ODE(n)
     {
         // dimension

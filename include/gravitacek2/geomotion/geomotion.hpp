@@ -19,6 +19,17 @@ namespace gr2
         real *y_m;                      //!<position where `metric` is calculated
         real *y_c;                      //!<position where `christoffel_symbols`is calculated
         real *y_r;                      //!<position where `riemann_tensor`is calculated
+
+        /**
+         * @brief Check if calculation in this point is necessary.
+         * 
+         * @param y current coordinate variables
+         * @param y_save coordinate variables, where caclulation was done previously
+         * @param n dimension of `y` and `y_save`
+         * @return true if calculation is necessary
+         * @return false if calculation is not necessary
+         */
+        bool necesarry_calculate(const real *y, real *y_save, const int& n);
     public:
         // ========== Constructors & destructors ========== 
         /**

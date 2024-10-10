@@ -11,6 +11,8 @@ namespace gr2
 
     void Schwarzschild::calculate_metric(const real *y)
     {
+        necesarry_calculate(y, y_m, dim);
+
         real t = y[T];
         real r = y[R];
         real theta = y[THETA];
@@ -26,6 +28,8 @@ namespace gr2
 
     void Schwarzschild::calculate_christoffel_symbols(const real *y)
     {
+        necesarry_calculate(y, y_c, dim);
+
         real t = y[T];
         real r = y[R];
         real theta = y[THETA];
@@ -52,6 +56,8 @@ namespace gr2
 
     void Schwarzschild::calculate_riemann_tensor(const real *y)
     {
+        necesarry_calculate(y, y_r, dim);
+
         real t = y[T];
         real r = y[R];
         real theta = y[THETA];
