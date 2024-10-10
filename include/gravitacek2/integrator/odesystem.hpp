@@ -4,7 +4,7 @@
 namespace gr2
 {
     /**
-     * @brief Class representing Ordinary Differential Equations (ODE).
+     * @brief Class representing system of Ordinary Differential Equations (ODEs).
      *
      * Assume we have equation 
      * \f[
@@ -18,17 +18,17 @@ namespace gr2
      * The class is abstract and is used to create concrete differential 
      * equations.
      */
-    class ODE
+    class OdeSystem
     {
     protected:
         int n; // number of ordinary differential equations
     public:
         /**
-         * @brief Construct a new ODE object
+         * @brief Construct a new OdeSystem object
          * 
          * @param n number of equations
          */
-        ODE(const int &n);
+        OdeSystem(const int &n);
 
         /**
          * @brief Return number of equations.

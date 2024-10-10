@@ -1,10 +1,10 @@
 #include <cmath>
 
-#include "gravitacek2/odesolver/stepcontroller_types.hpp"
+#include "gravitacek2/integrator/stepcontrollers.hpp"
 
 namespace gr2
 {
-    StepControllerNR::StepControllerNR(const int &n, const int &k, const real &atol, const real &rtol, const real &S, const real &factor_decrease, const real &factor_grow) : StepController(n)
+    StepControllerNR::StepControllerNR(const int &n, const int &k, const real &atol, const real &rtol, const real &S, const real &factor_decrease, const real &factor_grow) : StepControllerBase(n)
     {
         this->atol = atol;
         this->rtol = rtol;

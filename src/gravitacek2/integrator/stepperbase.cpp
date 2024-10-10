@@ -1,16 +1,16 @@
-#include "gravitacek2/odesolver/stepper.hpp"
+#include "gravitacek2/integrator/stepperbase.hpp"
 
 namespace gr2
 {
-    Stepper::Stepper():t(0), n(0), yt(nullptr), dydt(nullptr), dydt2(nullptr), ode(nullptr)
+    StepperBase::StepperBase():t(0), n(0), yt(nullptr), dydt(nullptr), dydt2(nullptr), ode(nullptr)
     {}
 
-    Stepper::~Stepper()
+    StepperBase::~StepperBase()
     {
         delete[] yt, dydt, dydt2;
     }
 
-    void Stepper::set_ODE(ODE& ode)
+    void StepperBase::set_OdeSystem(OdeSystem& ode)
     {
         int old_n = n;
         n = ode.get_n();
@@ -28,7 +28,7 @@ namespace gr2
         }
     }
 
-    void Stepper::step_err(const real &t, real y[], const real &h, real err[], const real dydt_in[], real dydt_out[])
+    void StepperBase::step_err(const real &t, real y[], const real &h, real err[], const real dydt_in[], real dydt_out[])
     {
         // save time internaly
         this->t = t;

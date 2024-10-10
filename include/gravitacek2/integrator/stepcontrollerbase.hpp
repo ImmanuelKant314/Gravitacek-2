@@ -7,7 +7,7 @@ namespace gr2
      * @brief Abstract class for changing step size.
      * 
      */
-    class StepController
+    class StepControllerBase
     {
     protected:
         int n; // number of solved ordinary differential equations
@@ -17,7 +17,7 @@ namespace gr2
          * 
          * @param n number of equations
          */
-        StepController(const int &n);
+        StepControllerBase(const int &n);
 
         /**
          * @brief Calculate new step size.

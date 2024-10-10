@@ -1,11 +1,11 @@
 #include <cmath>
 
-#include "gravitacek2/odesolver/stepcontroller_types.hpp"
+#include "gravitacek2/integrator/stepcontrollers.hpp"
 
 
 namespace gr2
 {
-    StandardStepController::StandardStepController(const int& n, const int& k, const real &eps_abs, const real &eps_rel, const real &a_y, const real &a_dydt, const real &S, const real &factor):StepController(n)
+    StandardStepController::StandardStepController(const int& n, const int& k, const real &eps_abs, const real &eps_rel, const real &a_y, const real &a_dydt, const real &S, const real &factor):StepControllerBase(n)
     {
         this->k = k;
         this->ratios = new real[n];

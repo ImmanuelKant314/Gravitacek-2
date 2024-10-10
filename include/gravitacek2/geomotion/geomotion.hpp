@@ -1,5 +1,5 @@
 #pragma once
-#include "gravitacek2/odesolver/ode.hpp"
+#include "gravitacek2/integrator/odesystem.hpp"
 
 namespace gr2
 {
@@ -7,7 +7,7 @@ namespace gr2
      * @brief Class GeoMotion represents ODE for geodesic motion.
      * 
      */
-    class GeoMotion : public ODE
+    class GeoMotion : public OdeSystem
     {
     protected:
         int dim;                        //!<dimension of space
@@ -115,6 +115,22 @@ namespace gr2
 
         // ========== Function ========== 
 
+        /**
+         * @brief Calculate time derivative of state vector.
+         * 
+         * State vector \f$\vec{y}\f$ contain coordinate values and velocities:
+         * \f[
+         * \vec{y} = (x^\mu, u^\mu).
+         * \f]
+         * Derivative of state vector is calculated as
+         * \f[
+         * \dv{\vec{y}}{t} = \left(u^\mu, -\tensor{\Gamma}{^\mu_\kappa_\lambda}u^\kappa u^\lambda\right).
+         * \f]
+         * 
+         * @param t time variable
+         * @param y state vector
+         * @param dydt derivation of state vector with respect to \f$t\f$
+         */
         virtual void function(const real &t, const real y[], real dydt[]) override;
     };
 }

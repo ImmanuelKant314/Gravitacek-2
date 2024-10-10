@@ -16,22 +16,22 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/external/googletest)
 add_subdirectory(${PROJECT_SOURCE_DIR}/tests)
 
 # directory shortcuts
-set(ODESOLVER_DIR ${PROJECT_SOURCE_DIR}/src/gravitacek2/odesolver)
+set(INTEGRATOR_DIR ${PROJECT_SOURCE_DIR}/src/gravitacek2/integrator)
 set(GEOMOTION_DIR ${PROJECT_SOURCE_DIR}/src/gravitacek2/geomotion)
 
 # add libraries
 add_library(setup STATIC ${PROJECT_SOURCE_DIR}/src/gravitacek2/setup.cpp)
-add_library(odesolver 
+add_library(integrator
             STATIC 
-            ${ODESOLVER_DIR}/ode.cpp
-            ${ODESOLVER_DIR}/event.cpp
-            ${ODESOLVER_DIR}/stepper.cpp
-            ${ODESOLVER_DIR}/stepcontroller.cpp
-            ${ODESOLVER_DIR}/integrator.cpp
-            ${ODESOLVER_DIR}/stepper_types/rk4.cpp
-            ${ODESOLVER_DIR}/stepper_types/dopr853.cpp
-            ${ODESOLVER_DIR}/stepcontroller_types/standardstepcontroller.cpp
-            ${ODESOLVER_DIR}/stepcontroller_types/stepcontrollernr.cpp)
+            ${INTEGRATOR_DIR}/odesystem.cpp
+            ${INTEGRATOR_DIR}/event.cpp
+            ${INTEGRATOR_DIR}/stepperbase.cpp
+            ${INTEGRATOR_DIR}/stepcontrollerbase.cpp
+            ${INTEGRATOR_DIR}/integrator.cpp
+            ${INTEGRATOR_DIR}/steppers/rk4.cpp
+            ${INTEGRATOR_DIR}/steppers/dopr853.cpp
+            ${INTEGRATOR_DIR}/stepcontrollers/standardstepcontroller.cpp
+            ${INTEGRATOR_DIR}/stepcontrollers/stepcontrollernr.cpp)
 
 add_library(geomotion
             STATIC 
@@ -40,13 +40,13 @@ add_library(geomotion
 
 # include directiories
 target_include_directories(setup PUBLIC ${PROJECT_SOURCE_DIR}/include)
-target_include_directories(odesolver PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(integrator PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_include_directories(geomotion PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 # link libraries
 target_link_libraries(Gravitacek2 PUBLIC setup)
-target_link_libraries(odesolver PUBLIC setup)
-target_link_libraries(geomotion PUBLIC setup odesolver)
+target_link_libraries(integrator PUBLIC setup)
+target_link_libraries(geomotion PUBLIC setup integrator)
 
 # testing 
 enable_testing()

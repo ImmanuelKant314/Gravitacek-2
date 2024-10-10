@@ -1,7 +1,7 @@
 // ========== include - my library ========== 
-#include "gravitacek2/odesolver/integrator.hpp"
-#include "gravitacek2/odesolver/steper_types.hpp"
-#include "gravitacek2/odesolver/stepcontroller_types.hpp"
+#include "gravitacek2/integrator/integrator.hpp"
+#include "gravitacek2/integrator/steppers.hpp"
+#include "gravitacek2/integrator/stepcontrollers.hpp"
 
 // ========== include - standard libraries ========== 
 #include <stdexcept>
@@ -115,20 +115,20 @@ namespace gr2
         return true;
     }
         
-    Integrator::Integrator(ODE &ode, const std::string& stepper_name)
+    Integrator::Integrator(OdeSystem &ode, const std::string& stepper_name)
     {
         this->basic_setup();
         this->ode = &ode;
         this->init_stepper(stepper_name);
-        this->stepper->set_ODE(ode);
+        this->stepper->set_OdeSystem(ode);
     }
 
-    Integrator::Integrator(ODE &ode, const std::string& stepper_name, const real &atol, const real &rtol)
+    Integrator::Integrator(OdeSystem &ode, const std::string& stepper_name, const real &atol, const real &rtol)
     {
         this->basic_setup();
         this->ode = &ode;
         this->init_stepper(stepper_name);
-        this->stepper->set_ODE(ode);
+        this->stepper->set_OdeSystem(ode);
         delete this->stepcontroller;
         this->stepcontroller = new StepControllerNR(ode.get_n(), this->stepper->get_err_order(), atol, rtol);
     }

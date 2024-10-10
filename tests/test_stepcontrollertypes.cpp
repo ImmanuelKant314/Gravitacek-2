@@ -1,12 +1,12 @@
 #include <cmath>
 
 #include "gtest/gtest.h"
-#include "gravitacek2/odesolver/ode.hpp"
-#include "gravitacek2/odesolver/event.hpp"
-#include "gravitacek2/odesolver/stepper.hpp"
-#include "gravitacek2/odesolver/steper_types.hpp"
-#include "gravitacek2/odesolver/stepcontroller.hpp"
-#include "gravitacek2/odesolver/stepcontroller_types.hpp"
+#include "gravitacek2/integrator/odesystem.hpp"
+#include "gravitacek2/integrator/event.hpp"
+#include "gravitacek2/integrator/stepperbase.hpp"
+#include "gravitacek2/integrator/steppers.hpp"
+#include "gravitacek2/integrator/stepcontrollerbase.hpp"
+#include "gravitacek2/integrator/stepcontrollers.hpp"
 
 TEST(StepControllerValues, StandardStepController)
 {

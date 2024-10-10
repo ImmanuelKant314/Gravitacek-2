@@ -1,4 +1,4 @@
-#include "gravitacek2/odesolver/event.hpp"
+#include "gravitacek2/integrator/event.hpp"
 
 namespace gr2
 {

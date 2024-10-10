@@ -1,8 +1,8 @@
 #include "gravitacek2/setup.hpp"
-#include "gravitacek2/odesolver/ode.hpp"
-#include "gravitacek2/odesolver/stepper.hpp"
-#include "gravitacek2/odesolver/stepcontroller.hpp"
-#include "gravitacek2/odesolver/event.hpp"
+#include "gravitacek2/integrator/odesystem.hpp"
+#include "gravitacek2/integrator/stepperbase.hpp"
+#include "gravitacek2/integrator/stepcontrollerbase.hpp"
+#include "gravitacek2/integrator/event.hpp"
 
 #include <vector>
 #include <string>
@@ -13,9 +13,9 @@ namespace gr2
     {
     protected:
         // ========== Components of itnegrator ========== 
-        ODE *ode;                       // ordinary differential equation
-        Stepper *stepper;               // stepper used for integrating
-        StepController *stepcontroller; // step controller
+        OdeSystem *ode;                       // ordinary differential equation
+        StepperBase *stepper;               // stepper used for integrating
+        StepControllerBase *stepcontroller; // step controller
 
         // ========== Events ========== 
         std::vector<Event*> events_data;
@@ -80,7 +80,7 @@ namespace gr2
          * @param ode set of ordinary differential equations to be solved
          * @param stepper_name name of stepper
          */
-        Integrator(ODE &ode, const std::string& stepper_name);
+        Integrator(OdeSystem &ode, const std::string& stepper_name);
 
         /**
          * @brief Construct a new Integrator object.
@@ -94,7 +94,7 @@ namespace gr2
          * @param a_y coefficient 
          * @param a_dydt coefficient
          */
-        Integrator(ODE &ode, const std::string& stepper_name, const real &atol, const real &rtol);
+        Integrator(OdeSystem &ode, const std::string& stepper_name, const real &atol, const real &rtol);
 
         /**
          * @brief Destroy the Integrator object.

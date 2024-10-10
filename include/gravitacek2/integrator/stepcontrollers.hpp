@@ -1,5 +1,5 @@
 #include "gravitacek2/setup.hpp"
-#include "gravitacek2/odesolver/stepcontroller.hpp"
+#include "gravitacek2/integrator/stepcontrollerbase.hpp"
 
 namespace gr2
 {
@@ -30,7 +30,7 @@ namespace gr2
      * To avoid uncontrolable changes of step size, \f$h_{new}\f$ is reduced
      * to interval \f$[h_{old}/5, 5h_{old}]\f$
      */
-    class StandardStepController : public StepController
+    class StandardStepController : public StepControllerBase
     {
     protected:
         int k;
@@ -75,7 +75,7 @@ namespace gr2
      * where \f$S\f$ is safety factor (because error estimate is not precise) 
      * and \f$k\f$ is order of steper used for calculation.
      */
-    class StepControllerNR : public StepController
+    class StepControllerNR : public StepControllerBase
     {
     protected:
         real atol;              // absolute error tolerance

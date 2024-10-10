@@ -1,6 +1,6 @@
 #include <iostream>
 #include "gravitacek2/setup.hpp"
-#include "gravitacek2/odesolver/ode.hpp"
+#include "gravitacek2/integrator/odesystem.hpp"
 
 int main()
 {

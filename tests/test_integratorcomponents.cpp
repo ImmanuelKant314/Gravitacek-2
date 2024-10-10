@@ -1,12 +1,12 @@
 #include <cmath>
 
 #include "gtest/gtest.h"
-#include "gravitacek2/odesolver/ode.hpp"
-#include "gravitacek2/odesolver/event.hpp"
-#include "gravitacek2/odesolver/stepper.hpp"
-#include "gravitacek2/odesolver/steper_types.hpp"
-#include "gravitacek2/odesolver/stepcontroller.hpp"
-#include "gravitacek2/odesolver/stepcontroller_types.hpp"
+#include "gravitacek2/integrator/odesystem.hpp"
+#include "gravitacek2/integrator/event.hpp"
+#include "gravitacek2/integrator/stepperbase.hpp"
+#include "gravitacek2/integrator/steppers.hpp"
+#include "gravitacek2/integrator/stepcontrollerbase.hpp"
+#include "gravitacek2/integrator/stepcontrollers.hpp"
 
 gr2::real exactDampedHarmonicOscillator(gr2::real t, gr2::real omega0, gr2::real xi, gr2::real x0, gr2::real v0)
 {
@@ -21,14 +21,14 @@ gr2::real exactDampedHarmonicOscillator(gr2::real t, gr2::real omega0, gr2::real
     return expl(-xi*t)*(A*sinl(omega*t) + B*cosl(omega*t));
 }
 
-class DampedHarmonicOscillator : public gr2::ODE
+class DampedHarmonicOscillator : public gr2::OdeSystem
 {
     protected:
         gr2::real omega0;
         gr2::real xi;
 
     public:
-        DampedHarmonicOscillator(const gr2::real &omega0, const gr2::real &xi):gr2::ODE(2) 
+        DampedHarmonicOscillator(const gr2::real &omega0, const gr2::real &xi):gr2::OdeSystem(2) 
         {
             this->omega0 = omega0;
             this->xi = xi;
@@ -133,7 +133,7 @@ TEST(Stepper, DumpedOscillator)
 
     // Stepper
     gr2::RK4 stepper = gr2::RK4();
-    stepper.set_ODE(osc);
+    stepper.set_OdeSystem(osc);
 
     // test order
     ASSERT_EQ(stepper.get_order(), 4);
@@ -162,7 +162,7 @@ TEST(Stepper, DumpedOscillatorWithError)
 
     // Stepper
     gr2::RK4 stepper = gr2::RK4();
-    stepper.set_ODE(osc);
+    stepper.set_OdeSystem(osc);
 
     // test order
     ASSERT_EQ(stepper.get_order(), 4);

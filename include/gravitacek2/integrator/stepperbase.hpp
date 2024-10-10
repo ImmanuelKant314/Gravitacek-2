@@ -1,6 +1,6 @@
 #pragma once
 #include "gravitacek2/setup.hpp"
-#include "gravitacek2/odesolver/ode.hpp"
+#include "gravitacek2/integrator/odesystem.hpp"
 
 namespace gr2
 {
@@ -11,10 +11,10 @@ namespace gr2
      * \f$\vec{y}(t)\f$. It is also possible to calculate error estimate of 
      * this value.
      */
-    class Stepper
+    class StepperBase
     {
     protected:
-        ODE *ode;       // solved system of differential equations
+        OdeSystem *ode;       // solved system of differential equations
         real *yt;       // array for storing current value of \f$\vec{y}\f$
         real *yt2;      // array for storing second estimate of \f$\vec{y}\f$ to calculate error
         real *dydt;     // array for storing current value of \f$\frac{\mathrm{d}\vec{y}}{\mathrm{d} t}\f$
@@ -26,13 +26,13 @@ namespace gr2
          * @brief Construct a new Stepper object.
          * 
          */
-        Stepper();
+        StepperBase();
 
         /**
          * @brief Destroy the Stepper object.
          * 
          */
-        ~Stepper();
+        ~StepperBase();
 
         /**
          * @brief Set ODE for stepper.
@@ -41,7 +41,7 @@ namespace gr2
          * 
          * @param ode integrated ODE
          */
-        virtual void set_ODE(ODE& ode);
+        virtual void set_OdeSystem(OdeSystem& ode);
 
         /**
          * @brief Reset stepper.

@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 #include "gravitacek2/setup.hpp"
-#include "gravitacek2/odesolver/integrator.hpp"
+#include "gravitacek2/integrator/integrator.hpp"
 
 #include <cmath>
 #include <iostream>
@@ -18,14 +18,14 @@ gr2::real exactDampedHarmonicOscillator(gr2::real t, gr2::real omega0, gr2::real
     return expl(-xi*t)*(A*sinl(omega*t) + B*cosl(omega*t));
 }
 
-class DampedHarmonicOscillator : public gr2::ODE
+class DampedHarmonicOscillator : public gr2::OdeSystem
 {
     protected:
         gr2::real omega0;
         gr2::real xi;
 
     public:
-        DampedHarmonicOscillator(const gr2::real &omega0, const gr2::real &xi):gr2::ODE(2) 
+        DampedHarmonicOscillator(const gr2::real &omega0, const gr2::real &xi):gr2::OdeSystem(2) 
         {
             this->omega0 = omega0;
             this->xi = xi;

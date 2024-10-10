@@ -1,18 +1,18 @@
-#include "gravitacek2/odesolver/steper_types.hpp"
+#include "gravitacek2/integrator/steppers.hpp"
 
 namespace gr2
 {
-    RK4::RK4():Stepper(), k1(nullptr), k2(nullptr), k3(nullptr), k4(nullptr){}
+    RK4::RK4():StepperBase(), k1(nullptr), k2(nullptr), k3(nullptr), k4(nullptr){}
 
     RK4::~RK4()
     {
         delete[] k1, k2, k3, k4;
     }
 
-    void RK4::set_ODE(ODE& ode)
+    void RK4::set_OdeSystem(OdeSystem& ode)
     {
         int old_n = n;
-        this->Stepper::set_ODE(ode);
+        this->StepperBase::set_OdeSystem(ode);
         if (old_n != n)
         {
             delete[] k1, k2, k3, k4;

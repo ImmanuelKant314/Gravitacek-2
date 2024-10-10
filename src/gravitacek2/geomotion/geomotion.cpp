@@ -20,7 +20,7 @@ namespace gr2
         return test;
     }
 
-    GeoMotion::GeoMotion(const int &dim, const int &n) : ODE(n)
+    GeoMotion::GeoMotion(const int &dim, const int &n) : OdeSystem(n)
     {
         // dimension
         this->dim = dim;
