@@ -2,7 +2,7 @@
 
 namespace gr2
 {
-    bool GeoMotion::necesarry_calculate(const real *y, real *y_save, const int& n)
+    bool GeoMotion::necessary_calculate(const real *y, real *y_save, const int& n)
     {
         if (!y_save)
         {
