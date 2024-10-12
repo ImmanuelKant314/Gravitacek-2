@@ -36,7 +36,9 @@ add_library(integrator
 add_library(geomotion
             STATIC 
             ${GEOMOTION_DIR}/geomotion.cpp
-            ${GEOMOTION_DIR}/spacetimes/schwarzschild.cpp)
+            ${GEOMOTION_DIR}/weyl.cpp
+            ${GEOMOTION_DIR}/spacetimes/schwarzschild.cpp
+            ${GEOMOTION_DIR}/spacetimes/weylschwarzschild.cpp)
 
 # include directiories
 target_include_directories(setup PUBLIC ${PROJECT_SOURCE_DIR}/include)
