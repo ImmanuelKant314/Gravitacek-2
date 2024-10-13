@@ -50,7 +50,3 @@ gtest_discover_tests(test_integrator)
 gtest_discover_tests(test_stepcontrollertypes)
 gtest_discover_tests(test_steppertypes)
 gtest_discover_tests(test_spacetimes)
-
-# copy data
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/data
-     DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
