@@ -18,6 +18,7 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/tests)
 # directory shortcuts
 set(INTEGRATOR_DIR ${PROJECT_SOURCE_DIR}/src/gravitacek2/integrator)
 set(GEOMOTION_DIR ${PROJECT_SOURCE_DIR}/src/gravitacek2/geomotion)
+set(MYMATH_DIR ${PROJECT_SOURCE_DIR}/src/gravitacek2)
 
 # add libraries
 add_library(setup STATIC ${PROJECT_SOURCE_DIR}/src/gravitacek2/setup.cpp)
@@ -32,23 +33,28 @@ add_library(integrator
             ${INTEGRATOR_DIR}/steppers/dopr853.cpp
             ${INTEGRATOR_DIR}/stepcontrollers/standardstepcontroller.cpp
             ${INTEGRATOR_DIR}/stepcontrollers/stepcontrollernr.cpp)
-
 add_library(geomotion
             STATIC 
             ${GEOMOTION_DIR}/geomotion.cpp
             ${GEOMOTION_DIR}/weyl.cpp
             ${GEOMOTION_DIR}/spacetimes/schwarzschild.cpp
             ${GEOMOTION_DIR}/spacetimes/weylschwarzschild.cpp)
+add_library(mymath
+            STATIC
+            ${MYMATH_DIR}/mymath.cpp)
+
 
 # include directiories
 target_include_directories(setup PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_include_directories(integrator PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_include_directories(geomotion PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(mymath PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 # link libraries
 target_link_libraries(Gravitacek2 PUBLIC setup)
 target_link_libraries(integrator PUBLIC setup)
 target_link_libraries(geomotion PUBLIC setup integrator)
+target_link_libraries(mymath PUBLIC setup)
 
 # testing 
 enable_testing()
