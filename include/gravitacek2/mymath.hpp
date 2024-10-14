@@ -37,8 +37,8 @@ namespace gr2
      * @param eps presision of integration
      * @return value of integral
      */
-    template<int K>
-    real romb(realfunction func, const real &a, const real &b, const real &eps = 10e-10)
+    template<int K, class T>
+    real romb(T func, const real &a, const real &b, const real &eps = 10e-10)
     {
         const int JMIN = 5, JMAX = 20;
         int m;
