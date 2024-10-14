@@ -65,10 +65,17 @@ TEST(WeylSchwarzchild, DerivativesOfPotential)
     EXPECT_NEAR(spacetime.get_nu_z(), 0.0005650330027458911, eps);
 }
 
-TEST(WeylSchwarzschild, Lambda)
+TEST(WeylSchwarzschild, LambdaExact)
 {
     gr2::WeylSchwarzschild spacetime = gr2::WeylSchwarzschild(0.3);
-    spacetime.calculate_lambda(y_weylschwarzschild);
+    spacetime.calculate_lambda_init(y_weylschwarzschild);
+    EXPECT_NEAR(spacetime.get_lambda(), -0.000415904944973, eps);
+}
+
+TEST(WeylSchwarzschild, LambdaIntegral)
+{
+    gr2::WeylSchwarzschild spacetime = gr2::WeylSchwarzschild(0.3, gr2::integral);
+    spacetime.calculate_lambda_init(y_weylschwarzschild);
     EXPECT_NEAR(spacetime.get_lambda(), -0.000415904944973, eps);
 }
 

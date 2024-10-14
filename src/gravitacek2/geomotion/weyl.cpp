@@ -1,12 +1,54 @@
 #include <cmath>
+#include <stdexcept>
 
 #include "gravitacek2/geomotion/weyl.hpp"
+#include "gravitacek2/mymath.hpp"
 
 namespace gr2
 {
-    Weyl::Weyl(bool lambda_exact) : GeoMotion(4, lambda_exact?8:9)
+    void Weyl::calculate_lambda_from_inf_to_z(const real* y, const real& eps)
     {
-        this->lambda_exact = lambda_exact;
+        // add variables
+        real a = 0.5;
+        real rho = y[RHO];
+        real z = y[Z];
+        real b = 1.0/(z+1); 
+        const int I_MAX = 20;
+
+        // create integrated function
+        auto integrated_function = [&rho, this](real x)
+        {
+            real y[] = {0, 0, 0, 0};
+            y[RHO] = rho;
+            y[Z] = 1.0/x-1;
+            this->calculate_nu1(y);
+            return -(2*rho*nu_rho*nu_z)/(x*x);
+        };
+
+        // find value of a
+        int i;
+        for (i = 0; i < I_MAX; i++)
+        {
+            real val = integrated_function(a);
+            if (fabsl(val)*a < eps)
+                break;
+            a *= 0.5;
+        }
+
+        if (i == I_MAX)
+            throw std::runtime_error("in calculating lambda lower bound was not found");
+
+        // calculate value lambda
+        this->lambda = romb<5>(integrated_function, a, b, eps);
+    }
+
+    Weyl::Weyl(LambdaEvaluation init, LambdaEvaluation run) : GeoMotion(4, run==LambdaEvaluation::diff?9:8)
+    {
+        // ways of calculating lambda
+        this->lambda_eval_init = init;
+        this->lambda_eval_run = run;
+
+        // index of lambda
         this->lambda_index = LAMBDA;
     }
 
@@ -45,12 +87,9 @@ namespace gr2
         return this->nu_zz;
     }
 
-    void Weyl::calculate_lambda_run(const real* y)
+    void Weyl::calculate_lambda_diff(const real* y)
     {
-        if (lambda_exact)
-            this->calculate_lambda(y);
-        else
-            this->lambda = y[this->lambda_index];
+        this->lambda = y[lambda_index];
     }
 
     real Weyl::get_lambda() const

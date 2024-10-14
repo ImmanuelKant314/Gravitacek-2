@@ -65,6 +65,9 @@ namespace gr2
     {
     protected:
         real M; //!<mass of the Swarzschild black hole
+
+        virtual void calculate_lambda_exact(const real* y);
+        virtual void calculate_lambda_integral(const real* y);
     public:
         /**
          * @brief Construct a new WeylSchwarzschild object.
@@ -72,12 +75,13 @@ namespace gr2
          * @param M mass of black hole
          * @param lambda_exact true if value of \f$\lambda\f$ should be calculated exaxtly 
          */
-        WeylSchwarzschild(real M = 1, bool lambda_exact = true);
+        WeylSchwarzschild(real M = 1, LambdaEvaluation init=LambdaEvaluation::exact, LambdaEvaluation run=LambdaEvaluation::exact);
+
+        virtual void calculate_lambda_init(const real* y) override;
+        virtual void calculate_lambda_run(const real* y) override;
 
         virtual void calculate_nu(const real* y) override;
         virtual void calculate_nu1(const real* y) override;
         virtual void calculate_nu2(const real* y) override;
-
-        virtual void calculate_lambda(const real* y) override;
     };
 }

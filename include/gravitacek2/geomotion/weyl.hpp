@@ -2,6 +2,16 @@
 
 namespace gr2
 {
+    enum LambdaEvaluation
+    {
+        exact,
+        diff,
+        integral,
+        custom1,
+        custom2,
+        custom3
+    };
+
     /**
      * @brief Class representing geodesic motion in general Weyl spacetime.
      * 
@@ -34,8 +44,10 @@ namespace gr2
     class Weyl : public GeoMotion
     {
     protected:
-        bool lambda_exact;  //!<truth value if \f$\lambda\f$ should be calculated exactly
-        int lambda_index;   //!<index where value of \f$\lambda\f$ should be stored
+        LambdaEvaluation lambda_eval_init;   //!<type of calculation of \f$\lambda\f$ when initializing
+        LambdaEvaluation lambda_eval_run;    //!<type of calculation of \f$\lambda\f$ when running simulation
+        
+        int lambda_index;               //!<index where value of \f$\lambda\f$ should be stored
 
         real nu;            //!<value of \f$\nu\f$
         real nu_rho;        //!<value of \f$\nu_{,\rho}\f$
@@ -47,6 +59,20 @@ namespace gr2
         real lambda;        //!<value of \f$\lambda\f$
         real lambda_rho;    //!<value of \f$\lambda_{,\rho}\f$
         real lambda_z;      //!<value of \f$\lambda_{,z}\f$
+
+        /**
+         * @brief Calculate value of \f$\lambda\f$ by integrating from \f$z = \inf\f$ to \f$z = z_0\f$.
+         * 
+         * Integration is done by Romberg's algorithm with K=5. Function integrated
+         * is
+         * \f[
+         * \lambda(\rho, z) = -\int_{0}^{\frac{1}{1+|z|}} \frac{1}{t^2}\lambda_{,z}\left(\rho, \frac{1}{t} - 1\right) \dd t.
+         * \f]
+         * 
+         * @param y coordinate values
+         */
+        void calculate_lambda_from_inf_to_z(const real* y, const real& eps=1e-10);
+        void calculate_lambda_diff(const real* y);
 
     public:
         static const int T = 0;         //!<index of coordinate \f$t\f$
@@ -64,7 +90,7 @@ namespace gr2
          * 
          * @param lambda_exact true if value of \f$\lambda\f$ should be calculated exaxtly
          */
-        Weyl(bool lambda_exact);
+        Weyl(LambdaEvaluation init, LambdaEvaluation run);
 
         /**
          * @brief Destroy the Weyl object.
@@ -143,7 +169,7 @@ namespace gr2
          * 
          * @param y coordinate variables
          */
-        virtual void calculate_lambda(const real* y) = 0;
+        virtual void calculate_lambda_init(const real* y) = 0;
 
         /**
          * @brief Calculate value of \f$\lambda\f$ optimally.
@@ -153,7 +179,7 @@ namespace gr2
          * 
          * @param y  coordinate variables (may include value of \f$\lambda\f$)
          */
-        virtual void calculate_lambda_run(const real* y);
+        virtual void calculate_lambda_run(const real* y) = 0;
 
         /**
          * @brief Get value of \f$\lambda\f$
