@@ -13,49 +13,49 @@ namespace gr2
     {
     protected:
         // ========== Components of itnegrator ========== 
-        OdeSystem *ode;                       // ordinary differential equation
-        StepperBase *stepper;               // stepper used for integrating
-        StepControllerBase *stepcontroller; // step controller
+        OdeSystem *ode;                     //!<solved system of ordinary differential equations
+        StepperBase *stepper;               //!<stepper used for integrating
+        StepControllerBase *stepcontroller; //!<step controller
 
         // ========== Events ========== 
-        std::vector<Event*> events_data;
-        std::vector<Event*> events_modifying;
-        std::vector<Event*> events_terminal;
+        std::vector<Event*> events_data;        //!<vector of data events
+        std::vector<Event*> events_modifying;   //!<vector of modyfying events
+        std::vector<Event*> events_terminal;    //!<vector of terminal events
 
         // ========== Values of events ========== 
-        real* events_data_values;
-        real* events_modifying_values;
-        real* events_terminal_values;
+        real* events_data_values;       //!<tracked values of data events
+        real* events_modifying_values;  //!<tracked values of modifying events
+        real* events_terminal_values;   //!<tracked values of terminal events
 
         // ========== Number of events ========== 
-        int number_of_events_data;
-        int number_of_events_modifying;
-        int number_of_events_terminal;
+        int number_of_events_data;      //!<number of data events
+        int number_of_events_modifying; //!<number of modifying events
+        int number_of_events_terminal;  //!<number of terminal events
 
         // ========== Step size ========== 
-        real h;         // current value of time step
-        real h2;        // value of time step for trying new step
-        real h3;        // value of time step for events
+        real h;         //!<current value of time step
+        real h2;        //!<value of time step for trying new step
+        real h3;        //!<value of time step for events
 
         // ========== Time variable ========== 
-        real t;         // current value of time
-        real t2;        // value of time for new time step
-        real t3;        // value of time for events
+        real t;         //!<current value of time
+        real t2;        //!<value of time for new time step
+        real t3;        //!<value of time for events
 
         // ========== Coordinate variables ========== 
-        real *yt;       // array for storing current value of y
-        real *yt2;      // array for trying next step
-        real *yt3;      // array for trying events
+        real *yt;       //!<array for storing current value of \f$\vec{y}\f$
+        real *yt2;      //!<array for trying next step
+        real *yt3;      //!<array for trying events
 
         // ========== Derivative values ========== 
-        real *dydt;     // array for calculating \f$\frac{\mathrm{d} \vec{y}}{\mathrm{d}}\f$
-        real *dydt2;    // array for calculating \f$\frac{\mathrm{d} \vec{y}}{\mathrm{d}}\f$ when trying new step
-        real *dydt3;    // array for calculating \f$\frac{\mathrm{d} \vec{y}}{\mathrm{d}}\f$ when calculating events
+        real *dydt;     //!<array for calculating \f$\frac{\mathrm{d} \vec{y}}{\mathrm{d}}\f$
+        real *dydt2;    //!<array for calculating \f$\frac{\mathrm{d} \vec{y}}{\mathrm{d}}\f$ when trying new step
+        real *dydt3;    //!<array for calculating \f$\frac{\mathrm{d} \vec{y}}{\mathrm{d}}\f$ when calculating events
 
         // ========== Error values ========== 
-        real *err;      // array for calculating error
-        real *err2;     // array for calculating error when trying new step
-        real *err3;     // array for calculating error in event
+        real *err;      //!<array for calculating error
+        real *err2;     //!<array for calculating error when trying new step
+        real *err3;     //!<array for calculating error in event
 
         /**
          * @brief Initializing basic variables.

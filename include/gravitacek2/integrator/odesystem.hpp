@@ -21,7 +21,7 @@ namespace gr2
     class OdeSystem
     {
     protected:
-        int n; // number of ordinary differential equations
+        int n; //!<number of ordinary differential equations
     public:
         /**
          * @brief Construct a new OdeSystem object

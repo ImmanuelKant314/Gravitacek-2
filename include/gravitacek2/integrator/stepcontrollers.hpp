@@ -34,7 +34,12 @@ namespace gr2
     {
     protected:
         int k;
-        real eps_abs, eps_rel, a_y, a_dydt, S, factor;
+        real eps_abs;
+        real eps_rel;
+        real a_y;
+        real a_dydt;
+        real S;
+        real factor;
         real *ratios;
     public:
         /**
@@ -78,14 +83,14 @@ namespace gr2
     class StepControllerNR : public StepControllerBase
     {
     protected:
-        real atol;              // absolute error tolerance
-        real rtol;              // relative error tolerance
-        int k;                  // order of stepper
-        real S;                 // safety factor
-        real factor_decrease;   // maximum decrease factor
-        real factor_grow;       // maximum growth factor
-        real err;
-        real scale;
+        real atol;              //!<absolute error tolerance
+        real rtol;              //!<relative error tolerance
+        int k;                  //!<order of stepper
+        real S;                 //!<safety factor
+        real factor_decrease;   //!<maximum decrease factor
+        real factor_grow;       //!<maximum growth factor
+        real err;               //!<variable for calculating error
+        real scale;             //!<variable for calculating scale
 
     public:
         /**

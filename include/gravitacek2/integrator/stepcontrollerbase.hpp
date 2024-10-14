@@ -10,7 +10,7 @@ namespace gr2
     class StepControllerBase
     {
     protected:
-        int n; // number of solved ordinary differential equations
+        int n; //!<number of solved ordinary differential equations
     public:
         /**
          * @brief Construct a new StepController object.

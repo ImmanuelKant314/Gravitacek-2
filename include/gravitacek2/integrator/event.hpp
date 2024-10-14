@@ -21,7 +21,7 @@ namespace gr2
     class Event
     {
     protected:
-        EventType type;
+        EventType type; //!<type of event
     public:
         /**
          * @brief Construct a new Event object.

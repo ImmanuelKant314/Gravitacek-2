@@ -10,13 +10,23 @@ namespace gr2
     class RK4 : public StepperBase
     {
     protected:
-        real *k1;   // array of coefficients \f$k_1\f$ for Runge-Kutta method
-        real *k2;   // array of coefficients \f$k_2\f$ for Runge-Kutta method
-        real *k3;   // array of coefficients \f$k_3\f$ for Runge-Kutta method
-        real *k4;   // array of coefficients \f$k_4\f$ for Runge-Kutta method
+        real *k1;   //!<array of coefficients \f$k_1\f$ for Runge-Kutta method
+        real *k2;   //!<array of coefficients \f$k_2\f$ for Runge-Kutta method
+        real *k3;   //!<array of coefficients \f$k_3\f$ for Runge-Kutta method
+        real *k4;   //!<array of coefficients \f$k_4\f$ for Runge-Kutta method
     public:
+        /**
+         * @brief Construct a new RK4 object.
+         * 
+         */
         RK4();
+
+        /**
+         * @brief Destroy the RK4 object.
+         * 
+         */
         ~RK4();
+
         virtual void set_OdeSystem(OdeSystem& ode);
         virtual void reset();
         virtual void step(const real &t, real y[], const real &h, const real dydt_in[] = nullptr, real dydt_out[] = nullptr) override;
@@ -31,11 +41,32 @@ namespace gr2
     class DoPr853 : public StepperBase
     {
     protected:
-        real *k1, *k2, *k3, *k4, *k5, *k6, *k7, *k8, *k9, *k10, *k11, *k12;
+        real *k1;   //!<array of coefficients \f$k_1\f$ for Runge-Kutta method
+        real *k2;   //!<array of coefficients \f$k_2\f$ for Runge-Kutta method
+        real *k3;   //!<array of coefficients \f$k_3\f$ for Runge-Kutta method
+        real *k4;   //!<array of coefficients \f$k_4\f$ for Runge-Kutta method 
+        real *k5;   //!<array of coefficients \f$k_5\f$ for Runge-Kutta method
+        real *k6;   //!<array of coefficients \f$k_6\f$ for Runge-Kutta method 
+        real *k7;   //!<array of coefficients \f$k_7\f$ for Runge-Kutta method
+        real *k8;   //!<array of coefficients \f$k_8\f$ for Runge-Kutta method
+        real *k9;   //!<array of coefficients \f$k_9\f$ for Runge-Kutta method
+        real *k10;  //!<array of coefficients \f$k_{10}\f$ for Runge-Kutta method 
+        real *k11;  //!<array of coefficients \f$k_{11}\f$ for Runge-Kutta method
+        real *k12;  //!<array of coefficients \f$k_{12}\f$ for Runge-Kutta method
         real *k_help;
     public:
+        /**
+         * @brief Construct a new DoPr853 object.
+         * 
+         */
         DoPr853();
+
+        /**
+         * @brief Destroy the DoPr853 object.
+         * 
+         */
         ~DoPr853();
+
         virtual void set_OdeSystem(OdeSystem& ode);
         virtual void reset();
         virtual void step(const real &t, real y[], const real &h, const real dydt_in[] = nullptr, real dydt_out[] = nullptr) override;
