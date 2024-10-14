@@ -72,6 +72,12 @@ TEST(elliptic_KE, E)
     }
 }
 
+TEST(romb5, IntegrateSinX)
+{
+    gr2::real eps=1e-13;
+    EXPECT_NEAR(gr2::romb<5>(*sinl, 0, gr2::pi), 2, eps);
+}
+
 int main(int argc, char **argv)
 {
     ::testing::InitGoogleTest(&argc, argv);

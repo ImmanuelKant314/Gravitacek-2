@@ -4,7 +4,8 @@ namespace gr2
 {
 // ==================== Types ==================== 
 
-typedef long double real;   // default type for real numbers
+typedef long double real;               //!<default type for real numbers
+typedef real (*realfunction)(real);     //!<type of real function
 
 
 // ==================== Constants ==================== 
