@@ -84,4 +84,35 @@ namespace gr2
         virtual void calculate_nu1(const real* y) override;
         virtual void calculate_nu2(const real* y) override;
     };
+
+    /**
+     * @brief Class representing geodesic motion in spacetime of Bach-Weyl ring.
+     * 
+     * Spacetime is given by potential
+     * \f[
+     * \nu = -\frac{2\mathcal{M} K(k)}{\pi l_2},
+     * \f]
+     * where \f$K(k) \equiv \int_0^{\pi/2}\frac{\dd \phi}{\sqrt{1-k^2\sin^2{\phi}}}\f$
+     * is complete elliptic integral of the first kind, \f$l_{1,2} = \sqrt{(\rho \mp b)^2 + z^2)}\f$
+     * and \f$k = \frac{\sqrt{4\rho b}}{l_2}\f$. \f$\mathcal{M}\f$ is mass of the ring 
+     * and \f$b\f$ is a radius of the ring.
+     * 
+     */
+    class BachWeylRing: public Weyl
+    {
+    protected:
+        real M; //!<mass of the Bach-Weyl ring
+        real b; //!<radius of the Bach-Weyl ring
+
+        virtual void calculate_lambda_integral(const real* y);
+    public:
+        BachWeylRing(real M, real b, LambdaEvaluation init=LambdaEvaluation::integral, LambdaEvaluation run=LambdaEvaluation::integral);
+
+        virtual void calculate_lambda_init(const real* y) override;
+        virtual void calculate_lambda_run(const real* y) override;
+
+        virtual void calculate_nu(const real* y) override;
+        virtual void calculate_nu1(const real* y) override;
+        virtual void calculate_nu2(const real* y) override;
+    };
 }

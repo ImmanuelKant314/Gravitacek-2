@@ -38,7 +38,8 @@ add_library(geomotion
             ${GEOMOTION_DIR}/geomotion.cpp
             ${GEOMOTION_DIR}/weyl.cpp
             ${GEOMOTION_DIR}/spacetimes/schwarzschild.cpp
-            ${GEOMOTION_DIR}/spacetimes/weylschwarzschild.cpp)
+            ${GEOMOTION_DIR}/spacetimes/weylschwarzschild.cpp
+            ${GEOMOTION_DIR}/spacetimes/bachweylring.cpp)
 add_library(mymath
             STATIC
             ${MYMATH_DIR}/mymath.cpp)
@@ -53,7 +54,7 @@ target_include_directories(mymath PUBLIC ${PROJECT_SOURCE_DIR}/include)
 # link libraries
 target_link_libraries(Gravitacek2 PUBLIC setup)
 target_link_libraries(integrator PUBLIC setup)
-target_link_libraries(geomotion PUBLIC setup integrator)
+target_link_libraries(geomotion PUBLIC setup integrator mymath)
 target_link_libraries(mymath PUBLIC setup)
 
 # testing 

@@ -5,7 +5,7 @@
 #include "gravitacek2/setup.hpp"
 #include "gravitacek2/geomotion/spacetimes.hpp"
 
-// ========== prepare Schwarzschild ========== 
+// ==================== Schwarzschild ==================== 
 
 gr2::real y_schwarzschild[4] = {};
 gr2::real metric_schwarzschild[4][4] = {};
@@ -44,12 +44,14 @@ TEST(Schwarzschild, RiemannTensor)
                     EXPECT_NEAR(spacetime.get_riemann_tensor()[i][j][k][l], riemann_tensor_schwarzschild[i][j][k][l], eps);
 }
 
+// ==================== WeylSchwarzschild ==================== 
+
 gr2::real y_weylschwarzschild[4] = {};
 gr2::real metric_weylschwarzschild[4][4] = {};
 gr2::real christoffel_symbols_weylschwarzschild[4][4][4] = {};
 gr2::real riemann_tensor_weylschwarzschild[4][4][4][4] = {};
 
-TEST(WeylSchwarzschild, potencial)
+TEST(WeylSchwarzschild, Potencial)
 {
     gr2::WeylSchwarzschild spacetime = gr2::WeylSchwarzschild(0.3);
     spacetime.calculate_nu(y_weylschwarzschild);
@@ -99,6 +101,27 @@ TEST(WeylSchwarzschild, ChristoffelSymbols)
 }
 
 //TODO: WeylSchwarzschild - Riemannův tensor
+
+// ==================== BachWeylRing ==================== 
+gr2::real y_bachweylring[4] = {};
+
+TEST(BachWeylRing, Potential)
+{
+    gr2::real eps = 1e-15;
+    gr2::BachWeylRing spacetime = gr2::BachWeylRing(0.3, 20);
+    spacetime.calculate_nu(y_bachweylring);
+    EXPECT_NEAR(spacetime.get_nu(), -0.015000654984792, eps);
+}
+
+TEST(BachWeylRing, DerivativesOfPotential)
+{
+    gr2::real eps = 1e-15;
+    gr2::BachWeylRing spacetime = gr2::BachWeylRing(0.3, 20);
+    spacetime.calculate_nu1(y_bachweylring);
+    EXPECT_NEAR(spacetime.get_nu(), -0.015000654984792, eps);
+    EXPECT_NEAR(spacetime.get_nu_rho(), -0.000009372089805, eps);
+    EXPECT_NEAR(spacetime.get_nu_z(), 0.000011262025116, eps);
+}
 
 int main(int argc, char **argv)
 {
@@ -190,6 +213,13 @@ int main(int argc, char **argv)
     christoffel_symbols_weylschwarzschild[3][2][3] = -0.002750848792062;
     christoffel_symbols_weylschwarzschild[3][3][2] = -0.002750848792062;
     christoffel_symbols_weylschwarzschild[3][3][3] = -0.000533079143940;
+
+    // ========== Prepare BachWeylRing ========== 
+    // coordinates
+    y_bachweylring[0] = 1.000000000000000;
+    y_bachweylring[1] = 4.000000000000000;
+    y_bachweylring[2] = 0.500000000000000;
+    y_bachweylring[3] = 0.300000000000000;
 
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
