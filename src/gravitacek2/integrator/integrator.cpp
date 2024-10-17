@@ -104,10 +104,8 @@ namespace gr2
                 h_b = h3;
                 b = current_value_of_event;
                 // if new value of event is close enought, stop for-cycle
-                if( fabs(current_value_of_event) < EVENT_PRECISION)
-                {
+                if( (h_b-h_a) < EVENT_PRECISION*std::max(h_a, h_b))
                     return true;
-                }
             }
         }
        
