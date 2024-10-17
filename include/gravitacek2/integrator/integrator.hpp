@@ -18,19 +18,22 @@ namespace gr2
         StepControllerBase *stepcontroller; //!<step controller
 
         // ========== Events ========== 
-        std::vector<Event*> events_data;        //!<vector of data events
-        std::vector<Event*> events_modifying;   //!<vector of modyfying events
-        std::vector<Event*> events_terminal;    //!<vector of terminal events
+        std::vector<Event*> events_data;                //!<vector of data events
+        std::vector<Event*> events_data_precise;        //!<vector of data events (precise)
+        std::vector<Event*> events_modifying;           //!<vector of modyfying events
+        std::vector<Event*> events_modifying_precise;   //!<vector of modyfying events
+        std::vector<Event*> events_terminal;            //!<vector of terminal events
+        std::vector<Event*> events_terminal_precise;    //!<vector of terminal events (precise)
 
         // ========== Values of events ========== 
-        real* events_data_values;       //!<tracked values of data events
-        real* events_modifying_values;  //!<tracked values of modifying events
-        real* events_terminal_values;   //!<tracked values of terminal events
+        real* events_data_precise_values;               //!<tracked values of data events
+        real* events_modifying_precise_values;          //!<tracked values of modifying events
+        real* events_terminal_precise_values;           //!<tracked values of terminal events
 
         // ========== Number of events ========== 
-        int number_of_events_data;      //!<number of data events
-        int number_of_events_modifying; //!<number of modifying events
-        int number_of_events_terminal;  //!<number of terminal events
+        int number_of_events_data_precise;      //!<number of data events
+        int number_of_events_modifying_precise; //!<number of modifying events (precise)
+        int number_of_events_terminal_precise;  //!<number of terminal events (precise)
 
         // ========== Step size ========== 
         real h;         //!<current value of time step

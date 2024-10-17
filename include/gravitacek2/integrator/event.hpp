@@ -8,7 +8,12 @@ namespace gr2
      */
     enum EventType
     {
-        data, modyfing, terminal
+        data,
+        data_precise,
+        modyfing,
+        modyfing_precise,
+        terminal,
+        terminal_precise
     };
 
     /**
