@@ -19,6 +19,7 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/tests)
 set(INTEGRATOR_DIR ${PROJECT_SOURCE_DIR}/src/gravitacek2/integrator)
 set(GEOMOTION_DIR ${PROJECT_SOURCE_DIR}/src/gravitacek2/geomotion)
 set(MYMATH_DIR ${PROJECT_SOURCE_DIR}/src/gravitacek2)
+set(INTF_DIR ${PROJECT_SOURCE_DIR}/src/interface)
 
 # add libraries
 add_library(setup STATIC ${PROJECT_SOURCE_DIR}/src/gravitacek2/setup.cpp)
@@ -43,6 +44,9 @@ add_library(geomotion
 add_library(mymath
             STATIC
             ${MYMATH_DIR}/mymath.cpp)
+add_library(interface
+            STATIC
+            ${INTF_DIR}/interface.cpp)
 
 
 # include directiories
@@ -50,12 +54,14 @@ target_include_directories(setup PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_include_directories(integrator PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_include_directories(geomotion PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_include_directories(mymath PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(interface PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
 # link libraries
-target_link_libraries(Gravitacek2 PUBLIC setup)
+target_link_libraries(Gravitacek2 PUBLIC setup interface)
 target_link_libraries(integrator PUBLIC setup)
 target_link_libraries(geomotion PUBLIC setup integrator mymath)
 target_link_libraries(mymath PUBLIC setup)
+target_link_libraries(interface PUBLIC setup)
 
 # testing 
 enable_testing()
