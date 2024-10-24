@@ -4,7 +4,7 @@
 class Interface
 {
 protected:
-    // macros
+    // ==================== Macros ==================== 
     std::vector<std::string> macros;    //!<vector of macro names
     std::vector<std::string> values;    //!<vector of macro numbers
 
@@ -43,8 +43,6 @@ protected:
      */
     void find_command_name(std::string text, std::string &command, std::string &rest);
 
-    std::string find_function_arguments(std::string text);
-
     // operators
     /**
      * @brief Try to apply operators.
@@ -76,7 +74,31 @@ protected:
      */
     void print_macro(std::string text);
 
+    // ==================== Functions ==================== 
+
+    /**
+     * @brief Find arguments in text.
+     * 
+     * @param text string with arguments
+     * @return vector of arguments
+     */
+    std::vector<std::string> find_function_arguments(std::string text);
+
+    /**
+     * @brief Try applying function.
+     * 
+     * @param text string with possible function
+     * @return true if function was applied
+     * @return false  if function was not applied
+     */
     bool try_apply_function(std::string text);
+
+    /**
+     * @brief Write given arguments.
+     * 
+     * @param text string with arguments
+     */
+    void split_args(std::string text);
 public:
     Interface();
 

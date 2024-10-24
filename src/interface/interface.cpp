@@ -71,35 +71,7 @@ void Interface::find_command_name(std::string text, std::string &command, std::s
     rest = "";
 }
 
-std::string Interface::find_function_arguments(std::string text)
-{
-    int counter = 0;
-    bool start = false;
-    int start_index, end_index;
-    for (int i = 0; i < text.length(); i++)
-    {
-        if (text[i]=='(')
-            counter ++;
-        else if (text[i]==')')
-            counter--;
 
-        if (counter == 1 && !start)
-        {
-            start = true;
-            start_index=i;
-        }
-        else if (start && counter == 0)
-        {
-            end_index = i;
-            break;
-        }
-        else if (counter < 0)
-        {
-            throw("invalid usage of parenthesis");
-        }
-    }
-    return text.substr(start_index, end_index-start_index);
-}
 
 bool Interface::try_apply_operators(std::string text)
 {
@@ -183,10 +155,74 @@ void Interface::print_macro(std::string text)
     throw std::invalid_argument("no macro with this name");
 }
 
+std::vector<std::string> Interface::find_function_arguments(std::string text)
+{
+    int i, counter = 0;
+    bool start = false;
+    int start_index, end_index;
+    int word_start, word_end;
+    std::vector<std::string> result;
+    
+    for (i = 0; i < text.length(); i++)
+    {
+        // counting parenthesis
+        if (text[i]=='(')
+            counter++;
+        else if (text[i]==')')
+            counter--;
+
+        // controling parenthesis
+        if (counter == 1 && !start)
+        {
+            start = true;
+            start_index=i;
+            word_start = i+1;
+        }
+        else if (start && counter == 0)
+        {
+            end_index = i;
+            break;
+        }
+        else if (counter < 0)
+        {
+            throw("invalid usage of parenthesis");
+        }
+
+        // getting arguments
+        if (start && (counter==1 && text[i] == ','))
+        {
+            result.push_back(strip(text.substr(word_start, i-word_start)));
+            word_start=i+1;
+        }
+    }
+    if (start)
+        result.push_back(strip(text.substr(word_start, i-word_start)));
+    if (!start)
+        throw std::invalid_argument("no argument to function were given");
+    return result;
+}
+
 bool Interface::try_apply_function(std::string text)
 {
+    std::string name, rest;
+    find_command_name(text, name, rest);
+    std::cout << name << std::endl;
+    if (name == "split_args")
+    {
+        this->split_args(rest);
+        return true;
+    }
+
     return false;
 }
+
+void Interface::split_args(std::string text)
+{
+    auto args = find_function_arguments(text);
+    for (int i = 0; i<args.size(); i++)
+        std::cout << "arg" << i << ": " << args[i] << std::endl;
+}
+
 
 Interface::Interface():macros(), values()
 {
