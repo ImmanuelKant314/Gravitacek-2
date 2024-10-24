@@ -313,19 +313,50 @@ void Interface::draw_lambda_1D(std::string text)
 
     // get arguments
     auto args = find_function_arguments(text);
-    int number_of_arguments = 6;
+    int number_of_arguments = 7;
     if (args.size() > number_of_arguments)
-        throw std::invalid_argument("too much arguments for draw_lambda_1D");
+        throw std::invalid_argument("too much arguments for draw_potential_1D");
     else if (args.size() < number_of_arguments)
-        throw std::invalid_argument("too little arguments for draw_lambda_1D");
+        throw std::invalid_argument("too little arguments for draw_potential_1D");
 
-    // save arguments
-    gr2::Weyl* spacetime = this->create_weyl_spacetime(args[0]);
-    int coordinate = std::stoi(args[1]);
-    gr2::real min = std::stold(args[2]);
-    gr2::real max = std::stold(args[3]);
-    int num = std::stoi(args[4]);
-    std::string file = args[5];
+    gr2::Weyl* spacetime = nullptr;
+    std::ofstream file;
+
+    try
+    {
+        // save arguments
+        spacetime = this->create_weyl_spacetime(args[0]);
+        int coordinate = std::stoi(args[1]);
+        auto coordinates = find_function_arguments(args[2]);
+        gr2::real min_val = std::stold(args[3]);
+        if (coordinates.size() != 4)
+            throw std::invalid_argument("invalid number of coordinates");
+        gr2::real max_val = std::stold(args[4]);
+        int num = std::stoi(args[5]);
+        std::string file_name = args[6];
+
+        // prepare calculation
+        gr2::real y[4];
+        for (int i = 0; i <4; i++)
+        {
+            y[i] = std::stold(coordinates[i]);
+        }
+
+        // calculation
+        file.open(file_name);
+        for (int i = 0; i< num; i++)
+        {
+            y[coordinate] = (max_val-min_val)/(num-1)*i + min_val;
+            spacetime->calculate_lambda_init(y);
+            file << y[coordinate] << ";" << spacetime->get_lambda() << std::endl;
+        }
+    }
+    catch(const std::exception& e)
+    {
+        delete[] spacetime;
+        file.close();
+        throw e;
+    }
 }
 
 
