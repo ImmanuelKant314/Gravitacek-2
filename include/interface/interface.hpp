@@ -1,5 +1,11 @@
+#pragma once
+
 #include <string>
 #include <vector>
+
+#include "gravitacek2/setup.hpp"
+#include "gravitacek2/geomotion/geomotion.hpp"
+#include "gravitacek2/geomotion/weyl.hpp"
 
 class Interface
 {
@@ -99,6 +105,37 @@ protected:
      * @param text string with arguments
      */
     void split_args(std::string text);
+
+    /**
+     * @brief Create spacetime with given parameters.
+     * 
+     * @param text definition of spacetime
+     * @return pointer to spacetime object
+     */
+    gr2::GeoMotion* create_spacetime(std::string text);
+
+    /**
+     * @brief Create Weyl spacetime with given parameters.
+     * 
+     * @param text definition of Weyl spacetime
+     * @return pointer to spacetime object
+     */
+    gr2::Weyl* create_weyl_spacetime(std::string text);
+
+    /**
+     * @brief Calculate potential with given parameters.
+     * 
+     * @param text parameters for function
+     */
+    void draw_potential_1D(std::string text);
+
+    /**
+     * @brief Calculate metric function lambda with given parameters.
+     * 
+     * @param text parameters for function
+     */
+    void draw_lambda_1D(std::string text);
+
 public:
     Interface();
 

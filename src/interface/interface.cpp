@@ -1,7 +1,9 @@
 #include "interface/interface.hpp"
+#include "gravitacek2/geomotion/spacetimes.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <algorithm>
+#include <fstream>
 
 std::string Interface::substitute(std::string text)
 {
@@ -70,8 +72,6 @@ void Interface::find_command_name(std::string text, std::string &command, std::s
     command = text;
     rest = "";
 }
-
-
 
 bool Interface::try_apply_operators(std::string text)
 {
@@ -155,6 +155,27 @@ void Interface::print_macro(std::string text)
     throw std::invalid_argument("no macro with this name");
 }
 
+gr2::Weyl* Interface::create_weyl_spacetime(std::string text)
+{
+    text = strip(text);
+    std::string spacetime_name, args_text;
+    this->find_command_name(text, spacetime_name, args_text);
+    auto args = this->find_function_arguments(args_text);
+    gr2::Weyl* spacetime;
+
+    if (spacetime_name == "WeylSchwarzschild")
+    {
+        if (args.size() != 1)
+            throw std::invalid_argument("invalid number of arguments for WeylSchwarzschild");
+        spacetime = new gr2::WeylSchwarzschild(std::stold(args[0]));
+    }
+    else
+    {
+        throw std::invalid_argument("spacetime with name " + spacetime_name + " does not exist");
+    }
+    return spacetime;
+}
+
 std::vector<std::string> Interface::find_function_arguments(std::string text)
 {
     int i, counter = 0;
@@ -206,10 +227,19 @@ bool Interface::try_apply_function(std::string text)
 {
     std::string name, rest;
     find_command_name(text, name, rest);
-    std::cout << name << std::endl;
     if (name == "split_args")
     {
         this->split_args(rest);
+        return true;
+    }
+    else if (name == "draw_potential_1D")
+    {
+        this->draw_potential_1D(rest);
+        return true;
+    }
+    else if (name == "draw_lambda_1D")
+    {
+        this->draw_lambda_1D(rest);
         return true;
     }
 
@@ -221,6 +251,81 @@ void Interface::split_args(std::string text)
     auto args = find_function_arguments(text);
     for (int i = 0; i<args.size(); i++)
         std::cout << "arg" << i << ": " << args[i] << std::endl;
+}
+
+void Interface::draw_potential_1D(std::string text)
+{
+    //weylspacetime, coordiante, initial_values, min, max, num, file
+
+    // get arguments
+    auto args = find_function_arguments(text);
+    int number_of_arguments = 7;
+    if (args.size() > number_of_arguments)
+        throw std::invalid_argument("too much arguments for draw_potential_1D");
+    else if (args.size() < number_of_arguments)
+        throw std::invalid_argument("too little arguments for draw_potential_1D");
+
+    gr2::Weyl* spacetime = nullptr;
+    std::ofstream file;
+
+    try
+    {
+        // save arguments
+        spacetime = this->create_weyl_spacetime(args[0]);
+        int coordinate = std::stoi(args[1]);
+        auto coordinates = find_function_arguments(args[2]);
+        gr2::real min_val = std::stold(args[3]);
+        if (coordinates.size() != 4)
+            throw std::invalid_argument("invalid number of coordinates");
+        gr2::real max_val = std::stold(args[4]);
+        int num = std::stoi(args[5]);
+        std::string file_name = args[6];
+
+        // prepare calculation
+        gr2::real y[4];
+        for (int i = 0; i <4; i++)
+        {
+            y[i] = std::stold(coordinates[i]);
+        }
+
+        // calculation
+        file.open(file_name);
+        for (int i = 0; i< num; i++)
+        {
+            y[coordinate] = (max_val-min_val)/(num-1)*i + min_val;
+            spacetime->calculate_nu(y);
+            file << y[coordinate] << ";" << spacetime->get_nu() << std::endl;
+        }
+    }
+    catch(const std::exception& e)
+    {
+        delete[] spacetime;
+        file.close();
+        throw e;
+    }
+    //TODO: try catch, spacetime is dynamicaly allocated, file has to be closed
+    // procede calculation
+}
+
+void Interface::draw_lambda_1D(std::string text)
+{
+    //weylspacetime, coordiante, min, max, num, file
+
+    // get arguments
+    auto args = find_function_arguments(text);
+    int number_of_arguments = 6;
+    if (args.size() > number_of_arguments)
+        throw std::invalid_argument("too much arguments for draw_lambda_1D");
+    else if (args.size() < number_of_arguments)
+        throw std::invalid_argument("too little arguments for draw_lambda_1D");
+
+    // save arguments
+    gr2::Weyl* spacetime = this->create_weyl_spacetime(args[0]);
+    int coordinate = std::stoi(args[1]);
+    gr2::real min = std::stold(args[2]);
+    gr2::real max = std::stold(args[3]);
+    int num = std::stoi(args[4]);
+    std::string file = args[5];
 }
 
 

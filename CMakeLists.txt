@@ -61,7 +61,7 @@ target_link_libraries(Gravitacek2 PUBLIC setup interface)
 target_link_libraries(integrator PUBLIC setup)
 target_link_libraries(geomotion PUBLIC setup integrator mymath)
 target_link_libraries(mymath PUBLIC setup)
-target_link_libraries(interface PUBLIC setup)
+target_link_libraries(interface PUBLIC setup geomotion)
 
 # testing 
 enable_testing()
