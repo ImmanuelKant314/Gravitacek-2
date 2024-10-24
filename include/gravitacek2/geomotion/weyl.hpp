@@ -1,3 +1,4 @@
+#pragma once
 #include "gravitacek2/geomotion/geomotion.hpp"
 
 namespace gr2
@@ -96,7 +97,7 @@ namespace gr2
          * @brief Destroy the Weyl object.
          * 
          */
-        ~Weyl();
+        virtual ~Weyl();
 
         /**
          * @brief Calculate value of \f$\nu\f$.

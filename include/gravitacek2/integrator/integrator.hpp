@@ -1,3 +1,5 @@
+#pragma once
+
 #include "gravitacek2/setup.hpp"
 #include "gravitacek2/integrator/odesystem.hpp"
 #include "gravitacek2/integrator/stepperbase.hpp"
