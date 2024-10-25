@@ -75,7 +75,7 @@ namespace gr2
          * @param M mass of black hole
          * @param lambda_exact true if value of \f$\lambda\f$ should be calculated exaxtly 
          */
-        WeylSchwarzschild(real M = 1, LambdaEvaluation init=LambdaEvaluation::exact, LambdaEvaluation run=LambdaEvaluation::exact);
+        WeylSchwarzschild(real M = 1, LambdaEvaluation init=LambdaEvaluation::exact, LambdaEvaluation run=LambdaEvaluation::diff);
 
         virtual void calculate_lambda_init(const real* y) override;
         virtual void calculate_lambda_run(const real* y) override;
@@ -106,7 +106,7 @@ namespace gr2
 
         virtual void calculate_lambda_integral(const real* y);
     public:
-        BachWeylRing(real M, real b, LambdaEvaluation init=LambdaEvaluation::integral, LambdaEvaluation run=LambdaEvaluation::integral);
+        BachWeylRing(real M, real b, LambdaEvaluation init=LambdaEvaluation::integral, LambdaEvaluation run=LambdaEvaluation::diff);
 
         virtual void calculate_lambda_init(const real* y) override;
         virtual void calculate_lambda_run(const real* y) override;
