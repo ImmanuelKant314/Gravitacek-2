@@ -169,6 +169,12 @@ gr2::Weyl* Interface::create_weyl_spacetime(std::string text)
             throw std::invalid_argument("invalid number of arguments for WeylSchwarzschild");
         spacetime = new gr2::WeylSchwarzschild(std::stold(args[0]));
     }
+    else if (spacetime_name == "BachWeylRing")
+    {   
+        if (args.size() != 2)
+            throw std::invalid_argument("invalid number of arguments for BachWeylRing");
+        spacetime = new gr2::BachWeylRing(std::stold(args[0]), std::stold(args[1]));
+    }
     else
     {
         throw std::invalid_argument("spacetime with name " + spacetime_name + " does not exist");
