@@ -123,6 +123,17 @@ protected:
     gr2::Weyl* create_weyl_spacetime(std::string text);
 
     /**
+     * @brief Create OdeSystem with given parameters.
+     * 
+     * Argument should be in form:
+     * `ode_system_name(ode_system_parameters)`
+     * 
+     * @param text definition of OdeSystem
+     * @return pointer to OdeSystem object
+     */
+    gr2::OdeSystem* create_ode_system(std::string text);
+
+    /**
      * @brief Calculate potential with given parameters.
      * 
      * @param text parameters for function
@@ -136,6 +147,15 @@ protected:
      */
     void draw_lambda_1D(std::string text);
 
+    /**
+     * @brief Solve given differential equation.
+     * 
+     * Argument should be in form:
+     * (ode_system_name(ode_system_params),initial_conditions,t_start,t_end,delta_t,method,file)
+     * 
+     * @param text arguments for solve_ode
+     */
+    void solve_ode_system(std::string text);
 public:
     Interface();
 

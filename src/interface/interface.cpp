@@ -1,9 +1,40 @@
 #include "interface/interface.hpp"
 #include "gravitacek2/geomotion/spacetimes.hpp"
+#include "gravitacek2/integrator/integrator.hpp"
+#include "gravitacek2/integrator/odesystems.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <algorithm>
 #include <fstream>
+#include <array>
+
+class DataRecord : public gr2::Event
+{
+protected:
+    int n;
+
+public:
+    std::vector<std::vector<gr2::real>> data;
+
+    DataRecord(int n) : gr2::Event(gr2::EventType::data)
+    {
+        this->n = n;
+    }
+
+    virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
+    {
+        return 0;
+    }
+
+    virtual void apply(gr2::real &t, gr2::real y[], gr2::real dydt[])
+    {
+        std::vector<gr2::real> record;
+        record.push_back(t);
+        for (int i=0; i < n; i++)
+            record.push_back(y[i]);
+        this->data.push_back(record);
+    }
+};
 
 std::string Interface::substitute(std::string text)
 {
@@ -248,6 +279,11 @@ bool Interface::try_apply_function(std::string text)
         this->draw_lambda_1D(rest);
         return true;
     }
+    else if (name == "solve_ode_system")
+    {
+        this->solve_ode_system(rest);
+        return true;
+    }
 
     return false;
 }
@@ -365,6 +401,80 @@ void Interface::draw_lambda_1D(std::string text)
     }
 }
 
+gr2::OdeSystem* Interface::create_ode_system(std::string text)
+{
+    text = strip(text);
+    std::string ode_name, args_text;
+    this->find_command_name(text, ode_name, args_text);
+    auto args = this->find_function_arguments(args_text);
+    gr2::OdeSystem* ode;
+
+    if (ode_name == "DampedHarmonicOscillator")
+    {
+        if (args.size() != 2)
+            throw std::invalid_argument("invalid number of arguments for DampedHarmonicOscillator");
+        ode = new gr2::DampedHarmonicOscillator(std::stold(args[0]), std::stold(args[1]));
+    }
+    else
+    {
+        throw std::invalid_argument("spacetime with name " + ode_name + "does not exists");
+    }
+    return ode;
+}
+
+void Interface::solve_ode_system(std::string text)
+{
+    auto args = find_function_arguments(text);
+    int number_of_arguments = 7;
+    if (args.size() < number_of_arguments)
+        throw std::invalid_argument("too little arguments for solve_ode_system");
+    else if (args.size() > number_of_arguments)
+        throw std::invalid_argument("too much arguments for solve_ode_system");
+    
+    gr2::OdeSystem* ode = nullptr;
+    std::ofstream file;
+
+    try
+    {
+        /* code */
+        ode = this->create_ode_system(args[0]);
+        auto initial_conditions = find_function_arguments(args[1]);
+        if (initial_conditions.size() != ode->get_n())
+            throw std::invalid_argument("invalid number of initial_value_conditions");
+        gr2::real t_start = std::stold(args[2]);
+        gr2::real t_end = std::stold(args[3]);
+        gr2::real delta_t = std::stold(args[4]);
+        std::string method = args[5];
+        std::string file_name = args[6];
+
+        // prepare initial conditions
+        gr2::real *y_initial = new gr2::real [ode->get_n()];
+        for (int i = 0; i < ode->get_n(); i++)
+            y_initial[i] = std::stold(initial_conditions[i]);
+
+        // calculation
+        gr2::Integrator integrator(*ode, method);
+        DataRecord recorder(ode->get_n());
+        integrator.add_event(&recorder);
+        integrator.integrate(y_initial, t_start, t_end, delta_t);
+
+        // saving data
+        file.open(file_name);
+        for (auto record:recorder.data)
+        {
+            for (auto d : record)
+                file << d << ";";
+            file << std::endl;
+        }
+    }
+    catch(const std::exception& e)
+    {
+        delete[] ode;
+        file.close();
+        throw e;
+    }
+    
+}
 
 Interface::Interface():macros(), values()
 {
