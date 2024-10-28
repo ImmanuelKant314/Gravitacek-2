@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "gravitacek2/setup.hpp"
 #include "gravitacek2/integrator/integrator.hpp"
+#include "gravitacek2/integrator/odesystems.hpp"
 
 #include <cmath>
 #include <iostream>
@@ -17,26 +18,6 @@ gr2::real exactDampedHarmonicOscillator(gr2::real t, gr2::real omega0, gr2::real
     // final value
     return expl(-xi*t)*(A*sinl(omega*t) + B*cosl(omega*t));
 }
-
-class DampedHarmonicOscillator : public gr2::OdeSystem
-{
-    protected:
-        gr2::real omega0;
-        gr2::real xi;
-
-    public:
-        DampedHarmonicOscillator(const gr2::real &omega0, const gr2::real &xi):gr2::OdeSystem(2) 
-        {
-            this->omega0 = omega0;
-            this->xi = xi;
-        }
-
-        virtual void function(const gr2::real &t, const gr2::real y[], gr2::real dydt[]) override
-        {
-            dydt[0] = y[1];
-            dydt[1] = -2*xi*y[1] - omega0*omega0*y[0];
-        }
-};
 
 class Bounce : public gr2::Event
 {

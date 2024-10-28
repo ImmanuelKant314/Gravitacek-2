@@ -33,7 +33,8 @@ add_library(integrator
             ${INTEGRATOR_DIR}/steppers/rk4.cpp
             ${INTEGRATOR_DIR}/steppers/dopr853.cpp
             ${INTEGRATOR_DIR}/stepcontrollers/standardstepcontroller.cpp
-            ${INTEGRATOR_DIR}/stepcontrollers/stepcontrollernr.cpp)
+            ${INTEGRATOR_DIR}/stepcontrollers/stepcontrollernr.cpp
+            ${INTEGRATOR_DIR}/odesystems.cpp)
 add_library(geomotion
             STATIC 
             ${GEOMOTION_DIR}/geomotion.cpp
