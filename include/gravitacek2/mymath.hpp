@@ -66,4 +66,24 @@ namespace gr2
         }
         throw std::runtime_error("Too much iterations in routine romb");
     }
+    
+    /**
+     * @brief Calculate n Legendre polynomials.
+     * 
+     * @param x argument for Legendre polynomials
+     * @param n number of calculated Legendre polynomials
+     * @param p array for saving Legedre polynomials 
+     */
+    void legendre_polynomials(const real& x, const int& n, real* p);
+
+    /**
+    * @brief Calculate n Legendre polynomials with first derivatives.
+    * 
+    * @param x argument for Legendre polynomials
+    * @param n number of calculated Legendre polynomials
+    * @param p0 array for saving Legendre polynomials
+    * @param p1 array for saving first derivatives of Legendre polynomials
+    */
+    void legendre_polynomials1(const real& x, const int& n, real* p0, real* p1);
 }
+

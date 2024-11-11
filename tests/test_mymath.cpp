@@ -78,6 +78,71 @@ TEST(romb5, IntegrateSinX)
     EXPECT_NEAR(gr2::romb<5>(*sinl, 0, gr2::pi), 2, eps);
 }
 
+TEST(legendre_polynomials, Values)
+{
+    const int n = 6;
+    gr2::real x = 0.27;
+    gr2::real eps = 1e-14;
+
+    gr2::real p_true[n] = {1.000000000000000,
+                           0.270000000000000,
+                          -0.390650000000000,
+                          -0.355792500000000,
+                           0.124875543750000,
+                           0.345323514262500};
+    gr2::real p_num[n] = {};
+
+    gr2::legendre_polynomials(x, n, p_num);
+    for (int i = 0; i < n; i++)
+    {
+        EXPECT_NEAR(p_true[i], p_num[i], eps);
+    }
+}
+
+TEST(legendre_polynomials1, Values)
+{
+    const int n = 6;
+    gr2::real x = 0.27;
+    gr2::real eps = 1e-14;
+
+    gr2::real p_true[n] = {1.000000000000000,
+                           0.270000000000000,
+                          -0.390650000000000,
+                          -0.355792500000000,
+                           0.124875543750000,
+                           0.345323514262500};
+    gr2::real p_num[n] = {};
+    gr2::real p_extra[n];
+
+    gr2::legendre_polynomials1(x, n, p_num, p_extra);
+    for (int i = 0; i < n; i++)
+    {
+        EXPECT_NEAR(p_true[i], p_num[i], eps);
+    }
+}
+
+TEST(legendre_polynomials1, Derivatives)
+{
+    const int n = 6;
+    gr2::real x = 0.27;
+    gr2::real eps = 1e-14;
+
+    gr2::real p_true[n] = {0.000000000000000,
+                           1.000000000000000,
+                           0.810000000000000,
+                          -0.953250000000000,
+                          -1.680547500000000,
+                           0.170629893750000};
+    gr2::real p_num[n] = {};
+    gr2::real p_extra[n];
+
+    gr2::legendre_polynomials1(x, n, p_extra, p_num);
+    for (int i = 0; i < n; i++)
+    {
+        EXPECT_NEAR(p_true[i], p_num[i], eps);
+    }
+}
+
 int main(int argc, char **argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
