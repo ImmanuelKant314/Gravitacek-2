@@ -115,4 +115,48 @@ namespace gr2
         virtual void calculate_nu1(const real* y) override;
         virtual void calculate_nu2(const real* y) override;
     };
+
+    /**
+     * @brief Class representing geodesic motion in space-time of inverted Kuzmin-Toomre disks.
+     * 
+     * Spacetime is given by potential
+     * \f[
+     * \nu_\text{iKT}^{(n)} = -\binom{n+1/2}{n} \frac{\mathcal{M}}{(1+2n)!!}\sum_{k=0}^{n} \mathcal{B}^{(n)}_k \frac{(-b)^k}{r_b^{k+1}}P_k\left(\frac{|z|+b}{r_b}\right),
+     * \f]
+     * where
+     * \f[
+     * r_b^2 \equiv \rho^2 + (|z| + b)^2
+     * \f]
+     * and
+     * \f[
+     * \mathcal{B}_k^{(n)} \equiv \sum_{j=k}^n \binom{j}{k}\frac{(2n-j)!}{2^{n-j}(n-j)!}.
+     * \f]
+     * \f$n\f$ is index of the disk (in the family), \f$\mathcal{M}\f$ 
+     * represents mass of the disk, \f$b\f$ refers to dypical radial scale of the disk. 
+     * \f$P_k\f$ refers to Legendre polynomial.
+     */
+    class InvertedKuzminToomreDisk: public Weyl
+    {
+    protected:
+        int n;  //!<index of inverted Kuzmin-Toomre disk
+        real M; //!<mass of the inverted Kuzmin-Toomre disk
+        real b; //!<radius of the inverted Kuzmin-Toomre disk 
+
+        real N;     //!<normalization constant
+        real *B;    //!<coefficients for potential
+        real *P0;   //!<values of Legendre polynomials
+        real *P1;   //!<values of derivatives of Legendre polynomials
+
+        virtual void calculate_lambda_integral(const real* y);
+    public:
+        InvertedKuzminToomreDisk(int n, real M, real b, LambdaEvaluation init=LambdaEvaluation::integral, LambdaEvaluation run=LambdaEvaluation::diff);
+        ~InvertedKuzminToomreDisk();
+
+        virtual void calculate_lambda_init(const real* y) override;
+        virtual void calculate_lambda_run(const real* y) override;
+
+        virtual void calculate_nu(const real* y) override;
+        virtual void calculate_nu1(const real* y) override;
+        virtual void calculate_nu2(const real* y) override;
+    };
 }

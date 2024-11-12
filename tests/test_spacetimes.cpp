@@ -123,6 +123,70 @@ TEST(BachWeylRing, DerivativesOfPotential)
     EXPECT_NEAR(spacetime.get_nu_z(), 0.000011262025116, eps);
 }
 
+// ==================== inverted Kuzmin-Toomre disks ==================== 
+TEST(InvertedKuzminToomreDisk, Potential)
+{
+    gr2::real eps = 1e-15;
+    gr2::real M = 3.000000000000000e-01;
+    gr2::real b = 5.000000000000000e+00;
+
+    gr2::real y[4] = {};
+    y[2] = 1.000000000000000e+01;
+    y[3] = 7.000000000000000e+00;
+
+    gr2::real nu[] = {
+        -1.684419608953263e-02,
+        -1.526271395131956e-02,
+        -1.407264603121147e-02};
+
+    for (int n = 1; n <=3; n++)
+    {
+        gr2::InvertedKuzminToomreDisk spacetime = gr2::InvertedKuzminToomreDisk(n, M, b);
+        spacetime.calculate_nu(y);
+        EXPECT_NEAR(spacetime.get_nu(), nu[n-1], eps);
+    }
+}
+
+TEST(InvertedKuzminToomreDisk, DerivativesOfPotential)
+{
+    gr2::real eps = 1e-15;
+    gr2::real M = 3.000000000000000e-01;
+    gr2::real b = 5.000000000000000e+00;
+
+    gr2::real y[4] = {};
+    y[2] = 1.000000000000000e+01;
+    y[3] = 7.000000000000000e+00;
+
+    gr2::real nu[] = {
+        -1.684419608953263e-02,
+        -1.526271395131956e-02,
+        -1.407264603121147e-02};
+
+    gr2::real nu_rho[] = {
+        4.967837823249628e-04,
+        3.380353453900308e-04,
+        2.380667922163150e-04};
+
+    gr2::real nu_z[] = {
+        7.929185304901022e-04,
+        6.774218538243885e-04,
+        5.863221910056083e-04};
+
+    for (int n = 1; n <=3; n++)
+    {
+        gr2::InvertedKuzminToomreDisk spacetime = gr2::InvertedKuzminToomreDisk(n, M, b);
+        spacetime.calculate_nu1(y);
+        EXPECT_NEAR(spacetime.get_nu(), nu[n-1], eps);
+        EXPECT_NEAR(spacetime.get_nu_rho(), nu_rho[n-1], eps);
+        EXPECT_NEAR(spacetime.get_nu_z(), nu_z[n-1], eps);
+    }
+}
+
+TEST(InvertedKuzminToomreDisk, Lambda)
+{
+
+}
+
 int main(int argc, char **argv)
 {
     // ========== Prepare schwarzschild ========== 

@@ -41,7 +41,8 @@ add_library(geomotion
             ${GEOMOTION_DIR}/weyl.cpp
             ${GEOMOTION_DIR}/spacetimes/schwarzschild.cpp
             ${GEOMOTION_DIR}/spacetimes/weylschwarzschild.cpp
-            ${GEOMOTION_DIR}/spacetimes/bachweylring.cpp)
+            ${GEOMOTION_DIR}/spacetimes/bachweylring.cpp
+            ${GEOMOTION_DIR}/spacetimes/invertedkuzmintoomredisk.cpp)
 add_library(mymath
             STATIC
             ${MYMATH_DIR}/mymath.cpp)
