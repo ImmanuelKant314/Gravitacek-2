@@ -85,5 +85,48 @@ namespace gr2
     * @param p1 array for saving first derivatives of Legendre polynomials
     */
     void legendre_polynomials1(const real& x, const int& n, real* p0, real* p1);
+
+    /**
+     * @brief Calculate n values of special function \f$\mathcal{Q}_{2n}\f$.
+     * 
+     * Special function \f$\mathcal{Q}_n(x)\f$ is defined by the Legendre function of 
+     * the second kind \f$Q_n(x)\f$ as
+     * \f[
+     * \mathcal{Q}_n(x) \equiv i Q_n(ix).
+     * \f]
+     * 
+     * Important note, the definition of \f$Q_n\f$ is not typically used one, we use
+     * \f[
+     * Q_n(ix) = -i P_{2n}(ix) \left(\frac{\pi}{2} - \atan{x}\right)
+     * - \sum_{j=1}^{2n}\frac{1}{j} P_{j-1}(ix) P_{2n-j}(ix).
+     * \f]
+     * 
+     * @param x argument for special function
+     * @param n number of calculated values
+     * @param q array for saving values
+     */
+    void special_function_Q2n(const real& x, const int& n, real* q);
+
+    /**
+     * @brief Calculate n values of special function \f$\mathcal{Q}_{2n}\f$ and its derivatives.
+     * 
+     * Special function \f$\mathcal{Q}_n(x)\f$ is defined by the Legendre function of 
+     * the second kind \f$Q_n(x)\f$ as
+     * \f[
+     * \mathcal{Q}_n(x) \equiv i Q_n(ix).
+     * \f]
+     * 
+     * Important note, the definition of \f$Q_n\f$ is not typically used one, we use
+     * \f[
+     * Q_n(ix) = -i P_{2n}(ix) \left(\frac{\pi}{2} - \atan{x}\right)
+     * - \sum_{j=1}^{2n}\frac{1}{j} P_{j-1}(ix) P_{2n-j}(ix).
+     * \f]
+     * 
+     * @param x argument for special function
+     * @param n number of calculated values
+     * @param q0 array for saving values
+     * @param q1 array for saving derivatives
+     */
+    void special_function_Q2n1(const real& x, const int& n, real* q0, real* q1);
 }
 

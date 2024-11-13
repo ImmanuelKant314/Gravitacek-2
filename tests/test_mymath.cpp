@@ -143,6 +143,71 @@ TEST(legendre_polynomials1, Derivatives)
     }
 }
 
+TEST(special_function_Q2n, Values)
+{
+    const int n = 6;
+    gr2::real x = 0.27;
+    gr2::real eps = 1e-14;
+
+    gr2::real q_true[n] = {1.307084492332630,
+                          -0.391471935402888,
+                           0.173008207890096,
+                          -0.084723372649464,
+                           0.043524450781026,
+                          -0.022988984539059};
+    gr2::real q_num[n];
+
+    gr2::special_function_Q2n(x, n, q_num);
+    for (int i = 0; i < n; i++)
+    {
+        EXPECT_NEAR(q_true[i], q_num[i], eps);
+    }
+}
+
+TEST(special_function_Q2n1, Values)
+{
+    const int n = 6;
+    gr2::real x = 0.27;
+    gr2::real eps = 1e-14;
+
+    gr2::real q_true[n] = {1.307084492332630,
+                          -0.391471935402888,
+                           0.173008207890096,
+                          -0.084723372649464,
+                           0.043524450781026,
+                          -0.022988984539059};
+    gr2::real q_num[n];
+    gr2::real q_help[n];
+
+    gr2::special_function_Q2n1(x, n, q_num, q_help);
+    for (int i = 0; i < n; i++)
+    {
+        EXPECT_NEAR(q_true[i], q_num[i], eps);
+    }
+}
+
+TEST(special_function_Q2n, Derivatives)
+{
+    const int n = 6;
+    gr2::real x = 0.27;
+    gr2::real eps = 1e-14;
+
+    gr2::real q_true[n] = {-0.932053313449529,
+                            1.009208247761040,
+                           -0.777395362047414,
+                            0.543718725188478,
+                           -0.363199801841301,
+                            0.236171352375938};
+    gr2::real q_num[n];
+    gr2::real q_help[n];
+
+    gr2::special_function_Q2n1(x, n, q_help, q_num);
+    for (int i = 0; i < n; i++)
+    {
+        EXPECT_NEAR(q_true[i], q_num[i], eps);
+    }
+}
+
 int main(int argc, char **argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
