@@ -1,5 +1,6 @@
 #include "gravitacek2/mymath.hpp"
 #include <cmath>
+#include <iostream>
 
 namespace gr2
 {
@@ -65,7 +66,7 @@ namespace gr2
     void special_function_Q2n(const real& x, const int& n, real* q)
     {
         gr2::real q0, q1;
-        if (n > 1)
+        if (n > 0)
         {
             q0 = pi_2-std::atan(x);
             q[0] = q0;
@@ -85,7 +86,7 @@ namespace gr2
         gr2::real q0_val, q1_val;
         gr2::real q0_der, q1_der;
 
-        if (n > 1)
+        if (n > 0)
         {
             q0_val = pi_2-std::atan(x);
             q0_der = -1.0/(x*x+1);
@@ -93,7 +94,7 @@ namespace gr2
             q1[0] = q0_der;
         }
 
-        if (n > 2)
+        if (n > 1)
         {
             q1_val = x*q0_val-1;
             q1_der = q0_val + x*q0_der;

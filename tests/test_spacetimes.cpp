@@ -71,7 +71,7 @@ TEST(WeylSchwarzschild, LambdaExact)
 {
     gr2::WeylSchwarzschild spacetime = gr2::WeylSchwarzschild(0.3);
     spacetime.calculate_lambda_init(y_weylschwarzschild);
-    EXPECT_NEAR(spacetime.get_lambda(), -0.000415904944973, eps);
+    EXPECT_NEAR(spacetime.get_lambda(), -4.159049449726778e-04, eps);
 }
 
 TEST(WeylSchwarzschild, LambdaIntegral)
@@ -83,7 +83,7 @@ TEST(WeylSchwarzschild, LambdaIntegral)
 
 TEST(WeylSchwarzschild, Metric)
 {
-    gr2::WeylSchwarzschild spacetime = gr2::WeylSchwarzschild(0.3);
+    gr2::WeylSchwarzschild spacetime = gr2::WeylSchwarzschild(0.3,gr2::exact,gr2::exact);
     spacetime.calculate_metric(y_weylschwarzschild);
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
@@ -92,7 +92,7 @@ TEST(WeylSchwarzschild, Metric)
 
 TEST(WeylSchwarzschild, ChristoffelSymbols)
 {
-    gr2::WeylSchwarzschild spacetime = gr2::WeylSchwarzschild(0.3);
+    gr2::WeylSchwarzschild spacetime = gr2::WeylSchwarzschild(0.3,gr2::exact, gr2::exact);
     spacetime.calculate_christoffel_symbols(y_weylschwarzschild);
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
@@ -187,6 +187,65 @@ TEST(InvertedKuzminToomreDisk, Lambda)
 
 }
 
+// ==================== inverted Morgan-Morgan disks ==================== 
+TEST(InvertedMorganMorganDisk, Potential)
+{
+    gr2::real eps = 1e-15;
+    gr2::real M = 3.000000000000000e-01;
+    gr2::real b = 5.000000000000000e+00;
+
+    gr2::real y[4] = {};
+    y[2] = 1.000000000000000e+01;
+    y[3] = 7.000000000000000e+00;
+
+    gr2::real nu[] = {
+        -1.747474699849155e-02,
+        -1.557819025295148e-02,
+        -1.423530400664234e-02};
+
+    for (int n = 1; n <=3; n++)
+    {
+        gr2::InvertedMorganMorganDisk spacetime = gr2::InvertedMorganMorganDisk(n, M, b);
+        spacetime.calculate_nu(y);
+        EXPECT_NEAR(spacetime.get_nu(), nu[n-1], eps);
+    }
+}
+
+TEST(InvertedMorganMorganDisk, DerivativesOfPotential)
+{
+    gr2::real eps = 1e-15;
+    gr2::real M = 3.000000000000000e-01;
+    gr2::real b = 5.000000000000000e+00;
+
+    gr2::real y[4] = {};
+    y[2] = 1.000000000000000e+01;
+    y[3] = 7.000000000000000e+00;
+
+    gr2::real nu[] = {
+        -1.747474699849155e-02,
+        -1.557819025295148e-02,
+        -1.423530400664234e-02};
+
+    gr2::real nu_rho[] = {
+        4.816239271321822e-04,
+        3.006630640524549e-04,
+        1.977496695848732e-04};
+
+    gr2::real nu_z[] = {
+        8.677415301569396e-04,
+        7.121903757523738e-04,
+        6.000699761341162e-04};
+
+    for (int n = 1; n <=3; n++)
+    {
+        gr2::InvertedMorganMorganDisk spacetime = gr2::InvertedMorganMorganDisk(n, M, b);
+        spacetime.calculate_nu1(y);
+        EXPECT_NEAR(spacetime.get_nu(), nu[n-1], eps);
+        EXPECT_NEAR(spacetime.get_nu_rho(), nu_rho[n-1], eps);
+        EXPECT_NEAR(spacetime.get_nu_z(), nu_z[n-1], eps);
+    }
+}
+
 int main(int argc, char **argv)
 {
     // ========== Prepare schwarzschild ========== 
@@ -245,8 +304,8 @@ int main(int argc, char **argv)
 
     // ========== Prepare WeylSchwarzschild ========== 
     // coordinates
-    y_weylschwarzschild[0] = 1.000000000000000;
-    y_weylschwarzschild[1] = 3.000000000000000;
+    y_weylschwarzschild[0] = 0.000000000000000;
+    y_weylschwarzschild[1] = 0.000000000000000;
     y_weylschwarzschild[2] = 10.000000000000000;
     y_weylschwarzschild[3] = 2.000000000000000;
 

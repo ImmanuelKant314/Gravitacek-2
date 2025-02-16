@@ -159,4 +159,31 @@ namespace gr2
         virtual void calculate_nu1(const real* y) override;
         virtual void calculate_nu2(const real* y) override;
     };
+
+    class InvertedMorganMorganDisk: public Weyl
+    {
+    protected:
+        int n;  //!<index of inverted Kuzmin-Toomre disk
+        real M; //!<mass of the inverted Kuzmin-Toomre disk
+        real b; //!<radius of the inverted Kuzmin-Toomre disk 
+
+        real N;     //!<normalization constant
+        real *C;    //!<constants for calculating potential
+        real *P0;   //!<values of Legendre polynomials
+        real *P1;   //!<values of derivatives of Legendre polynomials
+        real *Q0;   //!<values of special function Q
+        real *Q1;   //!<values of derivatives of special function Q
+
+        virtual void calculate_lambda_integral(const real* y);
+    public:
+        InvertedMorganMorganDisk(int n, real M, real b, LambdaEvaluation init=LambdaEvaluation::integral, LambdaEvaluation run=LambdaEvaluation::diff);
+        ~InvertedMorganMorganDisk();
+
+        virtual void calculate_lambda_init(const real* y) override;
+        virtual void calculate_lambda_run(const real* y) override;
+
+        virtual void calculate_nu(const real* y) override;
+        virtual void calculate_nu1(const real* y) override;
+        virtual void calculate_nu2(const real* y) override;
+    };
 }
