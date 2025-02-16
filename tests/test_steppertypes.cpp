@@ -287,8 +287,6 @@ TEST(OrderOfIntegrator, DoPr853Error)
         stepper.step_err(0, y, h, error);
         x_data[i] = exp;
         y_data[i] = log10(std::fabs(error[0]));
-
-        std::cout << exp << " " << log10(std::fabs(error[0])) << std::endl;
     }
     gr2::real order, bias;
     linear_regression(x_data, y_data, N, order, bias);
