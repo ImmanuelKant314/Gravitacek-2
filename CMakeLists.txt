@@ -11,6 +11,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # add executable 
 add_executable(Gravitacek2 main.cpp)
 
+# copy directory 
+file(COPY ${PROJECT_SOURCE_DIR}/tests/test_weylspacetime DESTINATION ${CMAKE_BINARY_DIR}/tests)
+
 # add subdirectories
 add_subdirectory(${PROJECT_SOURCE_DIR}/external/googletest)
 add_subdirectory(${PROJECT_SOURCE_DIR}/tests)
