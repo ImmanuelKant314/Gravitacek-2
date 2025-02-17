@@ -131,7 +131,7 @@ namespace gr2
     void special_function_Q2n1(const real& x, const int& n, real* q0, real* q1);
 
     /**
-     * @brief Numerically differentialte function using Richardson's extrapolation.
+     * @brief Numerically differentiate function using Richardson's extrapolation.
      * 
      * @tparam K order of extrapolation
      * @param func function to be differentiated
@@ -165,6 +165,45 @@ namespace gr2
 
         }
         throw std::runtime_error("Too much iterations in routine richder");
+    }
+
+    /**
+     * @brief Numerically calculate second derivative of the function using 
+     * Richardson's extrapolation.
+     * 
+     * @tparam K order of extrapolation
+     * @param func function to be differentiated
+     * @param x point of differentiation
+     * @param h0 initial step for differentiation
+     * @param eps precision of differentiation
+     * @return value of second derivative
+     */
+    template<int K, class T>
+    real richder2(T func, const real& x, const real& h0, const real &eps = 10e-10)
+    {
+        const int JMIN = 5, JMAX = 20;
+        int m;
+        real R[K][JMAX];
+        real h = 0.5*h0;
+        real f0 = func(x);
+        R[0][0] = (func(x+h0) -2*f0 + func(x-h0))/(h0*h0);
+        for (int j = 1, n = 1; j < JMAX; j++, n *= 2, h*= 0.5)
+        {
+            // ========== Second order rule ==========
+            R[0][j] = (func(x+h)-2*f0 + func(x-h))/(h*h);
+
+            // ========== Richardsons's algorithm ==========
+            m = 4;
+            for (int i = 1; i < std::min(j, K); i++, m *= 4)
+                R[i][j] = (m * R[i - 1][j] - R[i - 1][j - 1]) / (m - 1);
+
+            // ========== Checking precision ==========
+            if (j >= std::max(JMIN - 1, K + 1))
+                if (fabsl(R[K - 1][j] - R[K - 1][j - 1]) < eps * (fabsl(R[K - 1][j - 1]) + 1))
+                    return R[K - 1][j];
+
+        }
+        throw std::runtime_error("Too much iterations in routine richder2");
     }
 }
 

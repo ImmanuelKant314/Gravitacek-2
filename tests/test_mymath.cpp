@@ -208,10 +208,16 @@ TEST(special_function_Q2n, Derivatives)
     }
 }
 
-TEST(rich2, DiffSinX)
+TEST(richder_5, DiffSinX)
 {
     gr2::real eps=1e-10;
     EXPECT_NEAR(gr2::richder<5>(*sinl, 1, 0.1), cosl(1), eps);
+}
+
+TEST(richder2_5, DiffSinX)
+{
+    gr2::real eps=1e-10;
+    EXPECT_NEAR(gr2::richder2<5>(*sinl, 1, 0.1), -sinl(1), eps);
 }
 
 int main(int argc, char **argv)
