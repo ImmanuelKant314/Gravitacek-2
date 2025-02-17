@@ -101,16 +101,22 @@ TEST_P(GeneralWeylTest, Lambda)
 }
 
 void PrintTo(const WeylTestCase& testcase, std::ostream* os) {
-    *os << "-";
+    *os << "0";
 }
 
 std::string MyTestNameGenerator(const ::testing::TestParamInfo<WeylTestCase>& info) {
     return info.param.name;
 }
 
+std::string folder = "./test_weylspacetime/";
+
 auto test_cases = testing::Values(
-    WeylTestCase(std::make_shared<gr2::WeylSchwarzschild>(0.3), "./test_weylspacetime/weylschwarzschild.txt", "WeylSchwarzschild", 1e-15),
-    WeylTestCase(std::make_shared<gr2::BachWeylRing>(0.3, 5),  "./test_weylspacetime/bachweylring.txt", "BachWeylRing", 1e-15)
+    WeylTestCase(std::make_shared<gr2::WeylSchwarzschild>(0.3), folder + "weylschwarzschild.txt", "WeylSchwarzschild", 1e-15),
+    WeylTestCase(std::make_shared<gr2::BachWeylRing>(0.3, 5), folder + "bachweylring.txt", "BachWeylRing", 1e-15),
+    WeylTestCase(std::make_shared<gr2::InvertedKuzminToomreDisk>(1, 0.3, 5), folder + "invertedkuzmintoomredisk1.txt", "InvertedKuzminToomre1", 1e-15),
+    WeylTestCase(std::make_shared<gr2::InvertedKuzminToomreDisk>(3, 0.3, 5), folder + "invertedkuzmintoomredisk3.txt", "InvertedKuzminToomre3", 1e-15),
+    WeylTestCase(std::make_shared<gr2::InvertedMorganMorganDisk>(1, 0.3, 5), folder + "invertedmorganmorgandisk1.txt", "InvertedMorganMorgan1", 1e-15),
+    WeylTestCase(std::make_shared<gr2::InvertedMorganMorganDisk>(3, 0.3, 5), folder + "invertedmorganmorgandisk3.txt", "InvertedMorganMorgan3", 1e-15)
 );
 
 INSTANTIATE_TEST_SUITE_P(
