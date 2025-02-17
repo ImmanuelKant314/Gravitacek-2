@@ -27,6 +27,7 @@ namespace gr2
      */
     void elliptic_KE(const real& k, real &K, real &E, const real &eps = 1e-15);
 
+
     /**
      * @brief Integrate function using Romberg's integration.
      * 
@@ -128,5 +129,42 @@ namespace gr2
      * @param q1 array for saving derivatives
      */
     void special_function_Q2n1(const real& x, const int& n, real* q0, real* q1);
+
+    /**
+     * @brief Numerically differentialte function using Richardson's extrapolation.
+     * 
+     * @tparam K order of extrapolation
+     * @param func function to be differentiated
+     * @param x point of differentiation
+     * @param h0 initial step for differentiation
+     * @param eps precision of differentiation
+     * @return value of derivative
+     */
+    template<int K, class T>
+    real richder(T func, const real& x, const real& h0, const real &eps = 10e-10)
+    {
+        const int JMIN = 5, JMAX = 20;
+        int m;
+        real R[K][JMAX];
+        real h = 0.5*h0;
+        R[0][0] = (func(x+h0) - func(x-h0))/(2*h0);
+        for (int j = 1, n = 1; j < JMAX; j++, n *= 2, h*= 0.5)
+        {
+            // ========== Second order rule ==========
+            R[0][j] = (func(x+h)-func(x-h))/(2*h);
+
+            // ========== Richardsons's algorithm ==========
+            m = 4;
+            for (int i = 1; i < std::min(j, K); i++, m *= 4)
+                R[i][j] = (m * R[i - 1][j] - R[i - 1][j - 1]) / (m - 1);
+
+            // ========== Checking precision ==========
+            if (j >= std::max(JMIN - 1, K + 1))
+                if (fabsl(R[K - 1][j] - R[K - 1][j - 1]) < eps * (fabsl(R[K - 1][j - 1]) + 1))
+                    return R[K - 1][j];
+
+        }
+        throw std::runtime_error("Too much iterations in routine richder");
+    }
 }
 
