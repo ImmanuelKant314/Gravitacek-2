@@ -87,8 +87,21 @@ TEST_P(GeneralWeylTest, DerivativesOfPotential)
     gr2::real nu_rho =  GetParam().nu_rho;
     gr2::real nu_z =  GetParam().nu_z;
     spacetime->calculate_nu1(GetParam().y);
-    EXPECT_NEAR(spacetime->get_nu_rho(), nu_rho, eps + eps*nu_rho);
-    EXPECT_NEAR(spacetime->get_nu_z(), nu_z, eps + eps*nu_z);
+    EXPECT_NEAR(spacetime->get_nu_rho(), nu_rho, eps + eps*std::llabs(nu_rho));
+    EXPECT_NEAR(spacetime->get_nu_z(), nu_z, eps + eps*std::llabs(nu_z));
+}
+
+TEST_P(GeneralWeylTest, SecondDerivativesOfPotential)
+{
+    std::shared_ptr<gr2::Weyl> spacetime = GetParam().spacetime;
+    gr2::real eps = GetParam().eps;
+    gr2::real nu_rhorho =  GetParam().nu_rhorho;
+    gr2::real nu_rhoz =  GetParam().nu_rhoz;
+    gr2::real nu_zz =  GetParam().nu_zz;
+    spacetime->calculate_nu2(GetParam().y);
+    EXPECT_NEAR(spacetime->get_nu_rhorho(), nu_rhorho, eps + eps*std::llabs(nu_rhorho));
+    EXPECT_NEAR(spacetime->get_nu_rhoz(), nu_rhoz, eps + eps*std::llabs(nu_rhoz));
+    EXPECT_NEAR(spacetime->get_nu_zz(), nu_zz, eps + eps*std::llabs(nu_zz));
 }
 
 TEST_P(GeneralWeylTest, Lambda)
@@ -97,7 +110,7 @@ TEST_P(GeneralWeylTest, Lambda)
     gr2::real eps = GetParam().eps;
     gr2::real lambda =  GetParam().lambda;
     spacetime->calculate_lambda_init(GetParam().y);
-    EXPECT_NEAR(spacetime->get_lambda(), lambda, eps + eps*lambda);
+    EXPECT_NEAR(spacetime->get_lambda(), lambda, eps + eps*std::labs(lambda));
 }
 
 void PrintTo(const WeylTestCase& testcase, std::ostream* os) {
