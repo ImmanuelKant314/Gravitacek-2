@@ -172,6 +172,70 @@ namespace gr2
 
     void Weyl::calculate_riemann_tensor(const real *y)
     {
+        if(!necessary_calculate(y, y_r, dim))
+            return;
 
+        real t = y[T];
+        real phi = y[PHI];
+        real rho = y[RHO];
+        real z = y[Z];
+
+        this->calculate_lambda_run(y);
+        this->calculate_nu2(y);
+
+        real exp_4nu = expl(4*nu);
+        real exp_2lambda_inv = expl(-2*lambda);
+        real rho_inv = 1.0/rho;
+
+        // First derivatives of lambda
+        this->lambda_rho = rho*(nu_rho*nu_rho - nu_z*nu_z);
+        this->lambda_z = 2*rho*nu_rho*nu_z;
+
+        // Second derivatives of lambda
+        this->lambda_rhorho = (nu_rho*nu_rho - nu_z*nu_z) + 2*rho*(nu_rho*nu_rhorho - nu_z*nu_rhoz);
+        this->lambda_rhoz = 2*rho*(nu_rho*nu_rhoz - nu_z*nu_zz);
+        this->lambda_zz = 2*rho*(nu_rhoz*nu_z + nu_rho*nu_zz);
+
+        // Riemann tensor
+        riemann_tensor[T][PHI][T][PHI] = rho*(rho*nu_z*nu_z + (rho*nu_rho-1)*nu_rho)*exp_2lambda_inv;
+        riemann_tensor[T][PHI][PHI][T] = -riemann_tensor[T][PHI][T][PHI];
+        riemann_tensor[T][RHO][T][RHO] = lambda_rho*nu_rho - lambda_z*nu_z - 2*nu_rho*nu_rho - nu_rhorho + nu_z*nu_z;
+        riemann_tensor[T][RHO][RHO][T] = -riemann_tensor[T][RHO][T][RHO];
+        riemann_tensor[T][RHO][T][Z] = lambda_rho*nu_z + lambda_z*nu_rho - 3*nu_rho*nu_z - nu_rhoz;
+        riemann_tensor[T][RHO][Z][T] = -riemann_tensor[T][RHO][T][Z];
+        riemann_tensor[T][Z][T][RHO] = riemann_tensor[T][RHO][T][Z];
+        riemann_tensor[T][Z][RHO][T] = -riemann_tensor[T][Z][T][RHO];
+        riemann_tensor[T][Z][T][Z] = -lambda_rho*nu_rho + lambda_z*nu_z + nu_rho*nu_rho - 2*nu_z*nu_z - nu_zz;
+        riemann_tensor[T][Z][Z][T] = -riemann_tensor[T][Z][T][Z];
+        riemann_tensor[PHI][T][T][PHI] = rho_inv*(rho*nu_rho*nu_rho + rho*nu_z*nu_z - nu_rho)*exp_4nu*exp_2lambda_inv;
+        riemann_tensor[PHI][T][PHI][T] = -riemann_tensor[PHI][T][T][PHI];
+        riemann_tensor[PHI][RHO][PHI][RHO] = -lambda_rho*nu_rho + lambda_z*nu_z + nu_rhorho - nu_z*nu_z + rho_inv*(lambda_rho + nu_rho);
+        riemann_tensor[PHI][RHO][RHO][PHI] = -riemann_tensor[PHI][RHO][PHI][RHO];
+        riemann_tensor[PHI][RHO][PHI][Z] = -lambda_rho*nu_z - lambda_z*nu_rho + nu_rho*nu_z + nu_rhoz + rho_inv*lambda_z;
+        riemann_tensor[PHI][RHO][Z][PHI] = -riemann_tensor[PHI][RHO][PHI][Z]; 
+        riemann_tensor[PHI][Z][PHI][RHO] = riemann_tensor[PHI][RHO][PHI][Z];
+        riemann_tensor[PHI][Z][RHO][PHI] = -riemann_tensor[PHI][Z][PHI][RHO];
+        riemann_tensor[PHI][Z][PHI][Z] = lambda_rho*nu_rho-lambda_z*nu_z - nu_rho*nu_rho + nu_zz + rho_inv*(-lambda_rho + nu_rho);
+        riemann_tensor[PHI][Z][Z][PHI] = -riemann_tensor[PHI][Z][PHI][Z];
+        riemann_tensor[RHO][T][T][RHO] = (lambda_rho*nu_rho - lambda_z*nu_z - 2*nu_rho*nu_rho - nu_rhorho + nu_z*nu_z)*exp_4nu*exp_2lambda_inv;
+        riemann_tensor[RHO][T][RHO][T] = -riemann_tensor[RHO][T][T][RHO];
+        riemann_tensor[RHO][T][T][Z] = (lambda_rho*nu_z + lambda_z*nu_rho-3*nu_rho*nu_z-nu_rhoz)*exp_4nu*exp_2lambda_inv;
+        riemann_tensor[RHO][T][Z][T] = -riemann_tensor[RHO][T][T][Z];
+        riemann_tensor[RHO][PHI][PHI][RHO] = rho*(rho*(lambda_rho*nu_rho-lambda_z*nu_z-nu_rhorho+nu_z*nu_z)-lambda_rho-nu_rho)*exp_2lambda_inv;
+        riemann_tensor[RHO][PHI][RHO][PHI] = -riemann_tensor[RHO][PHI][PHI][RHO];
+        riemann_tensor[RHO][PHI][PHI][Z] = rho*(rho*(lambda_rho*nu_z + lambda_z*nu_rho-nu_rho*nu_z - nu_rhoz) - lambda_z)*exp_2lambda_inv;
+        riemann_tensor[RHO][PHI][Z][PHI] = -riemann_tensor[RHO][PHI][PHI][Z];
+        riemann_tensor[RHO][Z][RHO][Z] = -lambda_rhorho - lambda_zz + nu_rhorho + nu_zz;
+        riemann_tensor[RHO][Z][Z][RHO] = -riemann_tensor[RHO][Z][RHO][Z];
+        riemann_tensor[Z][T][T][RHO] = (lambda_rho*nu_z + lambda_z*nu_rho - 3*nu_rho*nu_z - nu_rhoz)*exp_4nu*exp_2lambda_inv;
+        riemann_tensor[Z][T][RHO][T] = -riemann_tensor[Z][T][T][RHO];
+        riemann_tensor[Z][T][T][Z] = (-lambda_rho*nu_rho + lambda_z*nu_z + nu_rho*nu_rho - 2*nu_z*nu_z - nu_zz)*exp_4nu*exp_2lambda_inv;
+        riemann_tensor[Z][T][Z][T] = -riemann_tensor[Z][T][T][Z];
+        riemann_tensor[Z][PHI][PHI][RHO] = rho*(rho*(lambda_rho*nu_z + lambda_z*nu_rho-nu_rho*nu_z - nu_rhoz) - lambda_z)*exp_2lambda_inv;
+        riemann_tensor[Z][PHI][RHO][PHI] = -riemann_tensor[Z][PHI][PHI][RHO];
+        riemann_tensor[Z][PHI][PHI][Z] = rho*(rho*(-lambda_rho*nu_rho+lambda_z*nu_z + nu_rho*nu_rho - nu_zz) + lambda_rho - nu_rho)*exp_2lambda_inv;
+        riemann_tensor[Z][PHI][Z][PHI] = -riemann_tensor[Z][PHI][PHI][Z];
+        riemann_tensor[Z][RHO][RHO][Z] = lambda_rhorho + lambda_zz - nu_rhorho - nu_zz;
+        riemann_tensor[Z][RHO][Z][RHO] = -riemann_tensor[Z][RHO][RHO][Z];
     };
 }

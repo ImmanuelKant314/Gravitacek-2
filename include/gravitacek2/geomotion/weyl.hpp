@@ -60,6 +60,9 @@ namespace gr2
         real lambda;        //!<value of \f$\lambda\f$
         real lambda_rho;    //!<value of \f$\lambda_{,\rho}\f$
         real lambda_z;      //!<value of \f$\lambda_{,z}\f$
+        real lambda_rhorho; //!<value of \f$\lambda_{,\rho\rho}\f$
+        real lambda_rhoz;   //!<value of \f$\lambda_{,\rho z}\f$
+        real lambda_zz;     //!<value of \f$\lambda_{,zz}\f$
 
         /**
          * @brief Calculate value of \f$\lambda\f$ by integrating from \f$z = \inf\f$ to \f$z = z_0\f$.
