@@ -157,7 +157,82 @@ namespace gr2
 
     void InvertedMorganMorganDisk::calculate_nu2(const real *y)
     {
+        // Coordinates
+        real rho = y[RHO], z = y[Z];
 
+        // Second derivatives of potential - functions
+        auto nu_rho_func = [&z, this](real rho)
+        {
+            real y[] = {0, 0, 0, 0};
+            y[RHO] = rho;
+            y[Z] = z;
+            this->calculate_nu1(y);
+            return this->get_nu_rho();
+        };
+
+        auto nu_z_func = [&rho, this](real z)
+        {
+            real y[] = {0, 0, 0, 0};
+            y[RHO] = rho;
+            y[Z] = z;
+            this->calculate_nu1(y);
+            return this->get_nu_z();
+        };
+
+        auto nu_z_func_rho = [&z, this](real rho)
+        {
+            real y[] = {0, 0, 0, 0};
+            y[RHO] = rho;
+            y[Z] = z;
+            this->calculate_nu1(y);
+            return this->get_nu_z();
+        };
+
+        // Second derivatives of potential
+        this->nu_rhorho = gr2::richder<5>(nu_rho_func, rho, 0.1, 1e-10);
+        this->nu_zz = gr2::richder<5>(nu_z_func, z, 0.1, 1e-10);
+        this->nu_rhoz = gr2::richder<5>(nu_z_func_rho, rho, 0.1, 1e-10);
+
+        // Calculation of the rest
+        real alpha = rho*rho + z*z - b*b;
+        real help_term1 = sqrtl(alpha*alpha + 4*(z*z)*(b*b));
+        real x = sqrtl(alpha + help_term1)/(sqrtl(2)*b);
+        real y_ = sqrtl(-alpha + help_term1)/(sqrtl(2)*b);
+        real help_term2 = sqrtl(x*x - y_*y_ + 1);
+        real Y = y_/help_term2;
+        real X = x/help_term2;
+        real x_rho = x*rho/help_term1;
+        real y_rho = -y_*rho/help_term1;
+        real x_z = z*(alpha + 2*b*b + help_term1)/(2*b*b*x*help_term1);
+        real y_z = z*(alpha + 2*b*b - help_term1)/(2*b*b*y_*help_term1);
+        real X_rho = ((1-y_*y_)*x_rho + x*y_*y_rho)/(help_term2*help_term2*help_term2);
+        real Y_rho = (-x*y_*x_rho + (x*x+1)*y_rho)/(help_term2*help_term2*help_term2);
+        real X_z = ((1-y_*y_)*x_z + x*y_*y_z)/(help_term2*help_term2*help_term2);
+        real Y_z = (-x*y_*x_z + (x*x+1)*y_z)/(help_term2*help_term2*help_term2);
+
+        legendre_polynomials1(X, 2*n + 1, P0, P1);
+        special_function_Q2n1(Y, n + 1, Q0, Q1);
+
+        nu = 0;
+        nu_rho = 0;
+        nu_z = 0;
+        for (int m = 0; m<= n; m++)
+        {
+            nu += C[m]*Q0[m]*P0[2*m];
+
+            nu_rho += C[m]*Q1[m]*P0[2*m]*Y_rho;
+            nu_rho += C[m]*Q0[m]*P1[2*m]*X_rho;
+
+            nu_z += C[m]*Q1[m]*P0[2*m]*Y_z;
+            nu_z += C[m]*Q0[m]*P1[2*m]*X_z;
+        }
+
+        nu_rho += -rho*nu/(b*b)/(help_term2*help_term2);
+        nu_z += -z*nu/(b*b)/(help_term2*help_term2);
+
+        nu *= N/help_term2;
+        nu_rho *= N/help_term2;
+        nu_z *= N/help_term2;
     }
 }
 

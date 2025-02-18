@@ -158,6 +158,69 @@ namespace gr2
 
     void InvertedKuzminToomreDisk::calculate_nu2(const real* y)
     {
+        // Coordinates
+        real rho = y[RHO], z = y[Z];
 
+        // Second derivatives of potential - functions
+        auto nu_rho_func = [&z, this](real rho)
+        {
+            real y[] = {0, 0, 0, 0};
+            y[RHO] = rho;
+            y[Z] = z;
+            this->calculate_nu1(y);
+            return this->get_nu_rho();
+        };
+
+        auto nu_z_func = [&rho, this](real z)
+        {
+            real y[] = {0, 0, 0, 0};
+            y[RHO] = rho;
+            y[Z] = z;
+            this->calculate_nu1(y);
+            return this->get_nu_z();
+        };
+
+        auto nu_z_func_rho = [&z, this](real rho)
+        {
+            real y[] = {0, 0, 0, 0};
+            y[RHO] = rho;
+            y[Z] = z;
+            this->calculate_nu1(y);
+            return this->get_nu_z();
+        };
+
+        // Second derivatives of potential
+        this->nu_rhorho = gr2::richder<5>(nu_rho_func, rho, 0.1, 1e-10);
+        this->nu_zz = gr2::richder<5>(nu_z_func, z, 0.1, 1e-10);
+        this->nu_rhoz = gr2::richder<5>(nu_z_func_rho, rho, 0.1, 1e-10);
+
+        // Calculate potential and derivatives
+        real rho2 = rho*rho;
+        int sign_z = z>0? 1:-1;
+        real abs_z = sign_z*z;
+        real rb = sqrtl(rho*rho + (abs_z+b)*(abs_z+b));
+        real P_arg = (abs_z + b)/rb;
+
+        nu = nu_rho = nu_z = 0;
+        real b_pow = 1;
+        real inv_rb = 1.0/rb;
+        real inv_rb_pows = inv_rb;
+        real inv_rb_pows2 = inv_rb*inv_rb*inv_rb;
+
+        legendre_polynomials1(P_arg, n+1, this->P0, this->P1);
+
+        for (int k = 0; k <= n; k++)
+        {
+            nu += B[k]*b_pow*inv_rb_pows*P0[k];
+            nu_rho += B[k]*b_pow*inv_rb_pows2*rho*((k+1)*P0[k]+P_arg*P1[k]);
+            nu_z += B[k]*b_pow*inv_rb_pows2*((k+1)*(abs_z+b)*P0[k]-rho2*inv_rb*P1[k]);
+
+            b_pow *= -b;
+            inv_rb_pows *= inv_rb;
+            inv_rb_pows2 *= inv_rb;
+        }
+        nu *= N;
+        nu_rho *= -N;
+        nu_z *= -N*sign_z;
     }
 }
