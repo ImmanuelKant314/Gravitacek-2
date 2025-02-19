@@ -145,8 +145,9 @@ std::string MyTestNameGenerator(const ::testing::TestParamInfo<SpacetimeTestCase
 std::string folder = "./test_spacetime/";
 
 auto test_cases = testing::Values(
-    SpacetimeTestCase(std::make_shared<gr2::Schwarzschild>(0.3), folder + "schwarzschild.txt", "Schwarzschild", 1e-15),
-    SpacetimeTestCase(std::make_shared<gr2::WeylSchwarzschild>(0.3, gr2::exact, gr2::exact), folder + "weyl.txt", "Weyl", 1e-14)
+    SpacetimeTestCase(std::make_shared<gr2::Schwarzschild>(0.3), folder + "schwarzschild.txt", "Schwarzschild", 1e-14),
+    SpacetimeTestCase(std::make_shared<gr2::WeylSchwarzschild>(0.3, gr2::exact, gr2::exact), folder + "weyl.txt", "Weyl", 1e-14),
+    SpacetimeTestCase(std::make_shared<gr2::ReissnerNordstromMPW>(0.3), folder + "mp.txt", "MajumdarPapapetrouWeyl", 1e-14)
 );
 
 INSTANTIATE_TEST_SUITE_P(

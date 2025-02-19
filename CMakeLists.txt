@@ -14,6 +14,7 @@ add_executable(Gravitacek2 main.cpp)
 # copy directory 
 file(COPY ${PROJECT_SOURCE_DIR}/tests/test_weylspacetime DESTINATION ${CMAKE_BINARY_DIR}/tests)
 file(COPY ${PROJECT_SOURCE_DIR}/tests/test_spacetime DESTINATION ${CMAKE_BINARY_DIR}/tests)
+file(COPY ${PROJECT_SOURCE_DIR}/tests/test_majumdarpapapetrouwspacetime DESTINATION ${CMAKE_BINARY_DIR}/tests)
 
 # add subdirectories
 add_subdirectory(${PROJECT_SOURCE_DIR}/external/googletest)
@@ -43,11 +44,13 @@ add_library(geomotion
             STATIC 
             ${GEOMOTION_DIR}/geomotion.cpp
             ${GEOMOTION_DIR}/weyl.cpp
+            ${GEOMOTION_DIR}/majumdarpapapetrouweyl.cpp
             ${GEOMOTION_DIR}/spacetimes/schwarzschild.cpp
             ${GEOMOTION_DIR}/spacetimes/weylschwarzschild.cpp
             ${GEOMOTION_DIR}/spacetimes/bachweylring.cpp
             ${GEOMOTION_DIR}/spacetimes/invertedkuzmintoomredisk.cpp
-            ${GEOMOTION_DIR}/spacetimes/invertedmorganmorgandisk.cpp)
+            ${GEOMOTION_DIR}/spacetimes/invertedmorganmorgandisk.cpp
+            ${GEOMOTION_DIR}/spacetimes/reissnernordstrommpw.cpp)
 add_library(mymath
             STATIC
             ${MYMATH_DIR}/mymath.cpp)

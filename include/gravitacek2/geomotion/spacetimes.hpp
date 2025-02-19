@@ -1,6 +1,7 @@
 #pragma once
 #include "gravitacek2/geomotion/geomotion.hpp"
 #include "gravitacek2/geomotion/weyl.hpp"
+#include "gravitacek2/geomotion/majumadpapapetrouweyl.hpp"
 
 namespace gr2
 {
@@ -185,5 +186,18 @@ namespace gr2
         virtual void calculate_nu(const real* y) override;
         virtual void calculate_nu1(const real* y) override;
         virtual void calculate_nu2(const real* y) override;
+    };
+
+    class ReissnerNordstromMPW : public MajumdarPapapetrouWeyl
+    {
+    protected:
+        real M;
+    public:
+        ReissnerNordstromMPW(const real& M);
+        ~ReissnerNordstromMPW();
+
+        virtual void calculate_N(const real* y) override;
+        virtual void calculate_N1(const real* y) override;
+        virtual void calculate_N2(const real* y) override;
     };
 }
