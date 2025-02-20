@@ -498,7 +498,7 @@ bool Interface::command(std::string text)
 
     // end
     text = strip(text);
-    if (text == "end" || text == "END")
+    if (text == "end" || text == "END" || text == "exit")
         return false;
 
     // try to apply def, delete
