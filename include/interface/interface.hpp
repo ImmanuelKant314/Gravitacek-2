@@ -80,6 +80,12 @@ protected:
      */
     void print_macro(std::string text);
 
+    /**
+     * @brief Print all saved macros.
+     * 
+     */
+    void print_all_macros();
+
     // ==================== Functions ==================== 
 
     /**

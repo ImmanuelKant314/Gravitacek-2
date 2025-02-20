@@ -130,6 +130,11 @@ bool Interface::try_apply_operators(std::string text)
         this->print_macro(rest);
         return true;
     }
+    else if(command == strip(text))
+    {
+        this->print_all_macros();
+        return true;
+    }
     return false;
 }
 
@@ -193,6 +198,14 @@ void Interface::print_macro(std::string text)
         }
     }
     throw std::invalid_argument("no macro with this name");
+}
+
+void Interface::print_all_macros()
+{
+    for (int i = 0; i < macros.size(); i++)
+    {
+        std::cout << macros[i] << ":" << values[i] << std::endl;
+    }
 }
 
 gr2::Weyl* Interface::create_weyl_spacetime(std::string text)
