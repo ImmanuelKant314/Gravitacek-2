@@ -151,7 +151,6 @@ void Interface::define_macro(std::string text)
             // check validity on the name
             if (!macro_name_valid(name))
                 throw std::invalid_argument("invalid macro name");
-
             std::string value = strip(text.substr(i+1));
             value = substitute(value);
             for (int j = 0; j < macros.size(); j++)
@@ -167,6 +166,7 @@ void Interface::define_macro(std::string text)
             return;
         }
     }
+    throw std::invalid_argument("macro is empty");
 }
 
 void Interface::delete_macro(std::string text)
