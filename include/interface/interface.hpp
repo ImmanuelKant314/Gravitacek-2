@@ -23,13 +23,13 @@ protected:
     std::string substitute(std::string text);
 
     /**
-     * @brief Check validity of characted in macro name.
+     * @brief Check validity of name of macro.
      * 
-     * @param c characted in macro name
-     * @return true if character is valid
-     * @return false if character is not valid
+     * @param name potential name for macro
+     * @return true if name is valid
+     * @return false if name is not valid
      */
-    bool macro_name_char(char c);
+    bool macro_name_valid(std::string name);
 
     /**
      * @brief Delete spaces on the begining and end.
@@ -95,7 +95,7 @@ protected:
      * 
      * @param text string with possible function
      * @return true if function was applied
-     * @return false  if function was not applied
+     * @return false if function was not applied
      */
     bool try_apply_function(std::string text);
 

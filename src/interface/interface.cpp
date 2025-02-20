@@ -55,11 +55,18 @@ std::string Interface::substitute(std::string text)
     return text;
 }
 
-bool Interface::macro_name_char(char c)
+bool Interface::macro_name_valid(std::string name)
 {
-    if (('A' <= c && 'Z' >= c) || c == '_')
-        return true;
-    return false;
+    // check first character
+    char c = name[0];
+    if (!('A' <= c && 'Z' >= c))
+        return false;
+    for (auto& c : name)
+    {
+        if(!(('A' <= c && 'Z' >=c) || (c == '_') || ('0' <= c || '9' >= c)))
+            return false;
+    }
+    return true;
 }
 
 std::string Interface::strip(std::string text)
@@ -136,6 +143,10 @@ void Interface::define_macro(std::string text)
         if (text[i] == ' ')
         {
             std::string name = text.substr(0, i);
+            // check validity on the name
+            if (!macro_name_valid(name))
+                throw std::invalid_argument("invalid macro name");
+
             std::string value = strip(text.substr(i+1));
             value = substitute(value);
             for (int j = 0; j < macros.size(); j++)
@@ -150,8 +161,6 @@ void Interface::define_macro(std::string text)
             values.push_back(value);
             return;
         }
-        else if (!macro_name_char(text[i]))
-            throw std::invalid_argument("invalid macro name");
     }
 }
 
