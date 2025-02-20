@@ -130,7 +130,7 @@ bool Interface::try_apply_operators(std::string text)
         this->print_macro(rest);
         return true;
     }
-    else if(command == strip(text))
+    else if(strip(text) == "printm")
     {
         this->print_all_macros();
         return true;
