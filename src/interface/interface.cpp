@@ -135,6 +135,12 @@ bool Interface::try_apply_operators(std::string text)
         this->print_all_macros();
         return true;
     }
+    else if(command == "help")
+    {
+        this->help(rest);
+        return true;
+    }
+
     return false;
 }
 
@@ -205,6 +211,34 @@ void Interface::print_all_macros()
     for (int i = 0; i < macros.size(); i++)
     {
         std::cout << macros[i] << ":" << values[i] << std::endl;
+    }
+}
+
+void Interface::help(std::string text)
+{
+    text = this->strip(text);
+    if (text.length() == 0)
+    {
+        int n = this->help_name.size();
+        if (n > 0)
+            std::cout << this->help_name[0];
+        for (int i = 1; i<n; i++)
+            std::cout << ", " << this->help_name[i];
+        std::cout << std::endl;
+    }
+    else
+    {
+        int i;
+        for (i = 0; i < this->help_name.size(); i++)
+        {
+            if (text == this->help_name[i])
+            {
+                std::cout << this->help_text[i] << std::endl;
+                break;
+            }
+        }
+        if (i == this->help_name.size())
+            throw std::runtime_error("help for " + text + " was not found");
     }
 }
 
@@ -498,9 +532,33 @@ void Interface::solve_ode_system(std::string text)
     
 }
 
-Interface::Interface():macros(), values()
+Interface::Interface():macros(), values(), help_name(), help_text()
 {
+    // load help
+    std::ifstream file;
+    std::string filename = "./data/help.txt";
 
+    file.open(filename);
+
+    if (!file.is_open())
+        throw std::runtime_error("Program was not able to load help");
+
+    std::string line, help_name_string, help_text_string;
+
+    while (getline(file, help_name_string))
+    {
+        while (getline(file, line))
+        {
+            if (line[0] == '=')
+            {
+                this->help_name.push_back(this->strip(help_name_string));
+                this->help_text.push_back(help_text_string);
+                help_text_string = "";
+                break;
+            }
+            help_text_string += help_text_string==""?line:"\n" + line;
+        }
+    }
 }
 
 bool Interface::command(std::string text)

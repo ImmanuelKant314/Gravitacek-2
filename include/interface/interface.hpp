@@ -14,6 +14,10 @@ protected:
     std::vector<std::string> macros;    //!<vector of macro names
     std::vector<std::string> values;    //!<vector of macro numbers
 
+    // ==================== Help ==================== 
+    std::vector<std::string> help_name; //!<vector of help names
+    std::vector<std::string> help_text; //!<vector of texts for help
+
     /**
      * @brief Substitute text using macros.
      * 
@@ -85,6 +89,13 @@ protected:
      * 
      */
     void print_all_macros();
+
+    /**
+     * @brief Print help for functions.
+     * 
+     * @param text parameter for help
+     */
+    void help(std::string text);
 
     // ==================== Functions ==================== 
 

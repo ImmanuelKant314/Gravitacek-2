@@ -15,6 +15,7 @@ add_executable(Gravitacek2 main.cpp)
 file(COPY ${PROJECT_SOURCE_DIR}/tests/test_weylspacetime DESTINATION ${CMAKE_BINARY_DIR}/tests)
 file(COPY ${PROJECT_SOURCE_DIR}/tests/test_spacetime DESTINATION ${CMAKE_BINARY_DIR}/tests)
 file(COPY ${PROJECT_SOURCE_DIR}/tests/test_majumdarpapapetrouwspacetime DESTINATION ${CMAKE_BINARY_DIR}/tests)
+file(COPY ${PROJECT_SOURCE_DIR}/src/interface/data DESTINATION ${CMAKE_BINARY_DIR})
 
 # add subdirectories
 add_subdirectory(${PROJECT_SOURCE_DIR}/external/googletest)
