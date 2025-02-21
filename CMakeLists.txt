@@ -48,6 +48,7 @@ add_library(geomotion
             STATIC 
             ${GEOMOTION_DIR}/geomotion.cpp
             ${GEOMOTION_DIR}/weyl.cpp
+            ${GEOMOTION_DIR}/combinedweyl.cpp
             ${GEOMOTION_DIR}/majumdarpapapetrouweyl.cpp
             ${GEOMOTION_DIR}/spacetimes/schwarzschild.cpp
             ${GEOMOTION_DIR}/spacetimes/weylschwarzschild.cpp

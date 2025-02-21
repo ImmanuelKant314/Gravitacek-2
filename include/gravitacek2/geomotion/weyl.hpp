@@ -1,4 +1,7 @@
 #pragma once
+#include <vector>
+#include <memory>
+
 #include "gravitacek2/geomotion/geomotion.hpp"
 
 namespace gr2
@@ -218,5 +221,28 @@ namespace gr2
         virtual void calculate_christoffel_symbols(const real *y) override;
         virtual void calculate_riemann_tensor(const real *y) override;
 
+    };
+
+    /**
+     * @brief Class representing combinations of sources in Weyl spacetimes.
+     * 
+     * For the combination we assume that sources are on the equatorial plane
+     * 
+     */
+    class CombinedWeyl : public Weyl
+    {
+    protected:
+        std::vector<std::shared_ptr<Weyl>> sources;
+        virtual void calculate_lambda_integral(const real* y);
+    public:
+        CombinedWeyl(std::vector<std::shared_ptr<Weyl>> sources);
+        ~CombinedWeyl();
+
+        virtual void calculate_lambda_init(const real* y) override;
+        virtual void calculate_lambda_run(const real* y) override;
+
+        virtual void calculate_nu(const real* y) override;
+        virtual void calculate_nu1(const real* y) override;
+        virtual void calculate_nu2(const real* y) override;
     };
 }
