@@ -242,25 +242,25 @@ void Interface::help(std::string text)
     }
 }
 
-gr2::Weyl* Interface::create_weyl_spacetime(std::string text)
+std::shared_ptr<gr2::Weyl> Interface::create_weyl_spacetime(std::string text)
 {
     text = strip(text);
     std::string spacetime_name, args_text;
     this->find_command_name(text, spacetime_name, args_text);
     auto args = this->find_function_arguments(args_text);
-    gr2::Weyl* spacetime;
+    std::shared_ptr<gr2::Weyl> spacetime;
 
     if (spacetime_name == "WeylSchwarzschild")
     {
         if (args.size() != 1)
             throw std::invalid_argument("invalid number of arguments for WeylSchwarzschild");
-        spacetime = new gr2::WeylSchwarzschild(std::stold(args[0]));
+        spacetime = std::make_shared<gr2::WeylSchwarzschild>(std::stold(args[0]));
     }
     else if (spacetime_name == "BachWeylRing")
     {   
         if (args.size() != 2)
             throw std::invalid_argument("invalid number of arguments for BachWeylRing");
-        spacetime = new gr2::BachWeylRing(std::stold(args[0]), std::stold(args[1]));
+        spacetime = std::make_shared<gr2::BachWeylRing>(std::stold(args[0]), std::stold(args[1]));
     }
     else
     {
@@ -363,7 +363,7 @@ void Interface::draw_potential_1D(std::string text)
     else if (args.size() < number_of_arguments)
         throw std::invalid_argument("too little arguments for draw_potential_1D");
 
-    gr2::Weyl* spacetime = nullptr;
+    std::shared_ptr<gr2::Weyl> spacetime = nullptr;
     std::ofstream file;
 
     try
@@ -397,7 +397,6 @@ void Interface::draw_potential_1D(std::string text)
     }
     catch(const std::exception& e)
     {
-        delete[] spacetime;
         file.close();
         throw e;
     }
@@ -417,7 +416,7 @@ void Interface::draw_lambda_1D(std::string text)
     else if (args.size() < number_of_arguments)
         throw std::invalid_argument("too little arguments for draw_potential_1D");
 
-    gr2::Weyl* spacetime = nullptr;
+    std::shared_ptr<gr2::Weyl> spacetime = nullptr;
     std::ofstream file;
 
     try
@@ -451,25 +450,24 @@ void Interface::draw_lambda_1D(std::string text)
     }
     catch(const std::exception& e)
     {
-        delete[] spacetime;
         file.close();
         throw e;
     }
 }
 
-gr2::OdeSystem* Interface::create_ode_system(std::string text)
+std::shared_ptr<gr2::OdeSystem> Interface::create_ode_system(std::string text)
 {
     text = strip(text);
     std::string ode_name, args_text;
     this->find_command_name(text, ode_name, args_text);
     auto args = this->find_function_arguments(args_text);
-    gr2::OdeSystem* ode;
+    std::shared_ptr<gr2::OdeSystem> ode;
 
     if (ode_name == "DampedHarmonicOscillator")
     {
         if (args.size() != 2)
             throw std::invalid_argument("invalid number of arguments for DampedHarmonicOscillator");
-        ode = new gr2::DampedHarmonicOscillator(std::stold(args[0]), std::stold(args[1]));
+        ode = std::make_shared<gr2::DampedHarmonicOscillator>(std::stold(args[0]), std::stold(args[1]));
     }
     else
     {
@@ -487,7 +485,7 @@ void Interface::solve_ode_system(std::string text)
     else if (args.size() > number_of_arguments)
         throw std::invalid_argument("too much arguments for solve_ode_system");
     
-    gr2::OdeSystem* ode = nullptr;
+    std::shared_ptr<gr2::OdeSystem> ode = nullptr;
     std::ofstream file;
 
     try
@@ -525,11 +523,9 @@ void Interface::solve_ode_system(std::string text)
     }
     catch(const std::exception& e)
     {
-        delete[] ode;
         file.close();
         throw e;
     }
-    
 }
 
 Interface::Interface():macros(), values(), help_name(), help_text()

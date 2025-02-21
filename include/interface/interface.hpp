@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "gravitacek2/setup.hpp"
 #include "gravitacek2/geomotion/geomotion.hpp"
@@ -129,7 +130,7 @@ protected:
      * @param text definition of spacetime
      * @return pointer to spacetime object
      */
-    gr2::GeoMotion* create_spacetime(std::string text);
+    std::shared_ptr<gr2::GeoMotion> create_spacetime(std::string text);
 
     /**
      * @brief Create Weyl spacetime with given parameters.
@@ -137,7 +138,7 @@ protected:
      * @param text definition of Weyl spacetime
      * @return pointer to spacetime object
      */
-    gr2::Weyl* create_weyl_spacetime(std::string text);
+    std::shared_ptr<gr2::Weyl> create_weyl_spacetime(std::string text);
 
     /**
      * @brief Create OdeSystem with given parameters.
@@ -148,7 +149,7 @@ protected:
      * @param text definition of OdeSystem
      * @return pointer to OdeSystem object
      */
-    gr2::OdeSystem* create_ode_system(std::string text);
+    std::shared_ptr<gr2::OdeSystem> create_ode_system(std::string text);
 
     /**
      * @brief Calculate potential with given parameters.
