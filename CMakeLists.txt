@@ -8,6 +8,9 @@ project(Gravitacek2 VERSION 0.1)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+# Attempt to find the GSL package
+find_package(GSL REQUIRED)
+
 # add executable 
 add_executable(Gravitacek2 main.cpp)
 
