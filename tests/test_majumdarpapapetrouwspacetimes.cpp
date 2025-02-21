@@ -11,10 +11,9 @@ class MPTestCase
 public:
     std::shared_ptr<gr2::MajumdarPapapetrouWeyl> spacetime;
     gr2::real y[4];
-    gr2::real N;
     gr2::real N_inv;
-    gr2::real N_rho, N_z;
-    gr2::real N_rhorho, N_rhoz, N_zz;
+    gr2::real N_inv_rho, N_inv_z;
+    gr2::real N_inv_rhorho, N_inv_rhoz, N_inv_zz;
     gr2::real eps;
 
     std::string name;
@@ -37,29 +36,23 @@ public:
         if (c != 4)
             throw std::runtime_error("Unable to read position from file " + filename);
 
-        // lapse
-        std::getline(file, line);
-        c = sscanf(line.c_str(), "%Lf%*s", &N);
-        if (c != 1)
-            throw std::runtime_error("Unable to read lapse function from file " + filename);
-
         // inverse of lapse
         std::getline(file, line);
         c = sscanf(line.c_str(), "%Lf%*s", &N_inv);
         if (c != 1)
             throw std::runtime_error("Unable to read inverse of lapse function from file " + filename);
 
-        // derivatives of lapse
+        // derivatives of inverse lapse
         std::getline(file, line);
-        c = sscanf(line.c_str(), "%Lf;%Lf%*s", &N_rho, &N_z);
+        c = sscanf(line.c_str(), "%Lf;%Lf%*s", &N_inv_rho, &N_inv_z);
         if (c != 2)
-            throw std::runtime_error("Unable to read derivatives of lapse from file " + filename);
+            throw std::runtime_error("Unable to read derivatives of inverse lapse from file " + filename);
 
-        // second derivatives of lapse
+        // second derivatives of inverse lapse
         std::getline(file, line);
-        c = sscanf(line.c_str(), "%Lf;%Lf;%Lf%*s", &N_rhorho, &N_rhoz, &N_zz);
+        c = sscanf(line.c_str(), "%Lf;%Lf;%Lf%*s", &N_inv_rhorho, &N_inv_rhoz, &N_inv_zz);
         if (c != 3)
-            throw std::runtime_error("Unable to read second derivatives of lapse from file " + filename);
+            throw std::runtime_error("Unable to read second derivatives of lapse inverse from file " + filename);
 
         file.close();
     }
@@ -71,54 +64,45 @@ class GeneralMPTest :
 
 };
 
-TEST_P(GeneralMPTest, Lapse)
-{
-    std::shared_ptr<gr2::MajumdarPapapetrouWeyl> spacetime = GetParam().spacetime;
-    gr2::real eps = GetParam().eps;
-    gr2::real N =  GetParam().N;
-    spacetime->calculate_N(GetParam().y);
-    EXPECT_NEAR(spacetime->get_N(), N, eps + eps*std::llabs(N));
-}
-
-TEST_P(GeneralMPTest, InvLapse)
+TEST_P(GeneralMPTest, InverseLapse)
 {
     std::shared_ptr<gr2::MajumdarPapapetrouWeyl> spacetime = GetParam().spacetime;
     gr2::real eps = GetParam().eps;
     gr2::real N_inv =  GetParam().N_inv;
-    spacetime->calculate_N(GetParam().y);
-    EXPECT_NEAR(spacetime->get_invN(), N_inv, eps + eps*std::llabs(N_inv));
+    spacetime->calculate_N_inv(GetParam().y);
+    EXPECT_NEAR(spacetime->get_N_inv(), N_inv, eps + eps*std::llabs(N_inv));
 }
 
-TEST_P(GeneralMPTest, DerivativesOfLapse)
+TEST_P(GeneralMPTest, DerivativesOfInverseLapse)
 {
     std::shared_ptr<gr2::MajumdarPapapetrouWeyl> spacetime = GetParam().spacetime;
     gr2::real eps = GetParam().eps;
-    gr2::real N =  GetParam().N;
-    gr2::real N_rho =  GetParam().N_rho;
-    gr2::real N_z =  GetParam().N_z;
-    spacetime->calculate_N1(GetParam().y);
-    EXPECT_NEAR(spacetime->get_N(), N, eps + eps*std::llabs(N));
-    EXPECT_NEAR(spacetime->get_N_rho(), N_rho, eps + eps*std::llabs(N_rho));
-    EXPECT_NEAR(spacetime->get_N_z(), N_z, eps + eps*std::llabs(N_z));
+    gr2::real N_inv =  GetParam().N_inv;
+    gr2::real N_inv_rho =  GetParam().N_inv_rho;
+    gr2::real N_inv_z =  GetParam().N_inv_z;
+    spacetime->calculate_N_inv1(GetParam().y);
+    EXPECT_NEAR(spacetime->get_N_inv(), N_inv, eps + eps*std::llabs(N_inv));
+    EXPECT_NEAR(spacetime->get_N_inv_rho(), N_inv_rho, eps + eps*std::llabs(N_inv_rho));
+    EXPECT_NEAR(spacetime->get_N_inv_z(), N_inv_z, eps + eps*std::llabs(N_inv_z));
 }
 
 TEST_P(GeneralMPTest, SecondDerivativesOfLapse)
 {
     std::shared_ptr<gr2::MajumdarPapapetrouWeyl> spacetime = GetParam().spacetime;
     gr2::real eps = GetParam().eps;
-    gr2::real N = GetParam().N;
-    gr2::real N_rho = GetParam().N_rho;
-    gr2::real N_z = GetParam().N_z;
-    gr2::real N_rhorho = GetParam().N_rhorho;
-    gr2::real N_rhoz = GetParam().N_rhoz;
-    gr2::real N_zz = GetParam().N_zz;
-    spacetime->calculate_N2(GetParam().y);
-    EXPECT_NEAR(spacetime->get_N(), N, eps + eps*std::llabs(N));
-    EXPECT_NEAR(spacetime->get_N_rho(), N_rho, eps + eps*std::llabs(N_rho));
-    EXPECT_NEAR(spacetime->get_N_z(), N_z, eps + eps*std::llabs(N_z));
-    EXPECT_NEAR(spacetime->get_N_rhorho(), N_rhorho, eps + eps*std::llabs(N_rhorho));
-    EXPECT_NEAR(spacetime->get_N_rhoz(), N_rhoz, eps + eps*std::llabs(N_rhoz));
-    EXPECT_NEAR(spacetime->get_N_zz(), N_zz, eps + eps*std::llabs(N_zz));
+    gr2::real N_inv = GetParam().N_inv;
+    gr2::real N_inv_rho = GetParam().N_inv_rho;
+    gr2::real N_inv_z = GetParam().N_inv_z;
+    gr2::real N_inv_rhorho = GetParam().N_inv_rhorho;
+    gr2::real N_inv_rhoz = GetParam().N_inv_rhoz;
+    gr2::real N_inv_zz = GetParam().N_inv_zz;
+    spacetime->calculate_N_inv2(GetParam().y);
+    EXPECT_NEAR(spacetime->get_N_inv(), N_inv, eps + eps*std::llabs(N_inv));
+    EXPECT_NEAR(spacetime->get_N_inv_rho(), N_inv_rho, eps + eps*std::llabs(N_inv_rho));
+    EXPECT_NEAR(spacetime->get_N_inv_z(), N_inv_z, eps + eps*std::llabs(N_inv_z));
+    EXPECT_NEAR(spacetime->get_N_inv_rhorho(), N_inv_rhorho, eps + eps*std::llabs(N_inv_rhorho));
+    EXPECT_NEAR(spacetime->get_N_inv_rhoz(), N_inv_rhoz, eps + eps*std::llabs(N_inv_rhoz));
+    EXPECT_NEAR(spacetime->get_N_inv_zz(), N_inv_zz, eps + eps*std::llabs(N_inv_zz));
 }
 
 void PrintTo(const MPTestCase& testcase, std::ostream* os) {

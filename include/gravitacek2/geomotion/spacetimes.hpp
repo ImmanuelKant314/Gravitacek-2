@@ -196,8 +196,8 @@ namespace gr2
         ReissnerNordstromMPW(const real& M);
         ~ReissnerNordstromMPW();
 
-        virtual void calculate_N(const real* y) override;
-        virtual void calculate_N1(const real* y) override;
-        virtual void calculate_N2(const real* y) override;
+        virtual void calculate_N_inv(const real* y) override;
+        virtual void calculate_N_inv1(const real* y) override;
+        virtual void calculate_N_inv2(const real* y) override;
     };
 }

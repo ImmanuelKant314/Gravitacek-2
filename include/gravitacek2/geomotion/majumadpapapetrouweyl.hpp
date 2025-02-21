@@ -24,13 +24,12 @@ namespace gr2
     class MajumdarPapapetrouWeyl : public GeoMotion
     {
     protected:
-        real N;         //!<value of \f$N\f$
-        real N_inv;     //!<value of \f$N^{-1}\f$
-        real N_rho;     //!<value of \f$N_{,\rho}\f$
-        real N_z;       //!<value of \f$N_{,z}\f$
-        real N_rhorho;  //!<value of \f$N_{,\rho\rho}\f$
-        real N_rhoz;    //!<value of \f$N_{,\rho z}\f$
-        real N_zz;      //!<value of \f$N_{,zz}\f$
+        real N_inv;         //!<value of \f$N^{-1}\f$
+        real N_inv_rho;     //!<value of \f$N^{-1}_{,\rho}\f$
+        real N_inv_z;       //!<value of \f$N^{-1}_{,z}\f$
+        real N_inv_rhorho;  //!<value of \f$N^{-1}_{,\rho\rho}\f$
+        real N_inv_rhoz;    //!<value of \f$N^{-1}_{,\rho z}\f$
+        real N_inv_zz;      //!<value of \f$N^{-1}_{,zz}\f$
 
     public:
         static const int T = 0;         //!<index of coordinate \f$t\f$
@@ -55,74 +54,67 @@ namespace gr2
         virtual ~MajumdarPapapetrouWeyl();
 
         /**
-         * @brief Calculate value of \f$N\f$ and \f$N^{-1}\f$.
+         * @brief Calculate value of \f$N^{-1}\f$.
          * 
          * @param y coordinate values
          */
-        virtual void calculate_N(const real* y) = 0;
+        virtual void calculate_N_inv(const real* y) = 0;
 
         /**
-         * @brief Calculate value of \f$N\f$, \f$N^{-1}\f$ and first derivatives of \f$N\f$.
+         * @brief Calculate value of \f$N^{-1}\f$ and its first derivatives.
          * 
-         * @param y 
+         * @param y coordinate values
          */
-        virtual void calculate_N1(const real* y) = 0;
+        virtual void calculate_N_inv1(const real* y) = 0;
 
         /**
-         * @brief Calculate value of \f$N\f$, \f$N^{-1}\f$ and its first and second derivatives of \f$N\f$.
+         * @brief Calculate value of \f$N^{-1}\f$ and its first and second derivatives.
          * 
-         * @param y 
+         * @param y coordiante values
          */
-        virtual void calculate_N2(const real* y) = 0;
-
-        /**
-         * @brief Get value of \f$N\f$.
-         * 
-         * @return real value of \f$N\f$
-         */
-        real get_N() const;
+        virtual void calculate_N_inv2(const real* y) = 0;
 
         /**
          * @brief Get value of \f$N^{-1}\f$.
          * 
          * @return real value of \f$N^{-1}\f$
          */
-        real get_invN() const;
+        real get_N_inv() const;
 
         /**
-         * @brief Get value of \f$N_{,\rho}\f$.
+         * @brief Get value of \f$(N^{-1})_{,\rho}\f$.
          * 
-         * @return real value of \f$N_{,\rho}\f$
+         * @return real value of \f$(N^{-1})_{,\rho}\f$
          */
-        real get_N_rho() const;
+        real get_N_inv_rho() const;
 
         /**
-         * @brief Get value of \f$N_{,z}\f$.
+         * @brief Get value of \f$(N^{-1}_{,z}\f$.
          * 
-         * @return real value of \f$N_{,z}\f$
+         * @return real value of \f$(N^{-1})_{,z}\f$
          */
-        real get_N_z() const;
+        real get_N_inv_z() const;
 
         /**
-         * @brief Get value of \f$N_{,\rho\rho}\f$.
+         * @brief Get value of \f$(N^{-1})_{,\rho\rho}\f$.
          * 
-         * @return real value of \f$N_{,\rho\rho}\f$
+         * @return real value of \f$(N^{-1})_{,\rho\rho}\f$
          */
-        real get_N_rhorho() const;
+        real get_N_inv_rhorho() const;
 
         /**
-         * @brief Get value of \f$N_{,\rho z}\f$.
+         * @brief Get value of \f$(N^{-1})_{,\rho z}\f$.
          * 
-         * @return real value of \f$N_{,\rho z}\f$
+         * @return real value of \f$(N^{-1})_{,\rho z}\f$
          */
-        real get_N_rhoz() const;
+        real get_N_inv_rhoz() const;
 
         /**
-         * @brief Get value of \f$N_{,zz}\f$.
+         * @brief Get value of \f$(N^{-1})_{,zz}\f$.
          * 
-         * @return real value of \f$N_{,zz}\f$
+         * @return real value of \f$(N^{-1})_{,zz}\f$
          */
-        real get_N_zz() const;
+        real get_N_inv_zz() const;
 
         // ========== Calculate tensors ========== 
 
