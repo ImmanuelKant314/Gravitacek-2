@@ -262,6 +262,18 @@ std::shared_ptr<gr2::Weyl> Interface::create_weyl_spacetime(std::string text)
             throw std::invalid_argument("invalid number of arguments for BachWeylRing");
         spacetime = std::make_shared<gr2::BachWeylRing>(std::stold(args[0]), std::stold(args[1]));
     }
+    else if (spacetime_name == "InvertedKuzminToomreDisk")
+    {
+        if (args.size() != 3)
+            throw std::invalid_argument("invalid number of arguments for InvertedKuzminToomreDisk");
+        spacetime = std::make_shared<gr2::InvertedKuzminToomreDisk>(std::stoi(args[0]), std::stold(args[1]), std::stold(args[2]));
+    }
+    else if (spacetime_name == "InvertedMorganMorganDisk")
+    {
+        if (args.size() != 3)
+            throw std::invalid_argument("invalid number of arguments for InvertedMorganMorganDisk");
+        spacetime = std::make_shared<gr2::InvertedMorganMorganDisk>(std::stoi(args[0]), std::stold(args[1]), std::stold(args[2]));
+    }
     else
     {
         throw std::invalid_argument("spacetime with name " + spacetime_name + " does not exist");
