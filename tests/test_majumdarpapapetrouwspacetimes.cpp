@@ -116,7 +116,8 @@ std::string MyTestNameGenerator(const ::testing::TestParamInfo<MPTestCase>& info
 std::string folder = "./test_majumdarpapapetrouwspacetime/";
 
 auto test_cases = testing::Values(
-    MPTestCase(std::make_shared<gr2::ReissnerNordstromMPW>(0.3), folder + "reissnernordstrom.txt", "ReissnerNordstrom", 1e-12)
+    MPTestCase(std::make_shared<gr2::ReissnerNordstromMPW>(0.3), folder + "reissnernordstrom.txt", "ReissnerNordstrom", 1e-12),
+    MPTestCase(std::make_shared<gr2::MajumdarPapapetrouRing>(0.3, 5), folder + "majumdarpapapetrouring.txt", "MajumdarPapapetrouRing", 1e-12)
 );
 
 INSTANTIATE_TEST_SUITE_P(

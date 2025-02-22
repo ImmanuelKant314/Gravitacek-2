@@ -200,4 +200,18 @@ namespace gr2
         virtual void calculate_N_inv1(const real* y) override;
         virtual void calculate_N_inv2(const real* y) override;
     };
+
+    class MajumdarPapapetrouRing : public MajumdarPapapetrouWeyl
+    {
+    protected:
+        real M;
+        real b;
+    public:
+        MajumdarPapapetrouRing(const real& M, const real &b);
+        ~MajumdarPapapetrouRing();
+
+        virtual void calculate_N_inv(const real* y) override;
+        virtual void calculate_N_inv1(const real* y) override;
+        virtual void calculate_N_inv2(const real* y) override;
+    };
 }

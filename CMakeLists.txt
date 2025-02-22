@@ -55,7 +55,8 @@ add_library(geomotion
             ${GEOMOTION_DIR}/spacetimes/bachweylring.cpp
             ${GEOMOTION_DIR}/spacetimes/invertedkuzmintoomredisk.cpp
             ${GEOMOTION_DIR}/spacetimes/invertedmorganmorgandisk.cpp
-            ${GEOMOTION_DIR}/spacetimes/reissnernordstrommpw.cpp)
+            ${GEOMOTION_DIR}/spacetimes/reissnernordstrommpw.cpp
+            ${GEOMOTION_DIR}/spacetimes/majumdarpapapetrouring.cpp)
 add_library(mymath
             STATIC
             ${MYMATH_DIR}/mymath.cpp)
