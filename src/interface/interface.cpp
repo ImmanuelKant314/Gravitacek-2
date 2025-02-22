@@ -250,7 +250,16 @@ std::shared_ptr<gr2::Weyl> Interface::create_weyl_spacetime(std::string text)
     auto args = this->find_function_arguments(args_text);
     std::shared_ptr<gr2::Weyl> spacetime;
 
-    if (spacetime_name == "WeylSchwarzschild")
+    if (spacetime_name == "CombinedWeyl")
+    {
+        std::vector<std::shared_ptr<gr2::Weyl>> sources = {};
+        for (auto &arg : args)
+        {
+            sources.push_back(this->create_weyl_spacetime(arg));
+        }
+        spacetime = std::make_shared<gr2::CombinedWeyl>(sources);
+    }
+    else if (spacetime_name == "WeylSchwarzschild")
     {
         if (args.size() != 1)
             throw std::invalid_argument("invalid number of arguments for WeylSchwarzschild");
