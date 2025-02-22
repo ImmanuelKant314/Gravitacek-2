@@ -1,5 +1,7 @@
 #pragma once
 #include "gravitacek2/geomotion/geomotion.hpp"
+#include <vector>
+#include <memory>
 
 namespace gr2
 {
@@ -121,5 +123,18 @@ namespace gr2
         virtual void calculate_metric(const real *y) override;
         virtual void calculate_christoffel_symbols(const real *y) override;
         virtual void calculate_riemann_tensor(const real *y) override;
+    };
+
+    class CombinedMPW : public MajumdarPapapetrouWeyl
+    {
+    protected:
+        std::vector<std::shared_ptr<MajumdarPapapetrouWeyl>> sources;
+    public:
+        CombinedMPW(std::vector<std::shared_ptr<MajumdarPapapetrouWeyl>> sources);
+        ~CombinedMPW();
+
+        virtual void calculate_N_inv(const real* y) override;
+        virtual void calculate_N_inv1(const real* y) override;
+        virtual void calculate_N_inv2(const real* y) override;
     };
 }

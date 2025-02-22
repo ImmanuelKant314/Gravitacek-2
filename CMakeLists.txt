@@ -50,6 +50,7 @@ add_library(geomotion
             ${GEOMOTION_DIR}/weyl.cpp
             ${GEOMOTION_DIR}/combinedweyl.cpp
             ${GEOMOTION_DIR}/majumdarpapapetrouweyl.cpp
+            ${GEOMOTION_DIR}/combinedmpw.cpp
             ${GEOMOTION_DIR}/spacetimes/schwarzschild.cpp
             ${GEOMOTION_DIR}/spacetimes/weylschwarzschild.cpp
             ${GEOMOTION_DIR}/spacetimes/bachweylring.cpp

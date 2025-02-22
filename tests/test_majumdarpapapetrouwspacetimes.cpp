@@ -115,9 +115,13 @@ std::string MyTestNameGenerator(const ::testing::TestParamInfo<MPTestCase>& info
 
 std::string folder = "./test_majumdarpapapetrouwspacetime/";
 
+std::vector<std::shared_ptr<gr2::MajumdarPapapetrouWeyl>> vec_rn_mp = {std::make_shared<gr2::ReissnerNordstromMPW>(1.0), std::make_shared<gr2::MajumdarPapapetrouRing>(1.0, 5.0)};
+std::shared_ptr<gr2::CombinedMPW> rnmp = std::make_shared<gr2::CombinedMPW>(vec_rn_mp);
+
 auto test_cases = testing::Values(
     MPTestCase(std::make_shared<gr2::ReissnerNordstromMPW>(0.3), folder + "reissnernordstrom.txt", "ReissnerNordstrom", 1e-12),
-    MPTestCase(std::make_shared<gr2::MajumdarPapapetrouRing>(0.3, 5), folder + "majumdarpapapetrouring.txt", "MajumdarPapapetrouRing", 1e-12)
+    MPTestCase(std::make_shared<gr2::MajumdarPapapetrouRing>(0.3, 5), folder + "majumdarpapapetrouring.txt", "MajumdarPapapetrouRing", 1e-12),
+    MPTestCase(rnmp, folder + "rnmpr.txt", "ReissnerNordstromMajumdarPapapetrouRing", 1e-12)
 );
 
 INSTANTIATE_TEST_SUITE_P(
