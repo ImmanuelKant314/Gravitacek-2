@@ -98,6 +98,11 @@ namespace gr2
         delete[] y_c, y_m, y_r;
     };
 
+    int GeoMotion::get_dim() const
+    {
+        return dim;
+    }
+
     real **GeoMotion::get_metric() const
     {
         return metric;

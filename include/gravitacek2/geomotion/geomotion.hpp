@@ -87,6 +87,13 @@ namespace gr2
         // ========== Getters ========== 
 
         /**
+         * @brief Get spatial dimensions of spacetime.
+         * 
+         * @return int dimension
+         */
+        int get_dim() const;
+
+        /**
          * @brief Get metric tensor.
          * 
          * Metric tensor is in form \f$g_{\mu\nu}\f$.
