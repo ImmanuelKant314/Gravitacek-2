@@ -83,7 +83,7 @@ target_link_libraries(integrator PUBLIC setup)
 target_link_libraries(geomotion PUBLIC setup integrator mymath)
 target_link_libraries(chaos PUBLIC setup geomotion PRIVATE GSL::gsl GSL::gslcblas)
 target_link_libraries(mymath PUBLIC setup)
-target_link_libraries(interface PUBLIC setup geomotion GSL::gsl GSL::gslcblas)
+target_link_libraries(interface PUBLIC setup geomotion GSL::gsl GSL::gslcblas chaos)
 
 # testing 
 enable_testing()

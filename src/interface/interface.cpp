@@ -2,11 +2,19 @@
 #include "gravitacek2/geomotion/spacetimes.hpp"
 #include "gravitacek2/integrator/integrator.hpp"
 #include "gravitacek2/integrator/odesystems.hpp"
+#include "gravitacek2/chaos/linearized_evolution.hpp"
+
 #include <stdexcept>
 #include <iostream>
 #include <algorithm>
 #include <fstream>
 #include <array>
+#include <cmath>
+
+#include <gsl/gsl_linalg.h>
+#include <gsl/gsl_eigen.h>
+#include <gsl/gsl_complex.h>
+#include <gsl/gsl_complex_math.h>
 
 class DataRecord : public gr2::Event
 {
@@ -361,7 +369,11 @@ bool Interface::try_apply_function(std::string text)
         this->solve_ode_system(rest);
         return true;
     }
-
+    else if (name == "local_expansions_Weyl")
+    {
+        this->local_expansions_Weyl(rest);
+        return true;
+    }
     return false;
 }
 
@@ -548,6 +560,132 @@ void Interface::solve_ode_system(std::string text)
         throw e;
     }
 }
+
+void Interface::local_expansions_Weyl(std::string text)
+{
+    // Initialize calculation
+    auto args = find_function_arguments(text);
+    int number_of_arguments = 7;
+    if (args.size() < number_of_arguments)
+        throw std::invalid_argument("too little arguments for local_expansions_Weyl");
+    else if (args.size() > number_of_arguments)
+        throw std::invalid_argument("too much arguments for local_expansions_Weyl");
+
+    std::shared_ptr<gr2::Weyl> spt = this->create_weyl_spacetime(args[0]);
+
+    gr2::real E = std::stold(args[1]);
+    gr2::real L = std::stold(args[2]);
+    auto range_rho = find_function_arguments(args[3]);
+    if (range_rho.size() != 3)
+        throw std::invalid_argument("incorent number of arguments for range in rho");
+    gr2::real rho_min = std::stold(range_rho[0]);
+    gr2::real rho_max = std::stold(range_rho[1]);
+    int n_rho = std::stoi(range_rho[2]);
+    gr2::real delta_rho = (rho_max-rho_min)/(n_rho-1);
+
+    auto range_z = find_function_arguments(args[4]);
+    if (range_z.size() != 3)
+        throw std::invalid_argument("incorent number of arguments for range in z");
+    gr2::real z_min = std::stold(range_z[0]);
+    gr2::real z_max = std::stold(range_z[1]);
+    int n_z = std::stoi(range_z[2]);
+    gr2::real delta_z = (z_max-z_min)/(n_z-1);
+
+    int n_angles = std::stoi(args[5]);
+    gr2::real delta_angle = 2*gr2::pi/n_angles;
+    std::string file_name = args[6];
+
+    std::ofstream file;
+    gr2::real y[9]={};
+    gsl_matrix* H;
+    gsl_vector_complex *eig_vals;
+    gsl_eigen_nonsymm_workspace *work_space;
+
+    // Procede in calculation
+    try
+    {
+        // open file
+        file.open(file_name);
+
+        if (!file.is_open())
+            throw std::runtime_error("file " + file_name + "could not be opened");
+
+        // prepare calculation of eigenvalues
+        eig_vals = gsl_vector_complex_alloc(8);
+        work_space = gsl_eigen_nonsymm_alloc(8);
+
+        // calculate eigenvalues
+        for (int i = 0; i < n_rho; i++)
+            for (int j = 0; j < n_z; j++)
+            {
+                gr2::real rho = rho_min + i*delta_rho;
+                gr2::real z = z_min + j*delta_z;
+                y[gr2::Weyl::RHO] = rho;
+                y[gr2::Weyl::Z] = z;
+
+                // calculate lambda 
+                spt->calculate_lambda_init(y);
+                y[gr2::Weyl::LAMBDA] = spt->get_lambda();
+
+                // calculate ut (from E)
+                spt->calculate_metric(y);
+                y[gr2::Weyl::UT] = E/spt->get_metric()[gr2::Weyl::T][gr2::Weyl::T];
+
+                // calculate uphi (from L)
+                y[gr2::Weyl::UPHI] = E/spt->get_metric()[gr2::Weyl::PHI][gr2::Weyl::PHI];
+
+                // calculate size of rest velocity
+                gr2::real norm2 = (-1 - y[gr2::Weyl::UT]*E - y[gr2::Weyl::UPHI]*L);
+                if (norm2 < 0)
+                    continue;
+                gr2::real norm2_c = norm2/spt->get_metric()[gr2::Weyl::RHO][gr2::Weyl::RHO];
+                gr2::real norm_c = sqrtl(norm2_c);
+            
+                gr2::real method_value = 0;
+                for (int k = 0; k < n_angles; k++)
+                {
+                    gr2::real value = 0;
+                    gr2::real angle = k*delta_angle;
+
+                    // calculate rest of velocity
+                    y[gr2::Weyl::URHO] = norm_c*cosl(angle);
+                    y[gr2::Weyl::UZ] = norm_c*sinl(angle);
+
+                    // calculate matrix H
+                    H = gr2::time_corrected_matrix_H(spt.get(), y);
+
+                    // calculate eigen values
+                    gsl_eigen_nonsymm(H, eig_vals, work_space);
+                    
+                    // find the greatest real part
+                    for (int i = 0; i < 8; i++)
+                        value = std::max((double)value, GSL_REAL(gsl_vector_complex_get(eig_vals, i)));
+                    method_value = std::max(value, method_value);
+
+                    // free the matrix
+                    gsl_matrix_free(H);
+                }
+                // save values to the file
+                file << i << ";" << j << ";" << rho << ";" << z << ";" << method_value << "\n";
+            }
+
+            // free the work space
+            gsl_vector_complex_free(eig_vals);
+            gsl_eigen_nonsymm_free(work_space);
+
+            // close file
+            file.close();
+    }
+    catch(const std::exception& e)
+    {
+        gsl_matrix_free(H);
+        gsl_vector_complex_free(eig_vals);
+        gsl_eigen_nonsymm_free(work_space);
+        file.close();
+        throw e;
+    }
+    
+};
 
 Interface::Interface():macros(), values(), help_name(), help_text()
 {
