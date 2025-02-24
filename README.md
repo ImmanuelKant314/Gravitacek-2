@@ -58,4 +58,16 @@ cd latex
 make
 ```
 
+# Using program Gravitáček 2
+
+## Basic idea
+
+Gravitáček is very simple program in which we cand do two things. The first one 
+is defining macros. The second one is then running implemented functions. We will
+discuss both concepts in this document. But the most important thing to mention,
+if we want to exit the program, just type `end` or `END` or `exit`.
+
+## Macros
+
+## Using functions
 
