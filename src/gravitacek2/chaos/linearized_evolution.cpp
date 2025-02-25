@@ -151,4 +151,60 @@ namespace gr2
             throw e;
         }   
     };
+
+    gsl_matrix *norm_growth(GeoMotion *spt, const real *y)
+    {
+        // constants
+        int dim = spt->get_dim();
+        int n = 2*dim;
+
+        // arrays and special constants
+        gsl_matrix *H, *gH, *g, *gHT; // matrix H
+
+        try
+        {
+            // calculate H
+            H = time_corrected_matrix_H(spt, y);
+
+            // calculate g (done)
+            spt->calculate_metric(y);
+            g = gsl_matrix_alloc(n, n);
+            gsl_matrix_set_zero(g);
+            for (int i = 0; i < dim; i++)
+                for (int j = 0; j < dim; j++)
+                {
+                    gsl_matrix_set(g, i, j, spt->get_metric()[i][j]);
+                    gsl_matrix_set(g, dim+i, dim+j, spt->get_metric()[i][j]);
+                }
+
+            // calculate gH
+            gH = gsl_matrix_alloc(n, n);
+            gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, g, H, 0, gH);
+
+            // calculate (gH).T
+            gHT = gsl_matrix_alloc(n, n);
+            gsl_matrix_transpose_memcpy(gHT, gH);
+        
+            // calculate final result
+            gsl_matrix_add(gH, gHT);
+            gsl_matrix_scale(gH, 0.5);
+
+            // delete matrices
+            gsl_matrix_free(H);
+            gsl_matrix_free(g);
+            gsl_matrix_free(gHT);
+
+            // return
+            return gH;
+        }
+        catch(const std::exception& e)
+        {
+            gsl_matrix_free(H);
+            gsl_matrix_free(gH);
+            gsl_matrix_free(g);
+            gsl_matrix_free(gHT);
+            throw e;
+        }
+        
+    }
 }

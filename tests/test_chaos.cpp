@@ -111,6 +111,51 @@ TEST(MatrixOfLinearizedEvolution, MathematicalCondition)
     gsl_matrix_free(matrix);
 }
 
+TEST(NormGrowth, NoGrowthInAcceleration)
+{
+    gr2::real eps = 1e-10;
+    gr2::real value;
+
+    gr2::WeylSchwarzschild spt(1.0);
+    gr2::real y[9] = {}; 
+    y[gr2::Weyl::RHO] = 10;
+    y[gr2::Weyl::Z] = 0;
+    y[gr2::Weyl::UT] = 1.190472574611857e+00;
+    y[gr2::Weyl::UPHI] = 3.071259328415933e-02;
+    y[gr2::Weyl::URHO] = 1.000000000000000e-01;
+    y[gr2::Weyl::UZ] = 1.663404206336647e-01;
+    
+    // initialize lambda
+    spt.calculate_lambda_init(y);
+    y[gr2::Weyl::LAMBDA] = spt.get_lambda();
+
+    // calculate matrix
+    gsl_matrix* matrix = gr2::norm_growth(&spt, y);
+    
+    // calculate acceleration
+    gr2::real dydt[8]{};
+    spt.calculate_christoffel_symbols(y);
+    for (int i = 0; i < 4; i++)
+    {
+        dydt[i] = y[i+4];
+        for (int j = 0; j < 4; j++)
+            for (int k = 0; k < 4; k++)
+                dydt[i+4] += -spt.get_christoffel_symbols()[i][j][k]*y[j+4]*y[k+4];
+    }
+
+    // check condition
+    gr2::real df[8] = {};
+    for (int i = 0; i<8; i++)
+        for (int j = 0; j<8; j++)
+        {
+            df[i] += gsl_matrix_get(matrix, i, j)*dydt[j];
+        }
+
+    // check condition
+    for (int i = 0; i < 8; i++)
+        EXPECT_NEAR(df[i], 0, eps);
+}
+
 int main(int argc, char **argv)
 {
     ::testing::InitGoogleTest(&argc, argv);
