@@ -35,15 +35,12 @@ namespace gr2
         real t_in;      //!<value of time variable at the beginning of the step
         real h;         //!<lenght of the step
         int n;          //!<number of solved differential equations
-        bool dense;     //!<calculation of dense output during steps
-
     public:
         /**
          * @brief Construct a new Stepper object.
          * 
-         * @param dense Prepare dense output during integration.
          */
-        StepperBase(bool dense);
+        StepperBase();
 
         /**
          * @brief Destroy the Stepper object.
@@ -86,7 +83,7 @@ namespace gr2
          * @param dytd_in 
          * @param dydt_out
          */
-        virtual void step(const real &t, real y[], const real &h, const real dydt_in[] = nullptr, real dydt_out[] = nullptr) = 0;
+        virtual void step(const real &t, real y[], const real &h, const bool &dense=false, const real dydt_in[] = nullptr, real dydt_out[] = nullptr) = 0;
 
         /**
          * @brief Calculate next step with error estimate.
@@ -115,7 +112,7 @@ namespace gr2
          * @param dydt_in 
          * @param dydt_out
          */
-        virtual void step_err(const real &t, real y[], const real &h, real err[], const real dydt_in[] = nullptr, real dydt_out[] = nullptr);
+        virtual void step_err(const real &t, real y[], const real &h, real err[], const bool& dense=false, const real dydt_in[] = nullptr, real dydt_out[] = nullptr);
 
         /**
          * @brief Prepare stepper for dense output

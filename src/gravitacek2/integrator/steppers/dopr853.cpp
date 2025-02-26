@@ -4,12 +4,12 @@
 
 namespace gr2
 {
-    DoPr853::DoPr853() : StepperBase(false), k1(nullptr), k2(nullptr), k3(nullptr), k4(nullptr), k5(nullptr), k6(nullptr), k7(nullptr), k8(nullptr), k9(nullptr), k10(nullptr), k11(nullptr), k12(nullptr)
+    DoPr853::DoPr853() : StepperBase(), k1(nullptr), k2(nullptr), k3(nullptr), k4(nullptr), k5(nullptr), k6(nullptr), k7(nullptr), k8(nullptr), k9(nullptr), k10(nullptr), k11(nullptr), k12(nullptr)
     {}
 
     DoPr853::~DoPr853()
     {
-        delete[] k1, k2, k3, k4, k5, k6, k7, k8, k9, k10, k11, k12;
+        delete[] k2, k3, k4, k5, k6, k7, k8, k9, k10, k11, k12;
         delete[] k_help;
     }
 
@@ -19,8 +19,8 @@ namespace gr2
         this->StepperBase::set_OdeSystem(ode);
         if(old_n != n)
         {
-            delete[] k1, k2, k3, k4, k5, k6, k7, k8, k9, k10, k11, k12;
-            k1 = new real[n];
+            delete[] k2, k3, k4, k5, k6, k7, k8, k9, k10, k11, k12;
+            k1 = dydt_in;
             k2 = new real[n];
             k3 = new real[n];
             k4 = new real[n];
@@ -40,9 +40,8 @@ namespace gr2
     {
     }
 
-    void DoPr853::step(const real &t, real y[], const real &h, const real dydt_in[], real dydt_out[]) 
+    void DoPr853::step(const real &t, real y[], const real &h, const bool &dense, const real dydt_in[], real dydt_out[]) 
     {
-        int i = 0;
         static const real c2 = 0.526001519587677318785587544488e-01;
         static const real c3 = 0.789002279381515978178381316732e-01;
         static const real c4 = 0.118350341907227396726757197510e+00;
@@ -139,6 +138,19 @@ namespace gr2
         static const real a1210 = 1.23605671757943030647266201528e1;
         static const real a1211 = 6.43392746015763530355970484046e-1;
 
+         int i;
+        
+        // save time and step internaly
+        this->t_in = t;
+        this->h = h;
+
+        // copy y to y_in, y_cur
+        for (int i = 0; i < n; i++)
+        {
+            y_in[i] = y[i];
+            y_cur[i] = y[i];
+        }
+
         if (dydt_in)
         {
             // copy dydt
@@ -149,7 +161,7 @@ namespace gr2
         {
             // first correction
             for (i = 0; i < n; i++)
-                y_cur[i] = y[i];
+                y_cur[i] = y_in[i];
             ode->function(t, y_cur, k1);
         }
 
@@ -212,18 +224,25 @@ namespace gr2
         for (i = 0; i < n; i++)
         {
             k_help[i] = (b1 * k1[i] + b6 * k6[i] + b7 * k7[i] + b8 * k8[i] + b9 * k9[i] + b10 * k10[i] + b11 * k11[i] + b12 * k12[i]);
-            y[i] = y[i] + h * k_help[i];
+            y_out[i] = y[i] + h * k_help[i];
+            y[i] = y_out[i];
         }
 
         if (dydt_out)
         {
             ode->function(t+h, y, dydt_out);
+            if (dense)
+                for (i = 0; i < n; i++)
+                    this->dydt_out[i] = dydt_out[i];
+        }
+        else if (dense)
+        {
+            ode->function(t+h, y, this->dydt_out);
         }
     }
 
-    void DoPr853::step_err(const real &t, real y[], const real &h, real err[], const real dydt_in[], real dydt_out[])
+    void DoPr853::step_err(const real &t, real y[], const real &h, real err[], const bool& dense, const real dydt_in[], real dydt_out[])
     {
-        int i = 0;
         static const real c2 = 0.526001519587677318785587544488e-01;
         static const real c3 = 0.789002279381515978178381316732e-01;
         static const real c4 = 0.118350341907227396726757197510e+00;
@@ -319,6 +338,19 @@ namespace gr2
         static const real a129 = -8.87285693353062954433549289258e0;
         static const real a1210 = 1.23605671757943030647266201528e1;
         static const real a1211 = 6.43392746015763530355970484046e-1;
+        
+        int i;
+        
+        // save time and step internaly
+        this->t_in = t;
+        this->h = h;
+
+        // copy y to y_in, y_cur
+        for (int i = 0; i < n; i++)
+        {
+            y_in[i] = y[i];
+            y_cur[i] = y[i];
+        }
 
         if (dydt_in)
         {
@@ -330,7 +362,7 @@ namespace gr2
         {
             // first correction
             for (i = 0; i < n; i++)
-                y_cur[i] = y[i];
+                y_cur[i] = y_in[i];
             ode->function(t, y_cur, k1);
         }
 
@@ -393,7 +425,8 @@ namespace gr2
         for (i = 0; i < n; i++)
         {
             k_help[i] = (b1 * k1[i] + b6 * k6[i] + b7 * k7[i] + b8 * k8[i] + b9 * k9[i] + b10 * k10[i] + b11 * k11[i] + b12 * k12[i]);
-            y[i] = y[i] + h * k_help[i];
+            y_out[i] = y[i] + h * k_help[i];
+            y[i] = y_out[i];
         }
 
         // calculate error
@@ -408,6 +441,13 @@ namespace gr2
         if (dydt_out)
         {
             ode->function(t+h, y, dydt_out);
+            if (dense)
+                for (i = 0; i < n; i++)
+                    this->dydt_out[i] = dydt_out[i];
+        }
+        else if (dense)
+        {
+            ode->function(t+h, y, this->dydt_out);
         }
     }
 

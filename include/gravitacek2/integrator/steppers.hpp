@@ -19,7 +19,7 @@ namespace gr2
          * @brief Construct a new RK4 object.
          * 
          */
-        RK4(bool dense);
+        RK4();
 
         /**
          * @brief Destroy the RK4 object.
@@ -29,7 +29,7 @@ namespace gr2
 
         virtual void set_OdeSystem(std::shared_ptr<OdeSystem> ode) override;
         virtual void reset();
-        virtual void step(const real &t, real y[], const real &h, const real dydt_in[] = nullptr, real dydt_out[] = nullptr) override;
+        virtual void step(const real &t, real y[], const real &h, const bool& dense=false, const real dydt_in[] = nullptr, real dydt_out[] = nullptr) override;
         virtual int get_order() const override;
         virtual int get_err_order() const override;
     };
@@ -69,8 +69,8 @@ namespace gr2
 
         virtual void set_OdeSystem(std::shared_ptr<OdeSystem> ode) override;
         virtual void reset();
-        virtual void step(const real &t, real y[], const real &h, const real dydt_in[] = nullptr, real dydt_out[] = nullptr) override;
-        virtual void step_err(const real &t, real y[], const real &h, real err[], const real dydt_in[] = nullptr, real dydt_out[] = nullptr) override;
+        virtual void step(const real &t, real y[], const real &h, const bool &dense=false, const real dydt_in[] = nullptr, real dydt_out[] = nullptr) override;
+        virtual void step_err(const real &t, real y[], const real &h, real err[], const bool &dense=false, const real dydt_in[] = nullptr, real dydt_out[] = nullptr) override;
         virtual int get_order() const override;
         virtual int get_err_order() const override;
     };

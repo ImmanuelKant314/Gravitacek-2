@@ -2,11 +2,11 @@
 
 namespace gr2
 {
-    RK4::RK4(bool dense):StepperBase(dense), k1(nullptr), k2(nullptr), k3(nullptr), k4(nullptr){}
+    RK4::RK4():StepperBase(), k1(nullptr), k2(nullptr), k3(nullptr), k4(nullptr){}
 
     RK4::~RK4()
     {
-        delete[] k1, k2, k3, k4;
+        delete[] k2, k3, k4;
     }
 
     void RK4::set_OdeSystem(std::shared_ptr<OdeSystem> ode)
@@ -15,8 +15,8 @@ namespace gr2
         this->StepperBase::set_OdeSystem(ode);
         if (old_n != n)
         {
-            delete[] k1, k2, k3, k4;
-            k1 = new real[n];
+            delete[] k2, k3, k4;
+            k1 = dydt_in;
             k2 = new real[n];
             k3 = new real[n];
             k4 = new real[n];
@@ -27,7 +27,7 @@ namespace gr2
     {
     }
 
-    void RK4::step(const real &t, real y[], const real &h, const real dydt_in[], real dydt_out[]) 
+    void RK4::step(const real &t, real y[], const real &h, const bool &dense, const real dydt_in[], real dydt_out[]) 
     {
         int i;
         

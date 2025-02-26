@@ -132,7 +132,7 @@ TEST(Stepper, DumpedOscillator)
     auto osc = std::make_shared<DampedHarmonicOscillator>(omega0, xi);
 
     // Stepper
-    gr2::RK4 stepper = gr2::RK4(false);
+    gr2::RK4 stepper = gr2::RK4();
     stepper.set_OdeSystem(osc);
 
     // test order
@@ -161,7 +161,7 @@ TEST(Stepper, DumpedOscillatorWithError)
     auto osc = std::make_shared<DampedHarmonicOscillator>(omega0, xi);
 
     // Stepper
-    gr2::RK4 stepper = gr2::RK4(false);
+    gr2::RK4 stepper = gr2::RK4();
     stepper.set_OdeSystem(osc);
 
     // test order

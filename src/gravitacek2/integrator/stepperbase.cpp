@@ -2,7 +2,7 @@
 
 namespace gr2
 {
-    StepperBase::StepperBase(bool dense):t_in(0), h(0), n(0), dense(dense), ode(nullptr), y_in(nullptr), y_out(nullptr), y_err(nullptr), y_help(nullptr), y_cur(nullptr), dydt_in(nullptr), dydt_out(nullptr), dydt_cur(nullptr), dydt_opt(nullptr)
+    StepperBase::StepperBase():t_in(0), h(0), n(0), ode(nullptr), y_in(nullptr), y_out(nullptr), y_err(nullptr), y_help(nullptr), y_cur(nullptr), dydt_in(nullptr), dydt_out(nullptr), dydt_cur(nullptr), dydt_opt(nullptr)
     {}
 
     StepperBase::~StepperBase()
@@ -37,7 +37,7 @@ namespace gr2
         }
     }
 
-    void StepperBase::step_err(const real &t, real y[], const real &h, real err[], const real dydt_in[], real dydt_out[])
+    void StepperBase::step_err(const real &t, real y[], const real &h, real err[], const bool &dense, const real dydt_in[], real dydt_out[])
     {
         // save time and step internaly
         this->t_in = t;
@@ -61,11 +61,11 @@ namespace gr2
             ode->function(t, y, this->dydt_in);
 
         // do two half steps
-        this->step(t, y_help, h/2, dydt_in=dydt_in, this->dydt_out);
-        this->step(t+h/2, y_help, h/2, this->dydt_out, dydt_out);
+        this->step(t, y_help, h/2, false, dydt_in=dydt_in, this->dydt_out);
+        this->step(t+h/2, y_help, h/2, false, this->dydt_out, dydt_out);
 
         // do one full step (error estimate)
-        this->step(t, y_err, h, dydt_in=dydt_in);
+        this->step(t, y_err, h, false, dydt_in=dydt_in);
         
         // calculate absolute error, copy y_cur to y_out
         for(int i = 0; i < n; i++)
