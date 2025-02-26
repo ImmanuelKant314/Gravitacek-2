@@ -2,6 +2,8 @@
 #include "gravitacek2/setup.hpp"
 #include "gravitacek2/integrator/odesystem.hpp"
 
+#include <memory>
+
 namespace gr2
 {
     /**
@@ -14,19 +16,34 @@ namespace gr2
     class StepperBase
     {
     protected:
-        OdeSystem *ode; //!<solved system of differential equations
-        real *yt;       //!<array for storing current value of \f$\vec{y}\f$
-        real *yt2;      //!<array for storing second estimate of \f$\vec{y}\f$ to calculate error
-        real *dydt;     //!<array for storing current value of \f$\frac{\mathrm{d}\vec{y}}{\mathrm{d} t}\f$
-        real *dydt2;    //!<array for storing value of \f$\frac{\mathrm{d}\vec{y}}{\mathrm{d} t}\f$ for improving performance
-        real t;         //!<value of time variable
+        std::shared_ptr<OdeSystem> ode; //!<solved system of differential equations
+
+        // ========== Values of y ==========
+        real *y_in;     //!<input value of \f$\vec{y}\f$
+        real *y_out;    //!<output value of \f$\vec{y}\f$
+        real *y_err;    //!<estimate of \f$
+        real *y_cur;    //!<current value of \f$\vec{y}\f$ during calculations
+        real *y_help;   //!< value of \f$\vec{y}\f$ saved on the side
+
+        // ========== Values of dydt ==========
+        real *dydt_in;  //!<input value of \f$\vec{y}\f$
+        real *dydt_out; //!<output value of \f$\vec{y}\f$
+        real *dydt_cur; //!<array for storing current value of \f$\frac{\mathrm{d}\vec{y}}{\mathrm{d} t}\f$
+        real *dydt_opt; //!<array for storing value of \f$\frac{\mathrm{d}\vec{y}}{\mathrm{d} t}\f$ for improving performance
+
+        // ========== Internal constants ==========
+        real t_in;      //!<value of time variable at the beginning of the step
+        real h;         //!<lenght of the step
         int n;          //!<number of solved differential equations
+        bool dense;     //!<calculation of dense output during steps
+
     public:
         /**
          * @brief Construct a new Stepper object.
          * 
+         * @param dense Prepare dense output during integration.
          */
-        StepperBase();
+        StepperBase(bool dense);
 
         /**
          * @brief Destroy the Stepper object.
@@ -41,14 +58,13 @@ namespace gr2
          * 
          * @param ode integrated ODE
          */
-        virtual void set_OdeSystem(OdeSystem& ode);
+        virtual void set_OdeSystem(std::shared_ptr<OdeSystem> ode);
 
         /**
          * @brief Reset stepper.
          * 
          * This function should be used after the next step is not continuation
          * of a previous one.
-         * 
          */
         virtual void reset()=0;
 
@@ -88,6 +104,10 @@ namespace gr2
          * 
          * If parametr `dydt_out` is given, value of derivative is returned.
          * 
+         * @note Default implementation is highly inefficient and should be used 
+         * with caution. Also it can behave unexpectadly, so be careful with 
+         * usage.
+         * 
          * @param t time value
          * @param y coordinate values
          * @param h time step
@@ -96,6 +116,23 @@ namespace gr2
          * @param dydt_out
          */
         virtual void step_err(const real &t, real y[], const real &h, real err[], const real dydt_in[] = nullptr, real dydt_out[] = nullptr);
+
+        /**
+         * @brief Prepare stepper for dense output
+         * 
+         * @param h time step
+         */
+        virtual void prepare_dense();
+
+        /**
+         * @brief Dense output
+         * 
+         * @param i index of outputed value
+         * @param h time step
+         * @param theta fraction of time_step
+         * @return vale of ith coordinate
+         */
+        virtual real dense_out(const int& i, const real &t);
 
         /**
          * @brief Get the order of integration

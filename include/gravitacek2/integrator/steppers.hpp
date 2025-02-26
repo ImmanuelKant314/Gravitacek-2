@@ -19,7 +19,7 @@ namespace gr2
          * @brief Construct a new RK4 object.
          * 
          */
-        RK4();
+        RK4(bool dense);
 
         /**
          * @brief Destroy the RK4 object.
@@ -27,7 +27,7 @@ namespace gr2
          */
         ~RK4();
 
-        virtual void set_OdeSystem(OdeSystem& ode);
+        virtual void set_OdeSystem(std::shared_ptr<OdeSystem> ode) override;
         virtual void reset();
         virtual void step(const real &t, real y[], const real &h, const real dydt_in[] = nullptr, real dydt_out[] = nullptr) override;
         virtual int get_order() const override;
@@ -67,7 +67,7 @@ namespace gr2
          */
         ~DoPr853();
 
-        virtual void set_OdeSystem(OdeSystem& ode);
+        virtual void set_OdeSystem(std::shared_ptr<OdeSystem> ode) override;
         virtual void reset();
         virtual void step(const real &t, real y[], const real &h, const real dydt_in[] = nullptr, real dydt_out[] = nullptr) override;
         virtual void step_err(const real &t, real y[], const real &h, real err[], const real dydt_in[] = nullptr, real dydt_out[] = nullptr) override;

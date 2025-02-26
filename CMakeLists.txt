@@ -39,7 +39,7 @@ add_library(integrator
             ${INTEGRATOR_DIR}/event.cpp
             ${INTEGRATOR_DIR}/stepperbase.cpp
             ${INTEGRATOR_DIR}/stepcontrollerbase.cpp
-            ${INTEGRATOR_DIR}/integrator.cpp
+            # ${INTEGRATOR_DIR}/integrator.cpp
             ${INTEGRATOR_DIR}/steppers/rk4.cpp
             ${INTEGRATOR_DIR}/steppers/dopr853.cpp
             ${INTEGRATOR_DIR}/stepcontrollers/standardstepcontroller.cpp

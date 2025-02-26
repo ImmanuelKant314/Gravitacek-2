@@ -173,7 +173,7 @@ protected:
      * 
      * @param text arguments for solve_ode
      */
-    void solve_ode_system(std::string text);
+    // void solve_ode_system(std::string text);
 
     /**
      * @brief Calculate values of local expansion for Weyl spacetime.

@@ -4,7 +4,7 @@
 
 namespace gr2
 {
-    DoPr853::DoPr853() : StepperBase(), k1(nullptr), k2(nullptr), k3(nullptr), k4(nullptr), k5(nullptr), k6(nullptr), k7(nullptr), k8(nullptr), k9(nullptr), k10(nullptr), k11(nullptr), k12(nullptr)
+    DoPr853::DoPr853() : StepperBase(false), k1(nullptr), k2(nullptr), k3(nullptr), k4(nullptr), k5(nullptr), k6(nullptr), k7(nullptr), k8(nullptr), k9(nullptr), k10(nullptr), k11(nullptr), k12(nullptr)
     {}
 
     DoPr853::~DoPr853()
@@ -13,7 +13,7 @@ namespace gr2
         delete[] k_help;
     }
 
-    void DoPr853::set_OdeSystem(OdeSystem& ode)
+    void DoPr853::set_OdeSystem(std::shared_ptr<OdeSystem> ode)
     {
         int old_n = n;
         this->StepperBase::set_OdeSystem(ode);
@@ -149,64 +149,64 @@ namespace gr2
         {
             // first correction
             for (i = 0; i < n; i++)
-                yt[i] = y[i];
-            ode->function(t, yt, k1);
+                y_cur[i] = y[i];
+            ode->function(t, y_cur, k1);
         }
 
         // 2. corection
         for (i = 0; i < n; i++)
-            yt[i] = y[i] + h * (a21 * k1[i]);
-        ode->function(t + c2 * h, yt, k2);
+            y_cur[i] = y[i] + h * (a21 * k1[i]);
+        ode->function(t + c2 * h, y_cur, k2);
 
         // 3. corection
         for (i = 0; i < n; i++)
-            yt[i] = y[i] + h * (a31 * k1[i] + a32 * k2[i]);
-        ode->function(t + c3 * h, yt, k3);
+            y_cur[i] = y[i] + h * (a31 * k1[i] + a32 * k2[i]);
+        ode->function(t + c3 * h, y_cur, k3);
 
         // 4. corection
         for (i = 0; i < n; i++)
-            yt[i] = y[i] + h * (a41 * k1[i] + a43 * k3[i]);
-        ode->function(t + c4 * h, yt, k4);
+            y_cur[i] = y[i] + h * (a41 * k1[i] + a43 * k3[i]);
+        ode->function(t + c4 * h, y_cur, k4);
 
         // 5. corection
         for (i = 0; i < n; i++)
-            yt[i] = y[i] + h * (a51 * k1[i] + a53 * k3[i] + a54 * k4[i]);
-        ode->function(t + c5 * h, yt, k5);
+            y_cur[i] = y[i] + h * (a51 * k1[i] + a53 * k3[i] + a54 * k4[i]);
+        ode->function(t + c5 * h, y_cur, k5);
 
         // 6. corection
         for (i = 0; i < n; i++)
-            yt[i] = y[i] + h * (a61 * k1[i] + a64 * k4[i] + a65 * k5[i]);
-        ode->function(t + c6 * h, yt, k6);
+            y_cur[i] = y[i] + h * (a61 * k1[i] + a64 * k4[i] + a65 * k5[i]);
+        ode->function(t + c6 * h, y_cur, k6);
 
         // 7. corection
         for (i = 0; i < n; i++)
-            yt[i] = y[i] + h * (a71 * k1[i] + a74 * k4[i] + a75 * k5[i] + a76 * k6[i]);
-        ode->function(t + c7 * h, yt, k7);
+            y_cur[i] = y[i] + h * (a71 * k1[i] + a74 * k4[i] + a75 * k5[i] + a76 * k6[i]);
+        ode->function(t + c7 * h, y_cur, k7);
 
         // 8. corection
         for (i = 0; i < n; i++)
-            yt[i] = y[i] + h * (a81 * k1[i] + a84 * k4[i] + a85 * k5[i] + a86 * k6[i] + a87 * k7[i]);
-        ode->function(t + c8 * h, yt, k8);
+            y_cur[i] = y[i] + h * (a81 * k1[i] + a84 * k4[i] + a85 * k5[i] + a86 * k6[i] + a87 * k7[i]);
+        ode->function(t + c8 * h, y_cur, k8);
 
         // 9. corection
         for (i = 0; i < n; i++)
-            yt[i] = y[i] + h * (a91 * k1[i] + a94 * k4[i] + a95 * k5[i] + a96 * k6[i] + a97 * k7[i] + a98 * k8[i]);
-        ode->function(t + c9 * h, yt, k9);
+            y_cur[i] = y[i] + h * (a91 * k1[i] + a94 * k4[i] + a95 * k5[i] + a96 * k6[i] + a97 * k7[i] + a98 * k8[i]);
+        ode->function(t + c9 * h, y_cur, k9);
 
         // 10. corection
         for (i = 0; i < n; i++)
-            yt[i] = y[i] + h * (a101 * k1[i] + a104 * k4[i] + a105 * k5[i] + a106 * k6[i] + a107 * k7[i] + a108 * k8[i] + a109 * k9[i]);
-        ode->function(t + c10 * h, yt, k10);
+            y_cur[i] = y[i] + h * (a101 * k1[i] + a104 * k4[i] + a105 * k5[i] + a106 * k6[i] + a107 * k7[i] + a108 * k8[i] + a109 * k9[i]);
+        ode->function(t + c10 * h, y_cur, k10);
 
         // 11. corection
         for (i = 0; i < n; i++)
-            yt[i] = y[i] + h * (a111 * k1[i] + a114 * k4[i] + a115 * k5[i] + a116 * k6[i] + a117 * k7[i] + a118 * k8[i] + a119 * k9[i] + a1110 * k10[i]);
-        ode->function(t + c11 * h, yt, k11);
+            y_cur[i] = y[i] + h * (a111 * k1[i] + a114 * k4[i] + a115 * k5[i] + a116 * k6[i] + a117 * k7[i] + a118 * k8[i] + a119 * k9[i] + a1110 * k10[i]);
+        ode->function(t + c11 * h, y_cur, k11);
 
         // 12. corection
         for (i = 0; i < n; i++)
-            yt[i] = y[i] + h * (a121 * k1[i] + a124 * k4[i] + a125 * k5[i] + a126 * k6[i] + a127 * k7[i] + a128 * k8[i] + a129 * k9[i] + a1210 * k10[i] + a1211 * k11[i]);
-        ode->function(t, yt, k12);
+            y_cur[i] = y[i] + h * (a121 * k1[i] + a124 * k4[i] + a125 * k5[i] + a126 * k6[i] + a127 * k7[i] + a128 * k8[i] + a129 * k9[i] + a1210 * k10[i] + a1211 * k11[i]);
+        ode->function(t, y_cur, k12);
 
         // final value
         for (i = 0; i < n; i++)
@@ -230,7 +230,7 @@ namespace gr2
         static const real c5 = 0.281649658092772603273242802490e+00;
         static const real c6 = 0.333333333333333333333333333333e+00;
         static const real c7 = 0.25e+00;
-        static const real c8 = 0.307692307692307692307692307692e+00;
+        static const real c8 = 0.30769230769230769230769230769+00;
         static const real c9 = 0.651282051282051282051282051282e+00;
         static const real c10 = 0.6e+00;
         static const real c11 = 0.857142857142857142857142857142e+00;
@@ -330,64 +330,64 @@ namespace gr2
         {
             // first correction
             for (i = 0; i < n; i++)
-                yt[i] = y[i];
-            ode->function(t, yt, k1);
+                y_cur[i] = y[i];
+            ode->function(t, y_cur, k1);
         }
 
         // 2. corection
         for (i = 0; i < n; i++)
-            yt[i] = y[i] + h * (a21 * k1[i]);
-        ode->function(t + c2 * h, yt, k2);
+            y_cur[i] = y[i] + h * (a21 * k1[i]);
+        ode->function(t + c2 * h, y_cur, k2);
 
         // 3. corection
         for (i = 0; i < n; i++)
-            yt[i] = y[i] + h * (a31 * k1[i] + a32 * k2[i]);
-        ode->function(t + c3 * h, yt, k3);
+            y_cur[i] = y[i] + h * (a31 * k1[i] + a32 * k2[i]);
+        ode->function(t + c3 * h, y_cur, k3);
 
         // 4. corection
         for (i = 0; i < n; i++)
-            yt[i] = y[i] + h * (a41 * k1[i] + a43 * k3[i]);
-        ode->function(t + c4 * h, yt, k4);
+            y_cur[i] = y[i] + h * (a41 * k1[i] + a43 * k3[i]);
+        ode->function(t + c4 * h, y_cur, k4);
 
         // 5. corection
         for (i = 0; i < n; i++)
-            yt[i] = y[i] + h * (a51 * k1[i] + a53 * k3[i] + a54 * k4[i]);
-        ode->function(t + c5 * h, yt, k5);
+            y_cur[i] = y[i] + h * (a51 * k1[i] + a53 * k3[i] + a54 * k4[i]);
+        ode->function(t + c5 * h, y_cur, k5);
 
         // 6. corection
         for (i = 0; i < n; i++)
-            yt[i] = y[i] + h * (a61 * k1[i] + a64 * k4[i] + a65 * k5[i]);
-        ode->function(t + c6 * h, yt, k6);
+            y_cur[i] = y[i] + h * (a61 * k1[i] + a64 * k4[i] + a65 * k5[i]);
+        ode->function(t + c6 * h, y_cur, k6);
 
         // 7. corection
         for (i = 0; i < n; i++)
-            yt[i] = y[i] + h * (a71 * k1[i] + a74 * k4[i] + a75 * k5[i] + a76 * k6[i]);
-        ode->function(t + c7 * h, yt, k7);
+            y_cur[i] = y[i] + h * (a71 * k1[i] + a74 * k4[i] + a75 * k5[i] + a76 * k6[i]);
+        ode->function(t + c7 * h, y_cur, k7);
 
         // 8. corection
         for (i = 0; i < n; i++)
-            yt[i] = y[i] + h * (a81 * k1[i] + a84 * k4[i] + a85 * k5[i] + a86 * k6[i] + a87 * k7[i]);
-        ode->function(t + c8 * h, yt, k8);
+            y_cur[i] = y[i] + h * (a81 * k1[i] + a84 * k4[i] + a85 * k5[i] + a86 * k6[i] + a87 * k7[i]);
+        ode->function(t + c8 * h, y_cur, k8);
 
         // 9. corection
         for (i = 0; i < n; i++)
-            yt[i] = y[i] + h * (a91 * k1[i] + a94 * k4[i] + a95 * k5[i] + a96 * k6[i] + a97 * k7[i] + a98 * k8[i]);
-        ode->function(t + c9 * h, yt, k9);
+            y_cur[i] = y[i] + h * (a91 * k1[i] + a94 * k4[i] + a95 * k5[i] + a96 * k6[i] + a97 * k7[i] + a98 * k8[i]);
+        ode->function(t + c9 * h, y_cur, k9);
 
         // 10. corection
         for (i = 0; i < n; i++)
-            yt[i] = y[i] + h * (a101 * k1[i] + a104 * k4[i] + a105 * k5[i] + a106 * k6[i] + a107 * k7[i] + a108 * k8[i] + a109 * k9[i]);
-        ode->function(t + c10 * h, yt, k10);
+            y_cur[i] = y[i] + h * (a101 * k1[i] + a104 * k4[i] + a105 * k5[i] + a106 * k6[i] + a107 * k7[i] + a108 * k8[i] + a109 * k9[i]);
+        ode->function(t + c10 * h, y_cur, k10);
 
         // 11. corection
         for (i = 0; i < n; i++)
-            yt[i] = y[i] + h * (a111 * k1[i] + a114 * k4[i] + a115 * k5[i] + a116 * k6[i] + a117 * k7[i] + a118 * k8[i] + a119 * k9[i] + a1110 * k10[i]);
-        ode->function(t + c11 * h, yt, k11);
+            y_cur[i] = y[i] + h * (a111 * k1[i] + a114 * k4[i] + a115 * k5[i] + a116 * k6[i] + a117 * k7[i] + a118 * k8[i] + a119 * k9[i] + a1110 * k10[i]);
+        ode->function(t + c11 * h, y_cur, k11);
 
         // 12. corection
         for (i = 0; i < n; i++)
-            yt[i] = y[i] + h * (a121 * k1[i] + a124 * k4[i] + a125 * k5[i] + a126 * k6[i] + a127 * k7[i] + a128 * k8[i] + a129 * k9[i] + a1210 * k10[i] + a1211 * k11[i]);
-        ode->function(t, yt, k12);
+            y_cur[i] = y[i] + h * (a121 * k1[i] + a124 * k4[i] + a125 * k5[i] + a126 * k6[i] + a127 * k7[i] + a128 * k8[i] + a129 * k9[i] + a1210 * k10[i] + a1211 * k11[i]);
+        ode->function(t, y_cur, k12);
 
         // final value
         for (i = 0; i < n; i++)

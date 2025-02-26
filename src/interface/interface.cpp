@@ -366,7 +366,7 @@ bool Interface::try_apply_function(std::string text)
     }
     else if (name == "solve_ode_system")
     {
-        this->solve_ode_system(rest);
+        // this->solve_ode_system(rest);
         return true;
     }
     else if (name == "local_expansions_Weyl")
@@ -514,57 +514,57 @@ std::shared_ptr<gr2::OdeSystem> Interface::create_ode_system(std::string text)
     return ode;
 }
 
-void Interface::solve_ode_system(std::string text)
-{
-    auto args = find_function_arguments(text);
-    int number_of_arguments = 7;
-    if (args.size() < number_of_arguments)
-        throw std::invalid_argument("too little arguments for solve_ode_system");
-    else if (args.size() > number_of_arguments)
-        throw std::invalid_argument("too much arguments for solve_ode_system");
+// void Interface::solve_ode_system(std::string text)
+// {
+//     auto args = find_function_arguments(text);
+//     int number_of_arguments = 7;
+//     if (args.size() < number_of_arguments)
+//         throw std::invalid_argument("too little arguments for solve_ode_system");
+//     else if (args.size() > number_of_arguments)
+//         throw std::invalid_argument("too much arguments for solve_ode_system");
     
-    std::shared_ptr<gr2::OdeSystem> ode = nullptr;
-    std::ofstream file;
+//     std::shared_ptr<gr2::OdeSystem> ode = nullptr;
+//     std::ofstream file;
 
-    try
-    {
-        /* code */
-        ode = this->create_ode_system(args[0]);
-        auto initial_conditions = find_function_arguments(args[1]);
-        if (initial_conditions.size() != ode->get_n())
-            throw std::invalid_argument("invalid number of initial_value_conditions");
-        gr2::real t_start = std::stold(args[2]);
-        gr2::real t_end = std::stold(args[3]);
-        gr2::real delta_t = std::stold(args[4]);
-        std::string method = args[5];
-        std::string file_name = args[6];
+//     try
+//     {
+//         /* code */
+//         ode = this->create_ode_system(args[0]);
+//         auto initial_conditions = find_function_arguments(args[1]);
+//         if (initial_conditions.size() != ode->get_n())
+//             throw std::invalid_argument("invalid number of initial_value_conditions");
+//         gr2::real t_start = std::stold(args[2]);
+//         gr2::real t_end = std::stold(args[3]);
+//         gr2::real delta_t = std::stold(args[4]);
+//         std::string method = args[5];
+//         std::string file_name = args[6];
 
-        // prepare initial conditions
-        gr2::real *y_initial = new gr2::real [ode->get_n()];
-        for (int i = 0; i < ode->get_n(); i++)
-            y_initial[i] = std::stold(initial_conditions[i]);
+//         // prepare initial conditions
+//         gr2::real *y_initial = new gr2::real [ode->get_n()];
+//         for (int i = 0; i < ode->get_n(); i++)
+//             y_initial[i] = std::stold(initial_conditions[i]);
 
-        // calculation
-        gr2::Integrator integrator(*ode, method);
-        DataRecord recorder(ode->get_n());
-        integrator.add_event(&recorder);
-        integrator.integrate(y_initial, t_start, t_end, delta_t);
+//         // calculation
+//         gr2::Integrator integrator(*ode, method);
+//         DataRecord recorder(ode->get_n());
+//         integrator.add_event(&recorder);
+//         integrator.integrate(y_initial, t_start, t_end, delta_t);
 
-        // saving data
-        file.open(file_name);
-        for (auto record:recorder.data)
-        {
-            for (auto d : record)
-                file << d << ";";
-            file << std::endl;
-        }
-    }
-    catch(const std::exception& e)
-    {
-        file.close();
-        throw e;
-    }
-}
+//         // saving data
+//         file.open(file_name);
+//         for (auto record:recorder.data)
+//         {
+//             for (auto d : record)
+//                 file << d << ";";
+//             file << std::endl;
+//         }
+//     }
+//     catch(const std::exception& e)
+//     {
+//         file.close();
+//         throw e;
+//     }
+// }
 
 void Interface::local_expansions_Weyl(std::string text)
 {

@@ -99,7 +99,7 @@ namespace gr2
          * @param a_y coefficient 
          * @param a_dydt coefficient
          */
-        Integrator(OdeSystem &ode, const std::string& stepper_name, const real &atol, const real &rtol);
+        Integrator(std::shared_ptr<OdeSystem> ode, const std::string& stepper_name, const real &atol, const real &rtol);
 
         /**
          * @brief Destroy the Integrator object.
