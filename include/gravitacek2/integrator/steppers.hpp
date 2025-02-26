@@ -53,6 +53,16 @@ namespace gr2
         real *k10;  //!<array of coefficients \f$k_{10}\f$ for Runge-Kutta method 
         real *k11;  //!<array of coefficients \f$k_{11}\f$ for Runge-Kutta method
         real *k12;  //!<array of coefficients \f$k_{12}\f$ for Runge-Kutta method
+
+        real *pc1;
+        real *pc2;
+        real *pc3;
+        real *pc4;
+        real *pc5;
+        real *pc6;
+        real *pc7;
+        real *pc8;
+
         real *k_help;
     public:
         /**
@@ -73,5 +83,7 @@ namespace gr2
         virtual void step_err(const real &t, real y[], const real &h, real err[], const bool &dense=false, const real dydt_in[] = nullptr, real dydt_out[] = nullptr) override;
         virtual int get_order() const override;
         virtual int get_err_order() const override;
+        virtual void prepare_dense() override;
+        virtual real dense_out(const int& i, const real &t) override;
     };
 }
