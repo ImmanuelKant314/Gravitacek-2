@@ -1,5 +1,7 @@
 #pragma once
 #include "gravitacek2/setup.hpp"
+#include <vector>
+#include <memory>
 
 namespace gr2
 {
@@ -47,5 +49,14 @@ namespace gr2
          * @param dydt array for returning values of derivation of \f$\vec{y}\f$ with respect to \f$t\f$
          */
         virtual void function(const real &t, const real y[], real dydt[]) = 0;
+    };
+
+    class CombinedOdeSystem : public OdeSystem
+    {
+    protected:
+        std::vector<std::shared_ptr<OdeSystem>> odes;
+    public:
+        CombinedOdeSystem(std::vector<std::shared_ptr<OdeSystem>> odes);
+        void function(const real &t, const real y[], real dydt[]) override;
     };
 }

@@ -88,7 +88,7 @@ TEST(Event, apply)
 }
 
 // ========== ODE ========== 
-TEST(ODE, get_n)
+TEST(OdeSystem, get_n)
 {
     // parameters and variables
     gr2::real omega0 = 1.5, xi = 1.0;
@@ -100,7 +100,23 @@ TEST(ODE, get_n)
     ASSERT_EQ(osc.get_n(), 2);
 }
 
-TEST(ODE, function)
+TEST(CombinedOdeSystem, get_n)
+{
+    // parameters and variables
+    gr2::real omega01 = 1.5, xi1 = 1.0;
+    gr2::real omega02 = 2.5, xi2 = 1.0;
+
+    // ODE
+    gr2::CombinedOdeSystem ode(
+        {std::make_shared<DampedHarmonicOscillator>(omega01, xi1),
+         std::make_shared<DampedHarmonicOscillator>(omega02, xi2)}
+    );
+
+    // test get_n
+    ASSERT_EQ(ode.get_n(), 4);
+}
+
+TEST(OdeSystem, function)
 {
     // parameters and variables
     gr2::real omega0 = 1.5, xi = 1.0;
@@ -116,6 +132,31 @@ TEST(ODE, function)
     osc.function(0, y, dydt);
     ASSERT_NEAR(dydt[0], v0, eps); 
     ASSERT_NEAR(dydt[1], -2*xi*v0-omega0*omega0*x0, eps);
+}
+
+TEST(CombinedOdeSystem, function)
+{
+    // parameters and variables
+    gr2::real omega01 = 1.5, xi1 = 1.0;
+    gr2::real omega02 = 2.5, xi2 = 1.0;
+    gr2::real x01 = 0.5, v01 = 1.5;
+    gr2::real x02 = 1.5, v02 = 1.5;
+    gr2::real y[] = {x01, v02, x02, v02};
+    gr2::real dydt[4];
+    gr2::real eps = 1e-15;
+
+    // ODE
+    gr2::CombinedOdeSystem ode(
+        {std::make_shared<DampedHarmonicOscillator>(omega01, xi1),
+         std::make_shared<DampedHarmonicOscillator>(omega02, xi2)}
+    );
+
+    // test function
+    ode.function(0, y, dydt);
+    ASSERT_NEAR(dydt[0], v01, eps); 
+    ASSERT_NEAR(dydt[1], -2*xi1*v01-omega01*omega01*x01, eps);
+    ASSERT_NEAR(dydt[2], v02, eps); 
+    ASSERT_NEAR(dydt[3], -2*xi2*v02-omega02*omega02*x02, eps);
 }
 
 TEST(Stepper, DumpedOscillator)
