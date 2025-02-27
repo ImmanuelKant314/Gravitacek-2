@@ -51,7 +51,7 @@ class ZeroY : public gr2::Event
         {
             return y[1];
         };
-        virtual void apply(gr2::real &t, gr2::real y[], gr2::real dydt[])
+        virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[])
         {
             this->last_y[0] = y[1];
         };
@@ -83,7 +83,7 @@ TEST(Event, apply)
     ZeroY event = ZeroY(&last_y);
 
     gr2::real t = 0, h = 0;
-    event.apply(t, y, nullptr);
+    event.apply(nullptr, t, y, nullptr);
     EXPECT_EQ(last_y, y[1]);
 }
 

@@ -58,6 +58,9 @@ namespace gr2
         real *err2;     //!<array for calculating error when trying new step
         real *err3;     //!<array for calculating error in event
 
+        // ========== Other variables ==========
+        bool dense;
+
         /**
          * @brief Initializing basic variables.
          * 
@@ -81,7 +84,7 @@ namespace gr2
          * @param ode set of ordinary differential equations to be solved
          * @param stepper_name name of stepper
          */
-        Integrator(std::shared_ptr<OdeSystem> ode, const std::string& stepper_name);
+        Integrator(std::shared_ptr<OdeSystem> ode, const std::string& stepper_name, const bool &dense=false);
 
         /**
          * @brief Construct a new Integrator object.
@@ -95,7 +98,7 @@ namespace gr2
          * @param a_y coefficient 
          * @param a_dydt coefficient
          */
-        Integrator(std::shared_ptr<OdeSystem> ode, const std::string& stepper_name, const real &atol, const real &rtol);
+        Integrator(std::shared_ptr<OdeSystem> ode, const std::string& stepper_name, const real &atol, const real &rtol, const bool &dense = false);
 
         /**
          * @brief Destroy the Integrator object.

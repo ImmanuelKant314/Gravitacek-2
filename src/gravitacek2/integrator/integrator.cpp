@@ -85,7 +85,7 @@ namespace gr2
                 yt3[j] = yt[j];
 
             // take step and calculate new value of event
-            this->stepper->step_err(t, yt3, h3, err3, dydt, dydt3);
+            this->stepper->step_err(t, yt3, h3, err3, dense, dydt, dydt3);
             current_value_of_event = event->value(t3, yt3, dydt3);
 
             // reduce interval for h
@@ -110,18 +110,20 @@ namespace gr2
         return true;
     }
         
-    Integrator::Integrator(std::shared_ptr<OdeSystem> ode, const std::string& stepper_name)
+    Integrator::Integrator(std::shared_ptr<OdeSystem> ode, const std::string& stepper_name, const bool &dense)
     {
         this->basic_setup();
+        this->dense = dense;
         this->ode = ode;
         this->init_stepper(stepper_name);
         this->stepper->set_OdeSystem(ode);
     }
 
-    Integrator::Integrator(std::shared_ptr<OdeSystem> ode, const std::string& stepper_name, const real &atol, const real &rtol)
+    Integrator::Integrator(std::shared_ptr<OdeSystem> ode, const std::string& stepper_name, const real &atol, const real &rtol, const bool &dense)
     {
         this->basic_setup();
         this->ode = ode;
+        this->dense = dense;
         this->init_stepper(stepper_name);
         this->stepper->set_OdeSystem(ode);
         delete this->stepcontroller;
@@ -187,7 +189,7 @@ namespace gr2
         while (t < t_end)
         {   
             // taky a step
-            this->stepper->step_err(t, yt2, h, err2);
+            this->stepper->step_err(t, yt2, h, err2, dense);
 
             // null current event
             current_event = nullptr;
@@ -218,7 +220,7 @@ namespace gr2
                         break;
                     for (int j = 0; j < n; j++)
                         yt2[j] = yt[j];
-                    this->stepper->step_err(t, yt2, h2, err2, dydt, dydt2);
+                    this->stepper->step_err(t, yt2, h2, err2, dense, dydt, dydt2);
                     t2 = t + h2;
                 }
             }
@@ -240,15 +242,18 @@ namespace gr2
             h3 = h;
             t2 = t3 = t + h;
 
+            if (dense)
+                this->stepper->prepare_dense();
+
             // apply event
             if (current_event)
-                current_event->apply(t, yt, dydt);
+                current_event->apply(stepper, t, yt, dydt);
             
             // data events 
             for (auto &event : events_data)
                 if (event->value(t, yt, dydt) == 0)
                 {
-                    event->apply(t, yt, dydt);
+                    event->apply(stepper, t, yt, dydt);
                     current_event_terminal = std::max(event->get_terminal(), current_event_terminal);
                 }
 

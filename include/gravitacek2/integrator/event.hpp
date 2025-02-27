@@ -1,5 +1,6 @@
 #pragma once
 #include "gravitacek2/setup.hpp"
+#include "gravitacek2/integrator/stepperbase.hpp"
 
 namespace gr2
 {
@@ -74,6 +75,6 @@ namespace gr2
          * @param h step size
          * @return value of internal function
          */
-        virtual void apply(real &t, real y[], real dydt[]) = 0;
+        virtual void apply(StepperBase* stepper, real &t, real y[], real dydt[]) = 0;
     };
 }

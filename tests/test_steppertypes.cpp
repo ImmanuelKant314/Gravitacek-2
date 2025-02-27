@@ -226,6 +226,32 @@ TEST_P(GeneralStepperTest, DenseOutput)
     }
 }
 
+TEST_P(GeneralStepperTest, DenseOutputWithError)
+{
+    // parameters and variables
+    gr2::real omega0 = 1.5, xi = 1.0;
+    gr2::real x0 = 0.5, v0 = 1.5;
+    gr2::real h = GetParam().h;
+    gr2::real y[2]{x0, v0}, dydt[2], err[2];
+
+    // ODE
+    auto osc = std::make_shared<DampedHarmonicOscillator>(omega0, xi);
+
+    // Stepper
+    auto stepper = GetParam().stepper;
+    stepper->set_OdeSystem(osc);
+
+    // test steps
+    for (int i = 0; i < int(7/h); i++)
+    {
+        stepper->step_err(i*h, y, h, err, true);
+        stepper->prepare_dense();
+        ASSERT_NEAR(stepper->dense_out(0, h*i), exactDampedHarmonicOscillator(h*i, omega0, xi, x0, v0), GetParam().eps_integration);
+        ASSERT_NEAR(stepper->dense_out(0, h*(i+0.5)), exactDampedHarmonicOscillator(h*(i+0.5), omega0, xi, x0, v0), GetParam().eps_integration);
+        ASSERT_NEAR(stepper->dense_out(0, h*(i+1)), exactDampedHarmonicOscillator(h*(i+1), omega0, xi, x0, v0), GetParam().eps_integration);
+    }
+}
+
 void PrintTo(const StepperTestCase& testcase, std::ostream* os) {
     *os << "0";
 }
