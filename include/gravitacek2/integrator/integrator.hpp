@@ -20,37 +20,33 @@ namespace gr2
         StepControllerBase *stepcontroller; //!<step controller
 
         // ========== Events ========== 
-        std::vector<Event*> events_data;                //!<vector of data events
-        std::vector<Event*> events_data_precise;        //!<vector of data events (precise)
-        std::vector<Event*> events_modifying;           //!<vector of modyfying events
-        std::vector<Event*> events_modifying_precise;   //!<vector of modyfying events
-        std::vector<Event*> events_terminal;            //!<vector of terminal events
-        std::vector<Event*> events_terminal_precise;    //!<vector of terminal events (precise)
+        std::vector<Event*> events_data;        //!<vector of data events
+        std::vector<Event*> events_modifying;   //!<vector of modyfying events
+        
+        // ========== Current event ==========
+        Event* current_event;           //!<event, which is being proceeded
+        bool current_event_terminal;    //!<is the current event terminal?
 
         // ========== Values of events ========== 
-        real* events_data_precise_values;               //!<tracked values of data events
-        real* events_modifying_precise_values;          //!<tracked values of modifying events
-        real* events_terminal_precise_values;           //!<tracked values of terminal events
+        real* events_modifying_values;  //!<tracked values of modifying events
 
         // ========== Number of events ========== 
-        int number_of_events_data_precise;      //!<number of data events
-        int number_of_events_modifying_precise; //!<number of modifying events (precise)
-        int number_of_events_terminal_precise;  //!<number of terminal events (precise)
+        int number_of_events_modifying; //!<number of modifying events (precise)
 
         // ========== Step size ========== 
-        real h;         //!<current value of time step
-        real h2;        //!<value of time step for trying new step
-        real h3;        //!<value of time step for events
+        real h;     //!<current value of time step
+        real h2;    //!<value of time step for trying new step
+        real h3;    //!<value of time step for events
 
         // ========== Time variable ========== 
-        real t;         //!<current value of time
-        real t2;        //!<value of time for new time step
-        real t3;        //!<value of time for events
+        real t;     //!<current value of time
+        real t2;    //!<value of time for new time step
+        real t3;    //!<value of time for events
 
         // ========== Coordinate variables ========== 
-        real *yt;       //!<array for storing current value of \f$\vec{y}\f$
-        real *yt2;      //!<array for trying next step
-        real *yt3;      //!<array for trying events
+        real *yt;   //!<array for storing current value of \f$\vec{y}\f$
+        real *yt2;  //!<array for trying next step
+        real *yt3;  //!<array for trying events
 
         // ========== Derivative values ========== 
         real *dydt;     //!<array for calculating \f$\frac{\mathrm{d} \vec{y}}{\mathrm{d}}\f$

@@ -10,11 +10,7 @@ namespace gr2
     enum EventType
     {
         data,
-        data_precise,
         modyfing,
-        modyfing_precise,
-        terminal,
-        terminal_precise
     };
 
     /**
@@ -28,19 +24,26 @@ namespace gr2
     {
     protected:
         EventType type; //!<type of event
+        bool terminal;  //!<is event terminal for integhration
     public:
         /**
          * @brief Construct a new Event object.
          * 
          * @param type type of event
          */
-        Event(const EventType& type);
+        Event(const EventType& type, const bool &terminal=false);
 
         /**
          * @brief Get type of Event object.
          * 
          */
         EventType get_type() const;
+        
+       /**
+        * @brief Get if the event is terminal
+        * 
+        */
+        bool get_terminal() const;
 
         /**
          * @brief Return value of event.

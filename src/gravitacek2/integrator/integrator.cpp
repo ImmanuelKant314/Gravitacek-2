@@ -20,9 +20,7 @@ namespace gr2
         this->stepper = nullptr;
         this->stepcontroller = nullptr;
 
-        this->events_data_precise_values = nullptr;
-        this->events_modifying_precise_values = nullptr;
-        this->events_terminal_precise_values = nullptr;
+        this->events_modifying_values = nullptr;
 
         this->yt = nullptr;
         this->yt2 = nullptr;
@@ -38,9 +36,6 @@ namespace gr2
 
         this->events_data = std::vector<Event*>();
         this->events_modifying = std::vector<Event*>();
-        this->events_modifying_precise = std::vector<Event*>();
-        this->events_terminal = std::vector<Event*>();
-        this->events_terminal_precise = std::vector<Event*>();
     }
 
     void Integrator::init_stepper(const std::string& stepper_name)
@@ -140,20 +135,8 @@ namespace gr2
         case EventType::data:
             this->events_data.push_back(event);
             break;
-        case EventType::data_precise:
-            this->events_data_precise.push_back(event);
-            break;
         case EventType::modyfing:
             this->events_modifying.push_back(event);
-            break;
-        case EventType::modyfing_precise:
-            this->events_modifying_precise.push_back(event);
-            break;
-        case EventType::terminal:
-            this->events_terminal.push_back(event);
-            break;
-        case EventType::terminal_precise:
-            this->events_terminal_precise.push_back(event);
             break;
         default:
             throw std::invalid_argument("invalid type of event");
@@ -171,7 +154,6 @@ namespace gr2
     {
         // prepare variables
         int i;
-        Event *current_event = nullptr;
         int n = this->ode->get_n();
 
         this->yt = new real[n];
@@ -192,22 +174,14 @@ namespace gr2
         t2 = t3 = t + h2;
 
         // number of events
-        number_of_events_data_precise = events_data.size();
-        number_of_events_modifying_precise = events_modifying.size();
-        number_of_events_terminal_precise = events_terminal.size();
+        number_of_events_modifying = events_modifying.size();
 
         // prepare event values
-        events_data_precise_values = new real[number_of_events_data_precise];
-        events_modifying_precise_values = new real[number_of_events_modifying_precise];
-        events_terminal_precise_values = new real[number_of_events_terminal_precise];
+        events_modifying_values = new real[number_of_events_modifying];
 
         // prepare values of events
-        for (int i = 0; i < number_of_events_data_precise; i++)
-            events_data_precise_values[i] = events_data[i]->value(t_start, yt, dydt);
-        for (int i = 0; i < number_of_events_modifying_precise; i++)
-            events_modifying_precise_values[i] = events_modifying[i]->value(t_start, yt, dydt);
-        for (int i = 0; i < number_of_events_terminal_precise; i++)
-            events_terminal_precise_values[i] = events_terminal[i]->value(t_start, yt, dydt);
+        for (int i = 0; i < number_of_events_modifying; i++)
+            events_modifying_values[i] = events_modifying[i]->value(t_start, yt, dydt);
 
         // cycle for calculating new values of y
         while (t < t_end)
@@ -217,11 +191,12 @@ namespace gr2
 
             // null current event
             current_event = nullptr;
+            current_event_terminal = false;
 
             // check modifying events
-            for (int i = 0; i < number_of_events_modifying_precise; i++)
+            for (int i = 0; i < number_of_events_modifying; i++)
             {
-                if(this->solve_event(events_modifying[i], events_modifying_precise_values[i]))
+                if(this->solve_event(events_modifying[i], events_modifying_values[i]))
                 {
                     for (int i = 0; i < n; i++)
                     {
@@ -230,21 +205,7 @@ namespace gr2
                     h2 = h3;
                     t2 = t3;
                     current_event = events_modifying[i];
-                }
-            }
-
-            // check terminal events
-            for (int i = 0; i < number_of_events_terminal_precise; i++)
-            {
-                if(this->solve_event(events_terminal[i], events_terminal_precise_values[i]))
-                {
-                    for (int i = 0; i < this->ode->get_n(); i++)
-                    {
-                        yt2[i] = yt3[i];
-                    }
-                    h2 = h3;
-                    t2 = t3;
-                    current_event = events_terminal[i];
+                    current_event_terminal = current_event->get_terminal();
                 }
             }
 
@@ -266,12 +227,6 @@ namespace gr2
             if (i >= MAX_ITERATIONS_HADJUST)
                 throw std::runtime_error("optimal step size was not found, MAX_ITERATIONS_HADJUST reached");
 
-            for (int i = 0; i < number_of_events_data_precise; i++)
-            {
-                if(this->solve_event(events_data[i], events_data_precise_values[i]))
-                    events_data[i]->apply(t3, yt3, dydt3);
-            }
-
             // "commit" to the step
             for (int i = 0; i < n; i++)
             {
@@ -289,42 +244,25 @@ namespace gr2
             if (current_event)
                 current_event->apply(t, yt, dydt);
             
-            // not precise events
+            // data events 
             for (auto &event : events_data)
                 if (event->value(t, yt, dydt) == 0)
-                    event->apply(t, yt, dydt);
-
-            for (auto &event : events_modifying)
-                if (event->value(t, yt, dydt) == 0)
-                    event->apply(t, yt, dydt);
-
-            bool terminal = false;
-            for(auto &event : events_terminal)
-                if (event->value(t, yt, dydt)==0)
                 {
                     event->apply(t, yt, dydt);
-                    terminal = true;
+                    current_event_terminal = std::max(event->get_terminal(), current_event_terminal);
                 }
 
             // kill precise event
-            if (current_event && current_event->get_type() == EventType::terminal)
-                break;
-
-            // kill unprecise event
-            if (terminal)
+            if (current_event_terminal)
                 break;
 
             // calculate new values of events
-            for (int i = 0; i < number_of_events_data_precise; i++)
-                events_data_precise_values[i] = events_data[i]->value(t, yt, dydt);
-            for (int i = 0; i < number_of_events_modifying_precise; i++)
-                events_modifying_precise_values[i] = events_modifying[i]->value(t, yt, dydt);
-            for (int i = 0; i < number_of_events_terminal_precise; i++)
-                events_terminal_precise_values[i] = events_terminal[i]->value(t, yt, dydt);
+            for (int i = 0; i < number_of_events_modifying; i++)
+                events_modifying_values[i] = events_modifying[i]->value(t, yt, dydt);
         }
 
         // delete events
-        delete[] events_data_precise_values, events_modifying_precise_values, events_terminal_precise_values;
+        delete[] events_modifying_values;
         // delete other arrays
         delete[] yt, yt2, yt3, dydt, dydt2, dydt3, err, err2, err3;
     }

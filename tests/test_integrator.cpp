@@ -23,7 +23,7 @@ class Bounce : public gr2::Event
 {
     protected:
     public:
-        Bounce() : gr2::Event(gr2::EventType::modyfing_precise){};
+        Bounce() : gr2::Event(gr2::EventType::modyfing){};
         virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
         {
             return y[0];
@@ -47,7 +47,7 @@ class DataMonitoring : public gr2::Event
             vel = std::vector<gr2::real>();
         }
         virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
-        {
+        {   
             return 0;
         }
         virtual void apply(gr2::real &t, gr2::real y[], gr2::real dydt[])
