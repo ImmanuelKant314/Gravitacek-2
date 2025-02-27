@@ -15,7 +15,7 @@ namespace gr2
     {
     protected:
         // ========== Components of itnegrator ========== 
-        OdeSystem *ode;                     //!<solved system of ordinary differential equations
+        std::shared_ptr<OdeSystem> ode;     //!<solved system of ordinary differential equations
         StepperBase *stepper;               //!<stepper used for integrating
         StepControllerBase *stepcontroller; //!<step controller
 
@@ -85,7 +85,7 @@ namespace gr2
          * @param ode set of ordinary differential equations to be solved
          * @param stepper_name name of stepper
          */
-        Integrator(OdeSystem &ode, const std::string& stepper_name);
+        Integrator(std::shared_ptr<OdeSystem> ode, const std::string& stepper_name);
 
         /**
          * @brief Construct a new Integrator object.

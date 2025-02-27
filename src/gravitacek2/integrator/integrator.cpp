@@ -115,22 +115,22 @@ namespace gr2
         return true;
     }
         
-    Integrator::Integrator(OdeSystem &ode, const std::string& stepper_name)
+    Integrator::Integrator(std::shared_ptr<OdeSystem> ode, const std::string& stepper_name)
     {
         this->basic_setup();
-        this->ode = &ode;
+        this->ode = ode;
         this->init_stepper(stepper_name);
         this->stepper->set_OdeSystem(ode);
     }
 
-    Integrator::Integrator(OdeSystem &ode, const std::string& stepper_name, const real &atol, const real &rtol)
+    Integrator::Integrator(std::shared_ptr<OdeSystem> ode, const std::string& stepper_name, const real &atol, const real &rtol)
     {
         this->basic_setup();
-        this->ode = &ode;
+        this->ode = ode;
         this->init_stepper(stepper_name);
         this->stepper->set_OdeSystem(ode);
         delete this->stepcontroller;
-        this->stepcontroller = new StepControllerNR(ode.get_n(), this->stepper->get_err_order(), atol, rtol);
+        this->stepcontroller = new StepControllerNR(ode->get_n(), this->stepper->get_err_order(), atol, rtol);
     }
 
     void Integrator::add_event(Event* event)
@@ -321,8 +321,6 @@ namespace gr2
                 events_modifying_precise_values[i] = events_modifying[i]->value(t, yt, dydt);
             for (int i = 0; i < number_of_events_terminal_precise; i++)
                 events_terminal_precise_values[i] = events_terminal[i]->value(t, yt, dydt);
-
-            
         }
 
         // delete events

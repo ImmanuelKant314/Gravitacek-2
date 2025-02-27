@@ -9,7 +9,7 @@ include(CTest)
 
 # add executable 
 add_executable(test_integratorcomponents test_integratorcomponents.cpp)
-# add_executable(test_integrator test_integrator.cpp)
+add_executable(test_integrator test_integrator.cpp)
 add_executable(test_stepcontrollertypes test_stepcontrollertypes.cpp)
 add_executable(test_steppertypes test_steppertypes.cpp)
 add_executable(test_spacetimes test_spacetimes.cpp)
@@ -20,7 +20,7 @@ add_executable(test_chaos test_chaos.cpp)
 
 # link libraries
 target_link_libraries(test_integratorcomponents PRIVATE gtest gtest_main integrator setup)
-# target_link_libraries(test_integrator PRIVATE gtest gtest_main integrator setup)
+target_link_libraries(test_integrator PRIVATE gtest gtest_main integrator setup)
 target_link_libraries(test_stepcontrollertypes PRIVATE gtest gtest_main integrator setup)
 target_link_libraries(test_steppertypes PRIVATE gtest gtest_main integrator setup)
 target_link_libraries(test_spacetimes PRIVATE gtest gtest_main geomotion setup)
@@ -77,7 +77,7 @@ add_test(
 
 # discover tests
 gtest_discover_tests(test_integratorcomponents)
-# gtest_discover_tests(test_integrator)
+gtest_discover_tests(test_integrator)
 gtest_discover_tests(test_stepcontrollertypes)
 gtest_discover_tests(test_steppertypes)
 gtest_discover_tests(test_spacetimes)

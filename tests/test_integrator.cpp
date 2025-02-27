@@ -71,7 +71,7 @@ TEST(Integrator, BouncingDumpedOscilatorNoStepController)
     DataMonitoring data = DataMonitoring();
     Bounce bounce = Bounce();
 
-    gr2::DampedHarmonicOscillator osc(omega0, xi);
+    auto osc = std::make_shared<gr2::DampedHarmonicOscillator>(omega0, xi);
     gr2::Integrator integrator = gr2::Integrator(osc, "RK4");
 
     integrator.add_event(&data);
@@ -100,7 +100,7 @@ TEST(Integrator, BouncingDumberOscilatorStepController)
     DataMonitoring data = DataMonitoring();
     Bounce bounce = Bounce();
 
-    gr2::DampedHarmonicOscillator osc(omega0, xi);
+    auto osc = std::make_shared<gr2::DampedHarmonicOscillator>(omega0, xi);
     gr2::Integrator integrator = gr2::Integrator(osc, "RK4", atol, rtol);
 
     integrator.add_event(&data);
