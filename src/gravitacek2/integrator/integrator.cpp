@@ -34,8 +34,8 @@ namespace gr2
         this->err2 = nullptr;
         this->err3 = nullptr;
 
-        this->events_data = std::vector<Event*>();
-        this->events_modifying = std::vector<Event*>();
+        this->events_data = std::vector<std::shared_ptr<Event>>();
+        this->events_modifying = std::vector<std::shared_ptr<Event>>();
     }
 
     void Integrator::init_stepper(const std::string& stepper_name)
@@ -47,7 +47,7 @@ namespace gr2
             throw std::invalid_argument("no integrator with given name found");
     }
 
-    bool Integrator::solve_event(Event *event, const real& previous_value_of_event)
+    bool Integrator::solve_event(std::shared_ptr<Event> event, const real& previous_value_of_event)
     {
         // prepare values
         int i;
@@ -128,7 +128,7 @@ namespace gr2
         this->stepcontroller = new StepControllerNR(ode->get_n(), this->stepper->get_err_order(), atol, rtol);
     }
 
-    void Integrator::add_event(Event* event)
+    void Integrator::add_event(std::shared_ptr<Event> event)
     {
         switch (event->get_type())
         {

@@ -68,21 +68,21 @@ TEST(Integrator, BouncingDumpedOscilatorNoStepController)
     gr2::real t_start = 0, t_end = 10;
     gr2::real h0 = 0.01;
 
-    DataMonitoring data = DataMonitoring();
-    Bounce bounce = Bounce();
+    auto data = std::make_shared<DataMonitoring>();
+    auto bounce = std::make_shared<Bounce>();
 
     auto osc = std::make_shared<gr2::DampedHarmonicOscillator>(omega0, xi);
     gr2::Integrator integrator = gr2::Integrator(osc, "RK4");
 
-    integrator.add_event(&data);
-    integrator.add_event(&bounce);
+    integrator.add_event(data);
+    integrator.add_event(bounce);
 
     integrator.integrate(y0, t_start, t_end, h0);
 
-    ASSERT_GE(data.times.size(), 10); // check if some data are recorded
-    for (int i = 0; i < data.times.size(); i++)
+    ASSERT_GE(data->times.size(), 10); // check if some data are recorded
+    for (int i = 0; i < data->times.size(); i++)
     {
-        EXPECT_NEAR(data.pos[i], exactDampedHarmonicOscillator(data.times[i], omega0, xi, x0, v0), eps);
+        EXPECT_NEAR(data->pos[i], exactDampedHarmonicOscillator(data->times[i], omega0, xi, x0, v0), eps);
     }
 }
 
@@ -97,21 +97,21 @@ TEST(Integrator, BouncingDumberOscilatorStepController)
     gr2::real h0 = 0.01;
     gr2::real atol = 1e-8, rtol = 1e-8;
 
-    DataMonitoring data = DataMonitoring();
-    Bounce bounce = Bounce();
+    auto data = std::make_shared<DataMonitoring>();
+    auto bounce = std::make_shared<Bounce>();
 
     auto osc = std::make_shared<gr2::DampedHarmonicOscillator>(omega0, xi);
     gr2::Integrator integrator = gr2::Integrator(osc, "RK4", atol, rtol);
 
-    integrator.add_event(&data);
-    integrator.add_event(&bounce);
+    integrator.add_event(data);
+    integrator.add_event(bounce);
 
     integrator.integrate(y0, t_start, t_end, h0);
 
-    ASSERT_GE(data.times.size(), 10); // check if some data are recorded
-    for (int i = 0; i < data.times.size(); i++)
+    ASSERT_GE(data->times.size(), 10); // check if some data are recorded
+    for (int i = 0; i < data->times.size(); i++)
     {
-        EXPECT_NEAR(data.pos[i], exactDampedHarmonicOscillator(data.times[i], omega0, xi, x0, v0), eps);
+        EXPECT_NEAR(data->pos[i], exactDampedHarmonicOscillator(data->times[i], omega0, xi, x0, v0), eps);
     }
 }
 

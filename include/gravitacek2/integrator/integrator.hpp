@@ -20,11 +20,11 @@ namespace gr2
         StepControllerBase *stepcontroller; //!<step controller
 
         // ========== Events ========== 
-        std::vector<Event*> events_data;        //!<vector of data events
-        std::vector<Event*> events_modifying;   //!<vector of modyfying events
+        std::vector<std::shared_ptr<Event>>events_data;        //!<vector of data events
+        std::vector<std::shared_ptr<Event>> events_modifying;   //!<vector of modyfying events
         
         // ========== Current event ==========
-        Event* current_event;           //!<event, which is being proceeded
+        std::shared_ptr<Event> current_event;           //!<event, which is being proceeded
         bool current_event_terminal;    //!<is the current event terminal?
 
         // ========== Values of events ========== 
@@ -70,7 +70,7 @@ namespace gr2
          * @param stepper_name Name of stepper
          */
         void init_stepper(const std::string& stepper_name);
-        bool solve_event(Event *event, const real& previous_value_of_event);
+        bool solve_event(std::shared_ptr<Event> event, const real& previous_value_of_event);
 
     public:
         /**
@@ -108,7 +108,7 @@ namespace gr2
          * 
          * @param event 
          */
-        void add_event(Event* event);
+        void add_event(std::shared_ptr<Event> event);
 
         /**
          * @brief Integrate ordinary differential equation
