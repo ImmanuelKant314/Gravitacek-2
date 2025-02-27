@@ -183,7 +183,7 @@ protected:
      * 
      * @param text arguments for local_expansions
      */
-    void local_expansions_Weyl(std::string text);
+    void local_expansions_weyl(std::string text);
 
     /**
      * @brief Calculate values of normg growth for Weyl spacetime.
@@ -194,6 +194,18 @@ protected:
      * @param text 
      */
     void norm_growth_weyl(std::string text);
+
+    /**
+     * @brief Calculate norm squared of velocity in plane \f$\rho z\f$.
+     * 
+     * Argument should be in form:
+     * (weyl_spacetime(weyl_spacetimes_params),E,L,(rho_min,rho_max,n_rho),(z_min,z_max,n_z),file)
+     * 
+     * @param text 
+     */
+    void rest_norm2_weyl(std::string text);
+
+
 public:
     Interface();
 

@@ -369,14 +369,19 @@ bool Interface::try_apply_function(std::string text)
         // this->solve_ode_system(rest);
         return true;
     }
-    else if (name == "local_expansions_Weyl")
+    else if (name == "local_expansions_weyl")
     {
-        this->local_expansions_Weyl(rest);
+        this->local_expansions_weyl(rest);
         return true;
     }
-    else if (name == "norm_growth_Weyl")
+    else if (name == "norm_growth_weyl")
     {
         this->norm_growth_weyl(rest);
+        return true;
+    }
+    else if (name == "rest_norm2_weyl")
+    {
+        this->rest_norm2_weyl(rest);
         return true;
     }
     return false;
@@ -566,7 +571,7 @@ std::shared_ptr<gr2::OdeSystem> Interface::create_ode_system(std::string text)
 //     }
 // }
 
-void Interface::local_expansions_Weyl(std::string text)
+void Interface::local_expansions_weyl(std::string text)
 {
     // Initialize calculation
     auto args = find_function_arguments(text);
@@ -689,8 +694,88 @@ void Interface::local_expansions_Weyl(std::string text)
         file.close();
         throw e;
     }
-    
 };
+
+void Interface::rest_norm2_weyl(std::string text)
+{
+    // Initialize calculation
+    auto args = find_function_arguments(text);
+    int number_of_arguments = 6;
+    if (args.size() < number_of_arguments)
+        throw std::invalid_argument("too little arguments for local_expansions_Weyl");
+    else if (args.size() > number_of_arguments)
+        throw std::invalid_argument("too much arguments for local_expansions_Weyl");
+
+    std::shared_ptr<gr2::Weyl> spt = this->create_weyl_spacetime(args[0]);
+
+    gr2::real E = std::stold(args[1]);
+    gr2::real L = std::stold(args[2]);
+    auto range_rho = find_function_arguments(args[3]);
+    if (range_rho.size() != 3)
+        throw std::invalid_argument("incorent number of arguments for range in rho");
+    gr2::real rho_min = std::stold(range_rho[0]);
+    gr2::real rho_max = std::stold(range_rho[1]);
+    int n_rho = std::stoi(range_rho[2]);
+    gr2::real delta_rho = (rho_max-rho_min)/(n_rho-1);
+
+    auto range_z = find_function_arguments(args[4]);
+    if (range_z.size() != 3)
+        throw std::invalid_argument("incorent number of arguments for range in z");
+    gr2::real z_min = std::stold(range_z[0]);
+    gr2::real z_max = std::stold(range_z[1]);
+    int n_z = std::stoi(range_z[2]);
+    gr2::real delta_z = (z_max-z_min)/(n_z-1);
+    
+    std::string file_name = args[5];
+
+    std::ofstream file;
+    gr2::real y[9]={};
+
+    // Procede in calculation
+    try
+    {
+        // open file
+        file.open(file_name);
+
+        if (!file.is_open())
+            throw std::runtime_error("file " + file_name + "could not be opened");
+
+        // calculate norms
+        for (int i = 0; i < n_rho; i++)
+            for (int j = 0; j < n_z; j++)
+            {
+                gr2::real rho = rho_min + i*delta_rho;
+                gr2::real z = z_min + j*delta_z;
+                y[gr2::Weyl::RHO] = rho;
+                y[gr2::Weyl::Z] = z;
+
+                // calculate lambda 
+                spt->calculate_lambda_init(y);
+                y[gr2::Weyl::LAMBDA] = spt->get_lambda();
+
+                // calculate ut (from E)
+                spt->calculate_metric(y);
+                y[gr2::Weyl::UT] = E/spt->get_metric()[gr2::Weyl::T][gr2::Weyl::T];
+
+                // calculate uphi (from L)
+                y[gr2::Weyl::UPHI] = E/spt->get_metric()[gr2::Weyl::PHI][gr2::Weyl::PHI];
+
+                // calculate size of rest velocity
+                gr2::real norm2 = (-1 - y[gr2::Weyl::UT]*E - y[gr2::Weyl::UPHI]*L);
+            
+                // save values to the file
+                file << i << ";" << j << ";" << rho << ";" << z << ";" << norm2 << "\n";
+            }
+
+            // close file
+            file.close();
+    }
+    catch(const std::exception& e)
+    {
+        file.close();
+        throw e;
+    }
+}
 
 Interface::Interface():macros(), values(), help_name(), help_text()
 {
