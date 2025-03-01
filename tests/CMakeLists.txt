@@ -17,6 +17,7 @@ add_executable(test_weylspacetimes test_weylspacetimes.cpp)
 add_executable(test_majumdarpapapetrouwspacetimes test_majumdarpapapetrouwspacetimes.cpp)
 add_executable(test_mymath test_mymath.cpp)
 add_executable(test_chaos test_chaos.cpp)
+add_executable(test_spacetimetrajectories test_spacetimetrajectories.cpp)
 
 # link libraries
 target_link_libraries(test_integratorcomponents PRIVATE gtest gtest_main integrator setup)
@@ -28,6 +29,7 @@ target_link_libraries(test_weylspacetimes PRIVATE gtest gtest_main geomotion set
 target_link_libraries(test_majumdarpapapetrouwspacetimes PRIVATE gtest gtest_main geomotion setup)
 target_link_libraries(test_mymath PRIVATE gtest gtest_main setup mymath)
 target_link_libraries(test_chaos PRIVATE gtest gtest_main setup chaos)
+target_link_libraries(test_spacetimetrajectories PRIVATE gtest gtest_main setup geomotion)
 
 # add tests
 add_test(
@@ -35,10 +37,10 @@ add_test(
     COMMAND test_integratorcomponents
 )
 
-# add_test(
-#     NAME    test_integrator
-#     COMMAND test_integrator
-# )
+add_test(
+    NAME    test_integrator
+    COMMAND test_integrator
+)
 
 add_test(
     NAME    test_stepcontrollertypes
@@ -75,6 +77,11 @@ add_test(
     COMMAND test_chaos
 )
 
+add_test(
+    NAME    test_spacetimetrajectories
+    COMMAND test_spacetimetrajectories
+)
+
 # discover tests
 gtest_discover_tests(test_integratorcomponents)
 gtest_discover_tests(test_integrator)
@@ -85,3 +92,4 @@ gtest_discover_tests(test_weylspacetimes)
 gtest_discover_tests(test_majumdarpapapetrouwspacetimes)
 gtest_discover_tests(test_mymath)
 gtest_discover_tests(test_chaos)
+gtest_discover_tests(test_spacetimetrajectories)
