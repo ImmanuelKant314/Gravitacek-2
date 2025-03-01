@@ -4,9 +4,9 @@
 
 #include "gtest/gtest.h"
 #include "gravitacek2/setup.hpp"
+#include "gravitacek2/integrator/steppers.hpp"
 #include "gravitacek2/geomotion/geomotion.hpp"
 #include "gravitacek2/geomotion/spacetimes.hpp"
-#include "gravitacek2/integrator/steppers.hpp"
 
 TEST(SchwarzschildTrajectory, IntetralsOfMotionPlanar)
 {
@@ -37,7 +37,7 @@ TEST(SchwarzschildTrajectory, IntetralsOfMotionPlanar)
 
     for (int i = 0; i < N; i++)
     {
-        stepper->step(0, y, dt);
+        stepper->step(0, y, dt, false, nullptr, nullptr);
         spt->calculate_metric(y);
         // energy
         EXPECT_NEAR(E, -spt->get_metric()[gr2::Schwarzschild::T][gr2::Schwarzschild::T]*y[gr2::Schwarzschild::UT], eps);
@@ -50,6 +50,7 @@ TEST(SchwarzschildTrajectory, IntetralsOfMotionPlanar)
         r_min = std::min(r_min, y[gr2::Schwarzschild::R]);
     }
     std::cout << r_min << std::endl;
+    std::cout <<spt->get_metric()[gr2::Schwarzschild::PHI][gr2::Schwarzschild::PHI]*y[gr2::Schwarzschild::UPHI] - L << std::endl;
 }
 
 TEST(SchwarzschildTrajectory, IntetralsOfMotionGeneral)
@@ -57,7 +58,7 @@ TEST(SchwarzschildTrajectory, IntetralsOfMotionGeneral)
     gr2::real eps = 1e-13;
 
     // prepare objects
-    auto stepper = std::make_shared<gr2::RK4>();
+    auto stepper = std::make_shared<gr2::DoPr853>();
     auto spt = std::make_shared<gr2::Schwarzschild>(1.0);
     stepper->set_OdeSystem(spt);
     gr2::real y[8]{};
@@ -69,7 +70,7 @@ TEST(SchwarzschildTrajectory, IntetralsOfMotionGeneral)
     // initial conditions - velocity
     spt->calculate_metric(y);
     gr2::real L = 3.6823981191047921;
-    gr2::real E = 0.98;
+    gr2::real E = 0.97;
     y[gr2::Schwarzschild::UPHI] = L/spt->get_metric()[gr2::Schwarzschild::PHI][gr2::Schwarzschild::PHI];
     y[gr2::Schwarzschild::UT] = -E/spt->get_metric()[gr2::Schwarzschild::T][gr2::Schwarzschild::T];
     y[gr2::Schwarzschild::UR] = 0.0;
@@ -83,14 +84,13 @@ TEST(SchwarzschildTrajectory, IntetralsOfMotionGeneral)
     y[gr2::Schwarzschild::UTHETA] = sqrtl((-1-norm2)/spt->get_metric()[gr2::Schwarzschild::THETA][gr2::Schwarzschild::THETA]);
 
     // initial conditions - steps
-    gr2::real dt = 0.05;
-    int N = 100;
-    int NN = 10;
+    const gr2::real dt = 0.7;
+    int N = 10000;
 
     for (int i = 0; i < N; i++)
     {
-        for (int j = 0; j < NN; j++)
-            stepper->step(0, y, dt);
+        std::cout << i << std::endl;
+        stepper->step(0, y, dt);
         spt->calculate_metric(y);
         // energy
         EXPECT_NEAR(E, -spt->get_metric()[gr2::Schwarzschild::T][gr2::Schwarzschild::T]*y[gr2::Schwarzschild::UT], eps);
@@ -104,7 +104,6 @@ TEST(SchwarzschildTrajectory, IntetralsOfMotionGeneral)
 
         theta = std::max(theta, y[gr2::Schwarzschild::THETA]);
     }
-    std::cout << theta << std::endl;
 }
 
 int main(int argc, char **argv)

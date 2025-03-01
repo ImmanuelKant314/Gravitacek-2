@@ -19,7 +19,7 @@ add_executable(test_mymath test_mymath.cpp)
 add_executable(test_chaos test_chaos.cpp)
 add_executable(test_spacetimetrajectories test_spacetimetrajectories.cpp)
 
-# link libraries
+# link libraries 
 target_link_libraries(test_integratorcomponents PRIVATE gtest gtest_main integrator setup)
 target_link_libraries(test_integrator PRIVATE gtest gtest_main integrator setup)
 target_link_libraries(test_stepcontrollertypes PRIVATE gtest gtest_main integrator setup)
@@ -29,7 +29,7 @@ target_link_libraries(test_weylspacetimes PRIVATE gtest gtest_main geomotion set
 target_link_libraries(test_majumdarpapapetrouwspacetimes PRIVATE gtest gtest_main geomotion setup)
 target_link_libraries(test_mymath PRIVATE gtest gtest_main setup mymath)
 target_link_libraries(test_chaos PRIVATE gtest gtest_main setup chaos)
-target_link_libraries(test_spacetimetrajectories PRIVATE gtest gtest_main setup geomotion)
+target_link_libraries(test_spacetimetrajectories PRIVATE gtest gtest_main setup geomotion integrator)
 
 # add tests
 add_test(

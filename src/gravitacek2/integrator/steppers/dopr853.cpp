@@ -4,7 +4,7 @@
 
 namespace gr2
 {
-    DoPr853::DoPr853() : StepperBase(), k1(nullptr), k2(nullptr), k3(nullptr), k4(nullptr), k5(nullptr), k6(nullptr), k7(nullptr), k8(nullptr), k9(nullptr), k10(nullptr), k11(nullptr), k12(nullptr)
+    DoPr853::DoPr853() : StepperBase(), k1(nullptr), k2(nullptr), k3(nullptr), k4(nullptr), k5(nullptr), k6(nullptr), k7(nullptr), k8(nullptr), k9(nullptr), k10(nullptr), k11(nullptr), k12(nullptr), k_help(nullptr), pc1(nullptr), pc2(nullptr), pc3(nullptr), pc4(nullptr), pc5(nullptr), pc6(nullptr), pc7(nullptr), pc8(nullptr)
     {}
 
     DoPr853::~DoPr853()
@@ -55,35 +55,45 @@ namespace gr2
     {
         static const real c2 = 0.526001519587677318785587544488e-01;
         static const real c3 = 0.789002279381515978178381316732e-01;
-        static const real c4 = 0.118350341907227396726757197510e+00;
-        static const real c5 = 0.281649658092772603273242802490e+00;
-        static const real c6 = 0.333333333333333333333333333333e+00;
-        static const real c7 = 0.25e+00;
-        static const real c8 = 0.307692307692307692307692307692e+00;
-        static const real c9 = 0.651282051282051282051282051282e+00;
-        static const real c10 = 0.6e+00;
-        static const real c11 = 0.857142857142857142857142857142e+00;
-        static const real c14 = 0.1e+00;
-        static const real c15 = 0.2e+00;
-        static const real c16 = 0.777777777777777777777777777778e+00;
+        static const real c4 = 0.118350341907227396726757197510;
+        static const real c5 = 0.281649658092772603273242802490;
+        static const real c6 = 0.333333333333333333333333333333;
+        static const real c7 = 0.25;
+        static const real c8 = 0.307692307692307692307692307692;
+        static const real c9 = 0.651282051282051282051282051282;
+        static const real c10 = 0.6;
+        static const real c11 = 0.857142857142857142857142857142;
+        static const real c14 = 0.1;
+        static const real c15 = 0.2;
+        static const real c16 = 0.777777777777777777777777777778;
 
         static const real b1 = 5.42937341165687622380535766363e-2;
-        static const real b6 = 4.45031289275240888144113950566e0;
-        static const real b7 = 1.89151789931450038304281599044e0;
-        static const real b8 = -5.8012039600105847814672114227e0;
+        static const real b6 = 4.45031289275240888144113950566;
+        static const real b7 = 1.89151789931450038304281599044;
+        static const real b8 = -5.8012039600105847814672114227;
         static const real b9 = 3.1116436695781989440891606237e-1;
         static const real b10 = -1.52160949662516078556178806805e-1;
         static const real b11 = 2.01365400804030348374776537501e-1;
         static const real b12 = 4.47106157277725905176885569043e-2;
-        static const real bhh1 = 0.244094488188976377952755905512e+00;
-        static const real bhh2 = 0.733846688281611857341361741547e+00;
-        static const real bhh3 = 0.220588235294117647058823529412e-01;
+
+        static const real bhh1 = 0.244094488188976377952755905512;
+        static const real bhh2 = 0.733846688281611857341361741547;
+        static const real bhh3 = 0.220588235294117647058823529412e-1;
+
+        static const real er1 = 0.1312004499419488073250102996e-01;
+        static const real er6 = -0.1225156446376204440720569753e+01;
+        static const real er7 = -0.4957589496572501915214079952;
+        static const real er8 = 0.1664377182454986536961530415e+01;
+        static const real er9 = -0.3503288487499736816886487290;
+        static const real er10 = 0.3341791187130174790297318841;
+        static const real er11 = 0.8192320648511571246570742613e-01;
+        static const real er12 = -0.2235530786388629525884427845e-01;
 
         static const real a21 = 5.26001519587677318785587544488e-2;
 
         static const real a31 = 1.97250569845378994544595329183e-2;
         static const real a32 = 5.91751709536136983633785987549e-2;
-
+        
         static const real a41 = 2.95875854768068491816892993775e-2;
         static const real a43 = 8.87627564304205475450678981324e-2;
 
@@ -107,40 +117,40 @@ namespace gr2
         static const real a87 = 8.27378916381402288758473766002e-3;
 
         static const real a91 = 6.24110958716075717114429577812e-1;
-        static const real a94 = -3.36089262944694129406857109825e0;
+        static const real a94 = -3.36089262944694129406857109825;
         static const real a95 = -8.68219346841726006818189891453e-1;
-        static const real a96 = 2.75920996994467083049415600797e1;
-        static const real a97 = 2.01540675504778934086186788979e1;
-        static const real a98 = -4.34898841810699588477366255144e1;
+        static const real a96 = 2.75920996994467083049415600797e+1;
+        static const real a97 = 2.01540675504778934086186788979e+1;
+        static const real a98 = -4.34898841810699588477366255144e+1;
 
         static const real a101 = 4.77662536438264365890433908527e-1;
-        static const real a104 = -2.48811461997166764192642586468e0;
+        static const real a104 = -2.48811461997166764192642586468;
         static const real a105 = -5.90290826836842996371446475743e-1;
-        static const real a106 = 2.12300514481811942347288949897e1;
-        static const real a107 = 1.52792336328824235832596922938e1;
-        static const real a108 = -3.32882109689848629194453265587e1;
+        static const real a106 = 2.12300514481811942347288949897e+1;
+        static const real a107 = 1.52792336328824235832596922938e+1;
+        static const real a108 = -3.32882109689848629194453265587e+1;
         static const real a109 = -2.03312017085086261358222928593e-2;
 
         static const real a111 = -9.3714243008598732571704021658e-1;
-        static const real a114 = 5.18637242884406370830023853209e0;
-        static const real a115 = 1.09143734899672957818500254654e0;
-        static const real a116 = -8.14978701074692612513997267357e0;
-        static const real a117 = -1.85200656599969598641566180701e1;
-        static const real a118 = 2.27394870993505042818970056734e1;
-        static const real a119 = 2.49360555267965238987089396762e0;
-        static const real a1110 = -3.0467644718982195003823669022e0;
+        static const real a114 = 5.18637242884406370830023853209;
+        static const real a115 = 1.09143734899672957818500254654;
+        static const real a116 = -8.14978701074692612513997267357;
+        static const real a117 = -1.85200656599969598641566180701e+1;
+        static const real a118 = 2.27394870993505042818970056734e+1;
+        static const real a119 = 2.49360555267965238987089396762;
+        static const real a1110 = -3.0467644718982195003823669022;
 
-        static const real a121 = 2.27331014751653820792359768449e0;
-        static const real a124 = -1.05344954667372501984066689879e1;
-        static const real a125 = -2.00087205822486249909675718444e0;
-        static const real a126 = -1.79589318631187989172765950534e1;
-        static const real a127 = 2.79488845294199600508499808837e1;
-        static const real a128 = -2.85899827713502369474065508674e0;
-        static const real a129 = -8.87285693353062954433549289258e0;
-        static const real a1210 = 1.23605671757943030647266201528e1;
+        static const real a121 = 2.27331014751653820792359768449;
+        static const real a124 = -1.05344954667372501984066689879e+1;
+        static const real a125 = -2.00087205822486249909675718444;
+        static const real a126 = -1.79589318631187989172765950534e+1;
+        static const real a127 = 2.79488845294199600508499808837e+1;
+        static const real a128 = -2.85899827713502369474065508674;
+        static const real a129 = -8.87285693353062954433549289258;
+        static const real a1210 = 1.23605671757943030647266201528e+1;
         static const real a1211 = 6.43392746015763530355970484046e-1;
 
-         int i;
+        int i;
         
         // save time and step internaly
         this->t_in = t;
