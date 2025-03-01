@@ -238,4 +238,12 @@ namespace gr2
         riemann_tensor[Z][RHO][RHO][Z] = lambda_rhorho + lambda_zz - nu_rhorho - nu_zz;
         riemann_tensor[Z][RHO][Z][RHO] = -riemann_tensor[Z][RHO][RHO][Z];
     };
+
+
+    void Weyl::function(const real &t, const real y[], real dydt[])
+    {
+        this->GeoMotion::function(t, y, dydt);
+        if (this->lambda_eval_run == gr2::diff)
+            dydt[this->lambda_index] = this->lambda_rho*y[URHO] + this->lambda_z*y[UZ];
+    }
 }

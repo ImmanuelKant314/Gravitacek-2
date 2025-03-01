@@ -221,6 +221,8 @@ namespace gr2
         virtual void calculate_christoffel_symbols(const real *y) override;
         virtual void calculate_riemann_tensor(const real *y) override;
 
+        // ========== Function ========== 
+        void function(const real &t, const real y[], real dydt[]) override;
     };
 
     /**
