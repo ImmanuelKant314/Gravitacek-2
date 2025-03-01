@@ -1,3 +1,4 @@
+#pragma once
 #include "gravitacek2/integrator/odesystem.hpp"
 
 namespace gr2

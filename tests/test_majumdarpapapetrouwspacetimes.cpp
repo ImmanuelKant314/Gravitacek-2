@@ -70,7 +70,7 @@ TEST_P(GeneralMPTest, InverseLapse)
     gr2::real eps = GetParam().eps;
     gr2::real N_inv =  GetParam().N_inv;
     spacetime->calculate_N_inv(GetParam().y);
-    EXPECT_NEAR(spacetime->get_N_inv(), N_inv, eps + eps*std::llabs(N_inv));
+    EXPECT_NEAR(spacetime->get_N_inv(), N_inv, eps + eps*std::abs(N_inv));
 }
 
 TEST_P(GeneralMPTest, DerivativesOfInverseLapse)
@@ -81,9 +81,9 @@ TEST_P(GeneralMPTest, DerivativesOfInverseLapse)
     gr2::real N_inv_rho =  GetParam().N_inv_rho;
     gr2::real N_inv_z =  GetParam().N_inv_z;
     spacetime->calculate_N_inv1(GetParam().y);
-    EXPECT_NEAR(spacetime->get_N_inv(), N_inv, eps + eps*std::llabs(N_inv));
-    EXPECT_NEAR(spacetime->get_N_inv_rho(), N_inv_rho, eps + eps*std::llabs(N_inv_rho));
-    EXPECT_NEAR(spacetime->get_N_inv_z(), N_inv_z, eps + eps*std::llabs(N_inv_z));
+    EXPECT_NEAR(spacetime->get_N_inv(), N_inv, eps + eps*std::abs(N_inv));
+    EXPECT_NEAR(spacetime->get_N_inv_rho(), N_inv_rho, eps + eps*std::abs(N_inv_rho));
+    EXPECT_NEAR(spacetime->get_N_inv_z(), N_inv_z, eps + eps*std::abs(N_inv_z));
 }
 
 TEST_P(GeneralMPTest, SecondDerivativesOfLapse)
@@ -97,12 +97,12 @@ TEST_P(GeneralMPTest, SecondDerivativesOfLapse)
     gr2::real N_inv_rhoz = GetParam().N_inv_rhoz;
     gr2::real N_inv_zz = GetParam().N_inv_zz;
     spacetime->calculate_N_inv2(GetParam().y);
-    EXPECT_NEAR(spacetime->get_N_inv(), N_inv, eps + eps*std::llabs(N_inv));
-    EXPECT_NEAR(spacetime->get_N_inv_rho(), N_inv_rho, eps + eps*std::llabs(N_inv_rho));
-    EXPECT_NEAR(spacetime->get_N_inv_z(), N_inv_z, eps + eps*std::llabs(N_inv_z));
-    EXPECT_NEAR(spacetime->get_N_inv_rhorho(), N_inv_rhorho, eps + eps*std::llabs(N_inv_rhorho));
-    EXPECT_NEAR(spacetime->get_N_inv_rhoz(), N_inv_rhoz, eps + eps*std::llabs(N_inv_rhoz));
-    EXPECT_NEAR(spacetime->get_N_inv_zz(), N_inv_zz, eps + eps*std::llabs(N_inv_zz));
+    EXPECT_NEAR(spacetime->get_N_inv(), N_inv, eps + eps*std::abs(N_inv));
+    EXPECT_NEAR(spacetime->get_N_inv_rho(), N_inv_rho, eps + eps*std::abs(N_inv_rho));
+    EXPECT_NEAR(spacetime->get_N_inv_z(), N_inv_z, eps + eps*std::abs(N_inv_z));
+    EXPECT_NEAR(spacetime->get_N_inv_rhorho(), N_inv_rhorho, eps + eps*std::abs(N_inv_rhorho));
+    EXPECT_NEAR(spacetime->get_N_inv_rhoz(), N_inv_rhoz, eps + eps*std::abs(N_inv_rhoz));
+    EXPECT_NEAR(spacetime->get_N_inv_zz(), N_inv_zz, eps + eps*std::abs(N_inv_zz));
 }
 
 void PrintTo(const MPTestCase& testcase, std::ostream* os) {

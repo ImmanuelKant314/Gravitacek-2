@@ -437,7 +437,10 @@ namespace gr2
         {
             err3 = (k_help[i] - bhh1 * k1[i] - bhh2 * k9[i] - bhh3 * k3[i]) * h;
             err5 = (er1 * k1[i] + er6 * k6[i] + er7 * k7[i] + er8 * k8[i] + er9 * k9[i] + er10 * k10[i] + er11 * k11[i] + er12 * k12[i]) * h;
-            err[i] = err5*err5/sqrtl(0.01*err3*err3 + err5*err5);
+            if (err5 != 0)
+                err[i] = err5*err5/sqrtl(0.01*err3*err3 + err5*err5);
+            else
+                err[i] == 0;
         }
 
         if (dydt_out)

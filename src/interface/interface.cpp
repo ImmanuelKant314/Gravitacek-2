@@ -1,4 +1,5 @@
 #include "interface/interface.hpp"
+#include "interface/usefullfunctions.hpp"
 #include "gravitacek2/geomotion/spacetimes.hpp"
 #include "gravitacek2/integrator/integrator.hpp"
 #include "gravitacek2/integrator/odesystems.hpp"
@@ -15,34 +16,6 @@
 #include <gsl/gsl_eigen.h>
 #include <gsl/gsl_complex.h>
 #include <gsl/gsl_complex_math.h>
-
-class DataRecord : public gr2::Event
-{
-protected:
-    int n;
-
-public:
-    std::vector<std::vector<gr2::real>> data;
-
-    DataRecord(int n) : gr2::Event(gr2::EventType::data)
-    {
-        this->n = n;
-    }
-
-    virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
-    {
-        return 0;
-    }
-
-    virtual void apply(gr2::real &t, gr2::real y[], gr2::real dydt[])
-    {
-        std::vector<gr2::real> record;
-        record.push_back(t);
-        for (int i=0; i < n; i++)
-            record.push_back(y[i]);
-        this->data.push_back(record);
-    }
-};
 
 std::string Interface::substitute(std::string text)
 {
@@ -387,6 +360,11 @@ bool Interface::try_apply_function(std::string text)
     else if (name == "poincare_border_weyl")
     {
         this->poincare_border_weyl(rest);
+        return true;
+    }
+    else if (name == "poincare_section_weyl")
+    {
+        this->poincare_section_weyl(rest);
         return true;
     }
     return false;
@@ -737,7 +715,7 @@ void Interface::norm_growth_weyl(std::string text)
 
     std::ofstream file;
     gr2::real y[9]={};
-    gsl_matrix* H;
+    gsl_matrix *H;
     gsl_vector *eig_vals;
     gsl_eigen_symm_workspace *work_space;
 
@@ -972,6 +950,115 @@ void Interface::poincare_border_weyl(std::string text)
         
             // save values to the file
             file << i << ";" << rho << ";" << urho << "\n";
+        }
+        // close file
+        file.close();
+    }
+    catch(const std::exception& e)
+    {
+        file.close();
+        throw e;
+    }
+}
+
+void Interface::poincare_section_weyl(std::string text)
+{
+    // Initialize calculation
+    auto args = find_function_arguments(text);
+    int number_of_arguments = 7;
+    if (args.size() < number_of_arguments)
+        throw std::invalid_argument("too little arguments for local_expansions_Weyl");
+    else if (args.size() > number_of_arguments)
+        throw std::invalid_argument("too much arguments for local_expansions_Weyl");
+
+    std::shared_ptr<gr2::Weyl> spt = this->create_weyl_spacetime(args[0]);
+
+    gr2::real E = std::stold(args[1]);
+    gr2::real L = std::stold(args[2]);
+    auto range_rho = find_function_arguments(args[3]);
+    if (range_rho.size() != 3)
+        throw std::invalid_argument("incorent number of arguments for range in rho");
+    gr2::real rho_min = std::stold(range_rho[0]);
+    gr2::real rho_max = std::stold(range_rho[1]);
+    int n_rho = std::stoi(range_rho[2]);
+    gr2::real delta_rho = (rho_max-rho_min)/(n_rho-1);
+
+    int angles = std::stoi(args[4]);
+    gr2::real delta_angle = gr2::pi_4/angles;
+    gr2::real t_max = std::stoll(args[5]);
+    std::string file_name = args[6];
+
+    std::ofstream file;
+    gr2::real y[9]={};
+
+    // Procede in calculation
+    try
+    {
+        // open file
+        file.open(file_name);
+
+        if (!file.is_open())
+            throw std::runtime_error("file " + file_name + "could not be opened");
+
+        gr2::Integrator integrator(spt, "DoPr853", 1e-6, 1e-6, true);
+        auto too_close = std::make_shared<StopBeforeBlackHole>(0.2);
+        integrator.add_event(too_close);
+        auto error_too_high = std::make_shared<StopTooHighError>(spt,E,1e-10);
+        integrator.add_event(error_too_high);
+        auto stop_on_disk = std::make_shared<StopOnDisk>(true);
+        integrator.add_event(stop_on_disk);
+
+        // calculate norms
+        for (int i = 0; i < n_rho; i++)
+        {
+            gr2::real rho = rho_min + i*delta_rho;
+            gr2::real z = 1e-5;
+            y[gr2::Weyl::RHO] = rho;
+            y[gr2::Weyl::Z] = z;
+
+            // calculate lambda 
+            spt->calculate_lambda_init(y);
+            y[gr2::Weyl::LAMBDA] = spt->get_lambda();
+
+            // calculate ut (from E)
+            spt->calculate_metric(y);
+            y[gr2::Weyl::UT] = -E/spt->get_metric()[gr2::Weyl::T][gr2::Weyl::T];
+
+            // calculate uphi (from L)
+            y[gr2::Weyl::UPHI] = L/spt->get_metric()[gr2::Weyl::PHI][gr2::Weyl::PHI];
+
+            // calculate size of rest velocity
+            gr2::real norm2 = (-1 + y[gr2::Weyl::UT]*E - y[gr2::Weyl::UPHI]*L);
+            if (norm2 < 0)
+                continue;
+            gr2::real norm = sqrtl(norm2/spt->get_metric()[gr2::Weyl::RHO][gr2::Weyl::RHO]);
+
+            for (int j = 0; j < angles; j++)
+            {
+                // calculate initial conditions
+                gr2::real angle = j*delta_angle;
+                y[gr2::Weyl::URHO] = norm*sinl(angle);
+                y[gr2::Weyl::Z] = norm*sinl(angle);
+
+                // calculate poincare section
+                try
+                {
+                    /* code */
+                    integrator.integrate(y, 0, t_max, 1e-5);
+                }
+                catch(const std::exception& e)
+                {
+                    std::cerr << e.what() << '\n';
+                }
+                
+                // save data
+                for (auto& d : stop_on_disk->data)
+                    file << d[0] << ";" << d[1] << "\n";
+                file << "\n";
+
+                // delete data
+                stop_on_disk->data.clear();
+            }
         }
         // close file
         file.close();

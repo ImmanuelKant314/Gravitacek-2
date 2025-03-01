@@ -43,6 +43,8 @@ namespace gr2
         delete stepper;
         if (stepper_name == "RK4")
             this->stepper = new RK4();
+        else if (stepper_name == "DoPr853")
+            this->stepper = new DoPr853();
         else
             throw std::invalid_argument("no integrator with given name found");
     }
@@ -56,12 +58,13 @@ namespace gr2
         for (i = 0; i< this->ode->get_n(); i++)
         {
             yt3[i] = yt2[i];
+            dydt3[i] = dydt2[i];
         }
         h3 = h2;
         t3 = t2;
 
         // calculate current value of event
-        real current_value_of_event = event->value(t3, yt3, dydt3);
+        real current_value_of_event = event->value(t3, yt2, dydt2);
 
         // check if event is triggered
         // if event is not triggered return true
@@ -127,7 +130,7 @@ namespace gr2
         this->init_stepper(stepper_name);
         this->stepper->set_OdeSystem(ode);
         delete this->stepcontroller;
-        this->stepcontroller = new StepControllerNR(ode->get_n(), this->stepper->get_err_order(), atol, rtol);
+        this->stepcontroller = new StepControllerNR(ode->get_n(), this->stepper->get_err_order(), atol, rtol, 0.95, 0.2, 10.0);
     }
 
     void Integrator::add_event(std::shared_ptr<Event> event)
@@ -174,6 +177,7 @@ namespace gr2
         this->t = t_start;
         this->h = this->h2 = this->h3 = h_start;
         t2 = t3 = t + h2;
+        this->ode->function(t, yt, dydt);
 
         // number of events
         number_of_events_modifying = events_modifying.size();
@@ -189,7 +193,7 @@ namespace gr2
         while (t < t_end)
         {   
             // taky a step
-            this->stepper->step_err(t, yt2, h, err2, dense);
+            this->stepper->step_err(t, yt2, h, err2, dense, dydt, dydt2);
 
             // null current event
             current_event = nullptr;
@@ -203,6 +207,7 @@ namespace gr2
                     for (int i = 0; i < n; i++)
                     {
                         yt2[i] = yt3[i];
+                        dydt2[i] = dydt3[i];
                     }
                     h2 = h3;
                     t2 = t3;
@@ -216,11 +221,12 @@ namespace gr2
             {
                 for (i = 0; i < MAX_ITERATIONS_HADJUST; i++)
                 {
-                    if(this->stepcontroller->hadjust(this->yt2, this->err2, this->dydt, this->h2))
+                    if(this->stepcontroller->hadjust(this->yt2, this->err2, this->dydt2, this->h2))
                         break;
                     for (int j = 0; j < n; j++)
                         yt2[j] = yt[j];
                     this->stepper->step_err(t, yt2, h2, err2, dense, dydt, dydt2);
+
                     t2 = t + h2;
                 }
             }
@@ -230,6 +236,7 @@ namespace gr2
                 throw std::runtime_error("optimal step size was not found, MAX_ITERATIONS_HADJUST reached");
 
             // "commit" to the step
+
             for (int i = 0; i < n; i++)
             {
                 yt[i] = yt2[i];

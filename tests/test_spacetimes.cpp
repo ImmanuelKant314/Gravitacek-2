@@ -101,7 +101,7 @@ TEST_P(GeneralSpacetimeTest, Metric)
         for (int j = 0; j < 4; j++)
         {
             gr2::real value = GetParam().metric[i][j];
-            EXPECT_NEAR(spacetime->get_metric()[i][j], value, eps + std::llabs(value)*eps);
+            EXPECT_NEAR(spacetime->get_metric()[i][j], value, eps + std::abs(value)*eps);
         }
 }
 
@@ -115,7 +115,7 @@ TEST_P(GeneralSpacetimeTest, ChristoffelSymbols)
             for (int k = 0; k < 4; k++)
             {
                 gr2::real value = GetParam().christoffel_symbols[i][j][k];
-                EXPECT_NEAR(spacetime->get_christoffel_symbols()[i][j][k], value, eps + std::llabs(value)*eps);
+                EXPECT_NEAR(spacetime->get_christoffel_symbols()[i][j][k], value, eps + std::abs(value)*eps);
             }
 }
 
@@ -130,7 +130,7 @@ TEST_P(GeneralSpacetimeTest, RiemannTensor)
                 for (int l = 0; l < 4; l++)
                 {
                     gr2::real value = GetParam().riemann_tensor[i][j][k][l];
-                    EXPECT_NEAR(spacetime->get_riemann_tensor()[i][j][k][l], value, eps + std::llabs(value)*eps);
+                    EXPECT_NEAR(spacetime->get_riemann_tensor()[i][j][k][l], value, eps + std::abs(value)*eps);
                 }
 }
 
