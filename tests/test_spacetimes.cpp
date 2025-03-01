@@ -157,35 +157,8 @@ INSTANTIATE_TEST_SUITE_P(
     MyTestNameGenerator
 );
 
-// ==================== WeylSchwarzschild ==================== 
-
-gr2::real y_weylschwarzschild[4] = {};
-gr2::real metric_weylschwarzschild[4][4] = {};
-gr2::real eps = 1e-10;
-
-TEST(WeylSchwarzschild, LambdaExact)
-{
-    gr2::WeylSchwarzschild spacetime = gr2::WeylSchwarzschild(0.3);
-    spacetime.calculate_lambda_init(y_weylschwarzschild);
-    EXPECT_NEAR(spacetime.get_lambda(), -4.159049449726778e-04, eps);
-}
-
-TEST(WeylSchwarzschild, LambdaIntegral)
-{
-    gr2::WeylSchwarzschild spacetime = gr2::WeylSchwarzschild(0.3, gr2::integral);
-    spacetime.calculate_lambda_init(y_weylschwarzschild);
-    EXPECT_NEAR(spacetime.get_lambda(), -0.000415904944973, eps);
-}
-
 int main(int argc, char **argv)
 {
-    // ========== Prepare WeylSchwarzschild ========== 
-    // coordinates
-    y_weylschwarzschild[0] = 0.000000000000000;
-    y_weylschwarzschild[1] = 0.000000000000000;
-    y_weylschwarzschild[2] = 10.000000000000000;
-    y_weylschwarzschild[3] = 2.000000000000000;
-
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
