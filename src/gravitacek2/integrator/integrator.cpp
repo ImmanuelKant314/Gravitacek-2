@@ -10,7 +10,7 @@
 // ========== macros ========== 
 #define MAX_ITERATIONS_HADJUST 10
 #define MAX_ITERATIONS_SOLVE_EVENT 20
-#define EVENT_PRECISION 1e-15
+#define EVENT_PRECISION 1e-10
 
 namespace gr2
 {
@@ -67,9 +67,9 @@ namespace gr2
         real current_value_of_event = event->value(t3, yt2, dydt2);
 
         // check if event is triggered
-        // if event is not triggered return true
+        // if event is not triggered return false 
         // else if current value of event is close enough, return true
-        if (current_value_of_event*previous_value_of_event > 0 || current_value_of_event != 0)
+        if (current_value_of_event*previous_value_of_event > 0 || previous_value_of_event == 0)
             return false;
         else if (fabs(previous_value_of_event) < EVENT_PRECISION) 
             return true;
@@ -104,8 +104,12 @@ namespace gr2
                 // if new value of event is close enought, stop for-cycle
                 if( (h_b-h_a) < EVENT_PRECISION*std::max(h_a, h_b))
                     return true;
+                else if ( std::abs(b) < EVENT_PRECISION)
+                    return true;
             }
         }
+        std::cout << "steps " << h_a << " " << h_b << std::endl;
+        std::cout << "values " << a << " " << b << std::endl;
        
         if (i == MAX_ITERATIONS_SOLVE_EVENT)
             throw std::runtime_error("precise time of event could not be found");
@@ -226,7 +230,6 @@ namespace gr2
                     for (int j = 0; j < n; j++)
                         yt2[j] = yt[j];
                     this->stepper->step_err(t, yt2, h2, err2, dense, dydt, dydt2);
-
                     t2 = t + h2;
                 }
             }
@@ -234,7 +237,6 @@ namespace gr2
             // if too much iteration for hadjust, throw exception
             if (i >= MAX_ITERATIONS_HADJUST)
                 throw std::runtime_error("optimal step size was not found, MAX_ITERATIONS_HADJUST reached");
-
             // "commit" to the step
 
             for (int i = 0; i < n; i++)
@@ -269,8 +271,14 @@ namespace gr2
                 break;
 
             // calculate new values of events
+            std::cout << "calculating value of mod-events" << std::endl;
             for (int i = 0; i < number_of_events_modifying; i++)
+            {
                 events_modifying_values[i] = events_modifying[i]->value(t, yt, dydt);
+                std::cout << events_modifying_values[i] << std::endl;
+            }
+            std::cout << "end calculating value of mod-events" << std::endl;
+
         }
 
         // delete events
