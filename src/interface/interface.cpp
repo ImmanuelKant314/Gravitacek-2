@@ -1000,19 +1000,21 @@ void Interface::poincare_section_weyl(std::string text)
         if (!file.is_open())
             throw std::runtime_error("file " + file_name + "could not be opened");
 
-        gr2::Integrator integrator(spt, "DoPr853", 1e-6, 1e-6, true);
-        auto too_close = std::make_shared<StopBeforeBlackHole>(0.2);
+        gr2::Integrator integrator(spt, "DoPr853", 1e-16, 1e-16, false);
+        auto too_close = std::make_shared<StopBeforeBlackHole>(0.4);
         integrator.add_event(too_close);
-        auto error_too_high = std::make_shared<StopTooHighError>(spt,E,1e-10);
-        integrator.add_event(error_too_high);
-        auto stop_on_disk = std::make_shared<StopOnDisk>(true);
+        auto errorE_too_high = std::make_shared<StopTooHighErrorE>(spt,E,1e-10);
+        integrator.add_event(errorE_too_high);
+        auto errorL_too_high = std::make_shared<StopTooHighErrorL>(spt,L,1e-10);
+        integrator.add_event(errorL_too_high);
+        auto stop_on_disk = std::make_shared<StopOnDisk>(spt, 1e-4, true);
         integrator.add_event(stop_on_disk);
 
         // calculate norms
         for (int i = 0; i < n_rho; i++)
         {
             gr2::real rho = rho_min + i*delta_rho;
-            gr2::real z = 1e-5;
+            gr2::real z = 1e-3;
             y[gr2::Weyl::RHO] = rho;
             y[gr2::Weyl::Z] = z;
 
@@ -1033,18 +1035,19 @@ void Interface::poincare_section_weyl(std::string text)
                 continue;
             gr2::real norm = sqrtl(norm2/spt->get_metric()[gr2::Weyl::RHO][gr2::Weyl::RHO]);
 
+            std::cout << y[gr2::Weyl::RHO] << std::endl;
             for (int j = 0; j < angles; j++)
             {
                 // calculate initial conditions
                 gr2::real angle = j*delta_angle;
                 y[gr2::Weyl::URHO] = norm*sinl(angle);
-                y[gr2::Weyl::Z] = norm*sinl(angle);
+                y[gr2::Weyl::UZ] = norm*cosl(angle);
 
                 // calculate poincare section
                 try
                 {
                     /* code */
-                    integrator.integrate(y, 0, t_max, 1e-5);
+                    integrator.integrate(y, 0, t_max, 0.2);
                 }
                 catch(const std::exception& e)
                 {
@@ -1054,10 +1057,11 @@ void Interface::poincare_section_weyl(std::string text)
                 // save data
                 for (auto& d : stop_on_disk->data)
                     file << d[0] << ";" << d[1] << "\n";
-                file << "\n";
 
                 // delete data
+                std::cout << "Size:" << stop_on_disk->data.size() << std::endl;
                 stop_on_disk->data.clear();
+                file.flush();
             }
         }
         // close file

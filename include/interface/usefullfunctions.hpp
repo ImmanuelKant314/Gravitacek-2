@@ -42,23 +42,27 @@ public:
 
 class StopOnDisk : public gr2::Event
 {
+protected:
+    std::shared_ptr<gr2::Weyl> spt;
 public:
     bool poincare;
     std::vector<std::array<gr2::real, 2>> data;
-    StopOnDisk(bool poincare=false) : gr2::Event(gr2::EventType::modyfing), poincare(poincare), data()
+    gr2::real z;
+    StopOnDisk(std::shared_ptr<gr2::Weyl> spt, gr2::real z, bool poincare=false) : gr2::Event(gr2::EventType::modyfing), z(z), poincare(poincare), data(), spt(spt)
     {
 
     }
-
     virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
     {
-        return y[gr2::Weyl::Z];
+        return y[gr2::Weyl::Z]-this->z;
     }
 
     virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
     {
         if (poincare)
             data.push_back({y[gr2::Weyl::RHO],y[gr2::Weyl::URHO]});
+        y[gr2::Weyl::UZ]*=-1;
+        spt->function(t, y, dydt);
     }
 };
 
@@ -79,25 +83,45 @@ public:
 
     virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
     {
+        std::cout << "Black hole" << std::endl;
     }
 };
 
-class StopTooHighError : public gr2::Event
+class StopTooHighErrorE : public gr2::Event
 {
 public:
     std::shared_ptr<gr2::Weyl> spt;
     gr2::real E, E_, eps;
 
-    StopTooHighError(std::shared_ptr<gr2::Weyl> spt, gr2::real E, gr2::real eps):gr2::Event(gr2::EventType::data, true), spt(spt), E(E), eps(eps)
-    {
-
-    }
+    StopTooHighErrorE(std::shared_ptr<gr2::Weyl> spt, gr2::real E, gr2::real eps):gr2::Event(gr2::EventType::data, true), spt(spt), E(E), eps(eps)
+    {}
 
     virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
     {
         spt->calculate_metric(y);
         E_ = - spt->get_metric()[gr2::Weyl::T][gr2::Weyl::T]*y[gr2::Weyl::UT];
         return abs(E_-E)/E < eps?1:0;
+    }
+
+    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
+    {
+    }
+};
+
+class StopTooHighErrorL : public gr2::Event
+{
+public:
+    std::shared_ptr<gr2::Weyl> spt;
+    gr2::real L, L_, eps;
+
+    StopTooHighErrorL(std::shared_ptr<gr2::Weyl> spt, gr2::real L, gr2::real eps):gr2::Event(gr2::EventType::data, true), spt(spt), L(L), eps(eps)
+    {}
+
+    virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
+    {
+        spt->calculate_metric(y);
+        L_ = spt->get_metric()[gr2::Weyl::PHI][gr2::Weyl::PHI]*y[gr2::Weyl::UPHI];
+        return abs(L_-L)/L < eps?1:0;
     }
 
     virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override

@@ -258,6 +258,7 @@ namespace gr2
                 dydt[i] = dydt2[i];
             }
             t = t2;
+
             if (this->stepcontroller)
                 h = h2;
             h2 = h;
