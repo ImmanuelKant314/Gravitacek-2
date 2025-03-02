@@ -4,9 +4,61 @@
 
 #include "gtest/gtest.h"
 #include "gravitacek2/setup.hpp"
+#include "gravitacek2/integrator/integrator.hpp"
+#include "gravitacek2/integrator/event.hpp"
 #include "gravitacek2/integrator/steppers.hpp"
 #include "gravitacek2/geomotion/geomotion.hpp"
 #include "gravitacek2/geomotion/spacetimes.hpp"
+
+class DataRecord : public gr2::Event
+{
+protected:
+    int n;
+
+public:
+    std::vector<std::vector<gr2::real>> data;
+
+    DataRecord(int n) : gr2::Event(gr2::EventType::data)
+    {
+        this->n = n;
+    }
+
+    virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
+    {
+        return 0;
+    }
+
+    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
+    {
+        std::vector<gr2::real> record;
+        record.push_back(t);
+        for (int i=0; i < n; i++)
+            record.push_back(y[i]);
+        this->data.push_back(record);
+    }
+};
+
+class StopOnDisk : public gr2::Event
+{
+protected:
+    std::shared_ptr<gr2::Weyl> spt;
+public:
+    StopOnDisk(std::shared_ptr<gr2::Weyl> spt) : gr2::Event(gr2::EventType::modyfing), spt(spt)
+    {
+
+    }
+
+    virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
+    {
+        return y[gr2::Weyl::Z]-1e-6;
+    }
+
+    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
+    {
+        y[gr2::Weyl::UZ]*=-1;
+        spt->function(t, y, dydt);
+    }
+};
 
 TEST(SchwarzschildTrajectory, IntegralsOfMotionPlanar)
 {
@@ -285,6 +337,74 @@ TEST(WeylSchwarzschildTrajectory, IntegralsOfMotionGeneralWithLambda)
     for (int i = 0; i < N; i++)
     {
         stepper->step(0, y, dt, false, nullptr, nullptr);
+        spt->calculate_metric(y);
+        // energy
+        EXPECT_NEAR(E, -spt->get_metric()[gr2::Weyl::T][gr2::Weyl::T]*y[gr2::Weyl::UT], eps);
+        // angular momentum
+        EXPECT_NEAR(L, spt->get_metric()[gr2::Weyl::PHI][gr2::Weyl::PHI]*y[gr2::Weyl::UPHI], eps);// norm of four-velocity
+        // norm2
+        gr2::real norm2 = 0;
+        for (int j = 0; j < 4; j++)
+            norm2 += spt->get_metric()[j][j]*y[4+j]*y[4+j];
+        EXPECT_NEAR(-1, norm2, eps);
+        // lambda
+        spt->calculate_lambda_init(y);
+        EXPECT_NEAR(spt->get_lambda(), y[gr2::Weyl::LAMBDA], eps);
+    }
+}
+
+TEST(CombinedWeylSpacetime, IntegralsOfMotionGeneral)
+{
+    gr2::real eps = 1e-13;
+
+    // prepare objects
+    auto stepper = std::make_shared<gr2::DoPr853>();
+    auto sch = std::make_shared<gr2::WeylSchwarzschild>(1.0, gr2::exact, gr2::diff);
+    auto ikt = std::make_shared<gr2::InvertedKuzminToomreDisk>(1, 0.1, 20);
+    auto spt = std::make_shared<gr2::CombinedWeyl>(std::vector<std::shared_ptr<gr2::Weyl>>{sch, ikt});
+    stepper->set_OdeSystem(spt);
+    gr2::real y[9]{};
+
+    // initial conditions - position
+    y[gr2::Weyl::RHO] = sqrtl(16*14);
+    y[gr2::Weyl::Z] = 1e-5;
+    
+    // lambda
+    spt->calculate_lambda_init(y);
+    y[gr2::Weyl::LAMBDA] = spt->get_lambda();
+
+    // initial conditions - velocity
+    spt->calculate_metric(y);
+    gr2::real L = 3.6823981191047921;
+    gr2::real E = 0.97;
+    y[gr2::Weyl::UPHI] = L/spt->get_metric()[gr2::Weyl::PHI][gr2::Weyl::PHI];
+    y[gr2::Weyl::UT] = -E/spt->get_metric()[gr2::Weyl::T][gr2::Weyl::T];
+    y[gr2::Weyl::URHO] = 0.0;
+
+    gr2::real norm2 = 0;
+    for (int j = 0; j < 4; j++)
+        norm2 += spt->get_metric()[j][j]*y[4+j]*y[4+j];
+    ASSERT_GT(-1-norm2, 0);
+    y[gr2::Weyl::UZ] = sqrtl((-1-norm2)/spt->get_metric()[gr2::Weyl::Z][gr2::Weyl::Z]);
+
+    // initial conditions - steps
+    gr2::real dt = 0.05;
+
+    // integrator
+    gr2::Integrator integrator(spt, "DoPr853", false);
+
+    // events
+    auto data = std::make_shared<DataRecord>(9);
+    integrator.add_event(data);
+    auto stop_on_disk = std::make_shared<StopOnDisk>(spt);
+    integrator.add_event(stop_on_disk);
+
+    // integration
+    integrator.integrate(y, 0,300, dt);
+    for (auto &d : data->data)
+    {
+        for (int i = 0; i < 9; i++)
+            y[i] = d[i+1];
         spt->calculate_metric(y);
         // energy
         EXPECT_NEAR(E, -spt->get_metric()[gr2::Weyl::T][gr2::Weyl::T]*y[gr2::Weyl::UT], eps);
