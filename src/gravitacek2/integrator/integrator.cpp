@@ -10,7 +10,7 @@
 // ========== macros ========== 
 #define MAX_ITERATIONS_HADJUST 10
 #define MAX_ITERATIONS_SOLVE_EVENT 20
-#define EVENT_PRECISION 1e-13
+#define EVENT_PRECISION 1e-15
 
 namespace gr2
 {
@@ -105,7 +105,7 @@ namespace gr2
             // if new value of event is close enought, stop for-cycle
             if( (h_b-h_a) < EVENT_PRECISION*std::max(h_a, h_b))
                 return true;
-            else if (std::abs(current_value_of_event) < EVENT_PRECISION )
+            if (std::abs(current_value_of_event) < EVENT_PRECISION )
                 return true;
         }
         if (i == MAX_ITERATIONS_SOLVE_EVENT)
@@ -135,6 +135,17 @@ namespace gr2
         delete this->stepcontroller;
         this->stepcontroller = new StepControllerNR(ode->get_n(), this->stepper->get_err_order(), atol, rtol, 0.95, 0.2, 10.0);
     }
+
+    // Integrator::Integrator(std::shared_ptr<OdeSystem> ode, const std::string& stepper_name, const real &atol, const real &rtol, const real &min_step, const real &max_step, const bool &dense = false): h_boundary(true)
+    // {
+    //     this->basic_setup();
+    //     this->ode = ode;
+    //     this->dense = dense;
+    //     this->init_stepper(stepper_name);
+    //     this->stepper->set_OdeSystem(ode);
+    //     delete this->stepcontroller;
+    //     this->stepcontroller = new StepControllerNR(ode->get_n(), this->stepper->get_err_order(), atol, rtol, 0.95, 0.2, 10.0);
+    // }
 
     void Integrator::add_event(std::shared_ptr<Event> event)
     {
@@ -231,13 +242,15 @@ namespace gr2
                         yt2[j] = yt[j];
                     this->stepper->step_err(t, yt2, h2, err2, dense, dydt, dydt2);
                     t2 = t + h2;
+                    current_event = nullptr;
+                    current_event_terminal = false;
                 }
             }
 
             // if too much iteration for hadjust, throw exception
             if (i >= MAX_ITERATIONS_HADJUST)
                 throw std::runtime_error("optimal step size was not found, MAX_ITERATIONS_HADJUST reached");
-            
+
             // "commit" to the step
             for (int i = 0; i < n; i++)
             {
