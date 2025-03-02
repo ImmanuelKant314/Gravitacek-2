@@ -10,7 +10,7 @@
 // ========== macros ========== 
 #define MAX_ITERATIONS_HADJUST 10
 #define MAX_ITERATIONS_SOLVE_EVENT 20
-#define EVENT_PRECISION 1e-10
+#define EVENT_PRECISION 1e-13
 
 namespace gr2
 {
@@ -55,16 +55,16 @@ namespace gr2
         int i;
 
         // coppy array yt2 to yt3 and h2 to h3
-        for (i = 0; i< this->ode->get_n(); i++)
-        {
-            yt3[i] = yt2[i];
-            dydt3[i] = dydt2[i];
-        }
-        h3 = h2;
-        t3 = t2;
+        // for (i = 0; i< this->ode->get_n(); i++)
+        // {
+        //     yt3[i] = yt2[i];
+        //     dydt3[i] = dydt2[i];
+        // }
+        // h3 = h2;
+        // t3 = t2;
 
         // calculate current value of event
-        real current_value_of_event = event->value(t3, yt2, dydt2);
+        real current_value_of_event = event->value(t2, yt2, dydt2);
 
         // check if event is triggered
         // if event is not triggered return false 
@@ -72,23 +72,23 @@ namespace gr2
         if (current_value_of_event*previous_value_of_event > 0 || previous_value_of_event == 0)
             return false;
         else if (fabs(previous_value_of_event) < EVENT_PRECISION) 
-            return true;
+            return false;
 
         // prepare values for secant method
         real a = previous_value_of_event, b = current_value_of_event;
-        real h_a = 0, h_b = h3;
+        real h_a = 0, h_b = h2;
 
         // ========== Secant method ==========
         for (i = 0; i < MAX_ITERATIONS_SOLVE_EVENT; i++)
         {
             h3 = (h_a*b-h_b*a)/(b-a); // new value of step size
-            t3 = t + h3;
             // copy starting value of yt to yt3
             for (int j = 0; j < this->ode->get_n(); j++)
                 yt3[j] = yt[j];
 
             // take step and calculate new value of event
             this->stepper->step_err(t, yt3, h3, err3, dense, dydt, dydt3);
+            t3 = t + h3;
             current_value_of_event = event->value(t3, yt3, dydt3);
 
             // reduce interval for h
@@ -101,18 +101,17 @@ namespace gr2
             {
                 h_b = h3;
                 b = current_value_of_event;
-                // if new value of event is close enought, stop for-cycle
-                if( (h_b-h_a) < EVENT_PRECISION*std::max(h_a, h_b))
-                    return true;
-                else if ( std::abs(b) < EVENT_PRECISION)
-                    return true;
             }
+            // if new value of event is close enought, stop for-cycle
+            if( (h_b-h_a) < EVENT_PRECISION*std::max(h_a, h_b))
+                return true;
+            else if (std::abs(current_value_of_event) < EVENT_PRECISION )
+                return true;
         }
-        std::cout << "steps " << h_a << " " << h_b << std::endl;
-        std::cout << "values " << a << " " << b << std::endl;
-       
         if (i == MAX_ITERATIONS_SOLVE_EVENT)
+        {
             throw std::runtime_error("precise time of event could not be found");
+        }
 
         return true;
     }
@@ -180,7 +179,7 @@ namespace gr2
             this->yt[i] = this->yt2[i] = y_start[i];
         this->t = t_start;
         this->h = this->h2 = this->h3 = h_start;
-        t2 = t3 = t + h2;
+        t2 = t3 = t;
         this->ode->function(t, yt, dydt);
 
         // number of events
@@ -198,6 +197,7 @@ namespace gr2
         {   
             // taky a step
             this->stepper->step_err(t, yt2, h, err2, dense, dydt, dydt2);
+            t2 = t + h;
 
             // null current event
             current_event = nullptr;
@@ -237,8 +237,8 @@ namespace gr2
             // if too much iteration for hadjust, throw exception
             if (i >= MAX_ITERATIONS_HADJUST)
                 throw std::runtime_error("optimal step size was not found, MAX_ITERATIONS_HADJUST reached");
+            
             // "commit" to the step
-
             for (int i = 0; i < n; i++)
             {
                 yt[i] = yt2[i];
@@ -249,7 +249,7 @@ namespace gr2
                 h = h2;
             h2 = h;
             h3 = h;
-            t2 = t3 = t + h;
+            // t2 = t3 = t + h;
 
             if (dense)
                 this->stepper->prepare_dense();
@@ -271,14 +271,17 @@ namespace gr2
                 break;
 
             // calculate new values of events
-            std::cout << "calculating value of mod-events" << std::endl;
             for (int i = 0; i < number_of_events_modifying; i++)
             {
                 events_modifying_values[i] = events_modifying[i]->value(t, yt, dydt);
-                std::cout << events_modifying_values[i] << std::endl;
             }
-            std::cout << "end calculating value of mod-events" << std::endl;
 
+            // propagate changes from events
+            for (int i = 0; i < n; i++)
+            {
+                yt2[i] = yt[i];
+                dydt2[i] = dydt[i];
+            }
         }
 
         // delete events
