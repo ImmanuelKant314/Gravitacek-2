@@ -225,7 +225,6 @@ protected:
      */
     void poincare_section_weyl(std::string text);
 
-
 public:
     Interface();
 
