@@ -43,6 +43,7 @@ class StopOnDisk : public gr2::Event
 protected:
     std::shared_ptr<gr2::Weyl> spt;
 public:
+    std::vector<gr2::real> data;
     StopOnDisk(std::shared_ptr<gr2::Weyl> spt) : gr2::Event(gr2::EventType::modyfing), spt(spt)
     {
 
@@ -50,13 +51,14 @@ public:
 
     virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
     {
-        return y[gr2::Weyl::Z]-1e-6;
+        return y[gr2::Weyl::Z]-1e-9;
     }
 
     virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
     {
         y[gr2::Weyl::UZ]*=-1;
         spt->function(t, y, dydt);
+        data.push_back(y[gr2::Weyl::Z]);
     }
 };
 
@@ -391,7 +393,7 @@ TEST(CombinedWeylSpacetime, IntegralsOfMotionGeneral)
     gr2::real dt = 0.05;
 
     // integrator
-    gr2::Integrator integrator(spt, "DoPr853", false);
+    gr2::Integrator integrator(spt, "DoPr853", false, 1e-15, 1e-15);
 
     // events
     auto data = std::make_shared<DataRecord>(9);
@@ -401,6 +403,8 @@ TEST(CombinedWeylSpacetime, IntegralsOfMotionGeneral)
 
     // integration
     integrator.integrate(y, 0,300, dt);
+
+    // integrals of motion
     for (auto &d : data->data)
     {
         for (int i = 0; i < 9; i++)
@@ -419,6 +423,10 @@ TEST(CombinedWeylSpacetime, IntegralsOfMotionGeneral)
         spt->calculate_lambda_init(y);
         EXPECT_NEAR(spt->get_lambda(), y[gr2::Weyl::LAMBDA], eps);
     }
+
+    // precision of event
+    for (auto &d : stop_on_disk->data)
+        EXPECT_NEAR(d, 1e-9, 1e-9);
 }
 
 int main(int argc, char **argv)
