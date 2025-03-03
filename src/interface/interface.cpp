@@ -1035,7 +1035,7 @@ void Interface::poincare_section_weyl(std::string text)
                 continue;
             gr2::real norm = sqrtl(norm2/spt->get_metric()[gr2::Weyl::RHO][gr2::Weyl::RHO]);
 
-            std::cout << y[gr2::Weyl::RHO] << std::endl;
+            std::cout << "rho" << y[gr2::Weyl::RHO] << std::endl;
             for (int j = 0; j < angles; j++)
             {
                 // calculate initial conditions
@@ -1059,7 +1059,6 @@ void Interface::poincare_section_weyl(std::string text)
                     file << d[0] << ";" << d[1] << "\n";
 
                 // delete data
-                std::cout << "Size:" << stop_on_disk->data.size() << std::endl;
                 stop_on_disk->data.clear();
                 file.flush();
             }

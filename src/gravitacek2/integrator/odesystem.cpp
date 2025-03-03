@@ -7,6 +7,11 @@ namespace gr2
         this->n = n;
     }
 
+    OdeSystem::~OdeSystem()
+    {
+
+    }
+
     int OdeSystem::get_n() const
     {
         return this->n;

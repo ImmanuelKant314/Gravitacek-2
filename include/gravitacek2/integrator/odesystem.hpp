@@ -32,6 +32,8 @@ namespace gr2
          */
         OdeSystem(const int &n);
 
+        virtual ~OdeSystem();
+
         /**
          * @brief Return number of equations.
          *

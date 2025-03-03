@@ -9,8 +9,25 @@ namespace gr2
 
     DoPr853::~DoPr853()
     {
-        delete[] k2, k3, k4, k5, k6, k7, k8, k9, k10, k11, k12;
-        delete[] pc1, pc2, pc3, pc4, pc5, pc6, pc7, pc8;
+        delete[] k2;
+        delete[] k3;
+        delete[] k4;
+        delete[] k5;
+        delete[] k6;
+        delete[] k7;
+        delete[] k8;
+        delete[] k9;
+        delete[] k10;
+        delete[] k11;
+        delete[] k12;
+        delete[] pc1;
+        delete[] pc2;
+        delete[] pc3;
+        delete[] pc4;
+        delete[] pc5;
+        delete[] pc6;
+        delete[] pc7;
+        delete[] pc8;
         delete[] k_help;
     }
 
@@ -20,8 +37,25 @@ namespace gr2
         this->StepperBase::set_OdeSystem(ode);
         if(old_n != n)
         {
-            delete[] k2, k3, k4, k5, k6, k7, k8, k9, k10, k11, k12;
-            delete[] pc1, pc2, pc3, pc4, pc5, pc6, pc7, pc8;
+            delete[] k2;
+            delete[] k3;
+            delete[] k4;
+            delete[] k5;
+            delete[] k6;
+            delete[] k7;
+            delete[] k8;
+            delete[] k9;
+            delete[] k10;
+            delete[] k11;
+            delete[] k12;
+            delete[] pc1;
+            delete[] pc2;
+            delete[] pc3;
+            delete[] pc4;
+            delete[] pc5;
+            delete[] pc6;
+            delete[] pc7;
+            delete[] pc8;
             delete[] k_help;
             k1 = dydt_in;
             k2 = new real[n];

@@ -60,7 +60,11 @@ namespace gr2
 
     InvertedMorganMorganDisk::~InvertedMorganMorganDisk()
     {
-        delete[] C, P0, P1, Q0, Q1;
+        delete[] C;
+        delete[] P0;
+        delete[] P1;
+        delete[] Q0;
+        delete[] Q1;
     }
 
     void InvertedMorganMorganDisk::calculate_lambda_init(real const* y)

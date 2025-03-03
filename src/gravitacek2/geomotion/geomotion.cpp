@@ -2,16 +2,16 @@
 
 namespace gr2
 {
-    bool GeoMotion::necessary_calculate(const real *y, real *y_save, const int& n)
+    bool GeoMotion::necessary_calculate(const real *y, real *&y_save, const int& nn)
     {
         if (!y_save)
         {
-            y_save = new real[n];
+            y_save = new real[nn];
             return true;
         }
 
         bool test = false;
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < nn; i++)
         {
             if (!test && y[i] != y_save[i])
                 test = true;
@@ -95,7 +95,9 @@ namespace gr2
         }
 
         // coordinates
-        delete[] y_c, y_m, y_r;
+        delete[] y_c;
+        delete[] y_m;
+        delete[] y_r;
     };
 
     int GeoMotion::get_dim() const

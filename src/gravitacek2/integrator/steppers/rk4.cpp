@@ -6,7 +6,9 @@ namespace gr2
 
     RK4::~RK4()
     {
-        delete[] k2, k3, k4;
+        delete[] k2;
+        delete[] k3;
+        delete[] k4;
     }
 
     void RK4::set_OdeSystem(std::shared_ptr<OdeSystem> ode)
@@ -15,7 +17,9 @@ namespace gr2
         this->StepperBase::set_OdeSystem(ode);
         if (old_n != n)
         {
-            delete[] k2, k3, k4;
+            delete[] k2;
+            delete[] k3;
+            delete[] k4;
             k1 = dydt_in;
             k2 = new real[n];
             k3 = new real[n];

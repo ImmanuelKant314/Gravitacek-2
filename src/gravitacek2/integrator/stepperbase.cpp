@@ -7,8 +7,16 @@ namespace gr2
 
     StepperBase::~StepperBase()
     {
-        delete[] y_in, y_out, y_err, y_cur, y_help;
-        delete[] dydt_in, dydt_out, dydt_cur, dydt_opt;
+        delete[] y_in;
+        delete[] y_out;
+        delete[] y_err;
+        delete[] y_cur;
+        delete[] y_help;
+
+        delete[] dydt_in;
+        delete[] dydt_out;
+        delete[] dydt_cur;
+        delete[] dydt_opt;
     }
 
     void StepperBase::set_OdeSystem(std::shared_ptr<OdeSystem> ode)
@@ -21,8 +29,16 @@ namespace gr2
         // create new arrays
         if (old_n != n)
         {
-            delete[] y_in, y_out, y_err, y_cur, y_help;
-            delete[] dydt_in, dydt_out, dydt_cur, dydt_opt;
+            delete[] y_in;
+            delete[] y_out;
+            delete[] y_err;
+            delete[] y_cur;
+            delete[] y_help;
+
+            delete[] dydt_in;
+            delete[] dydt_out;
+            delete[] dydt_cur;
+            delete[] dydt_opt;
 
             y_in = new real[n];
             y_out = new real[n];

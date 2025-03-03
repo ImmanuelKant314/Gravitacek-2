@@ -29,7 +29,7 @@ namespace gr2
          * @return true if calculation is necessary
          * @return false if calculation is not necessary
          */
-        bool necessary_calculate(const real *y, real *y_save, const int& n);
+        bool necessary_calculate(const real *y, real *&y_save, const int& n);
     public:
         // ========== Constructors & destructors ========== 
         /**
@@ -44,7 +44,7 @@ namespace gr2
          * @brief Destroy the GeoMotion object.
          * 
          */
-        ~GeoMotion();
+        virtual ~GeoMotion();
 
         // ========== Calculate ========== 
 

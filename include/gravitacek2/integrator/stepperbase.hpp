@@ -46,7 +46,7 @@ namespace gr2
          * @brief Destroy the Stepper object.
          * 
          */
-        ~StepperBase();
+        virtual ~StepperBase();
 
         /**
          * @brief Set ODE for stepper.

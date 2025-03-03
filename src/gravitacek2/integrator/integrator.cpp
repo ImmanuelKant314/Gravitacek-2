@@ -123,6 +123,18 @@ namespace gr2
         this->ode = ode;
         this->init_stepper(stepper_name);
         this->stepper->set_OdeSystem(ode);
+
+        int n = this->ode->get_n();
+
+        this->yt = new real[n];
+        this->yt2 = new real[n];
+        this->yt3 = new real[n];
+        this->dydt = new real[n];
+        this->dydt2 = new real[n];
+        this->dydt3 = new real[n];
+        this->err = new real[n];
+        this->err2 = new real[n];
+        this->err3 = new real[n];
     }
 
     Integrator::Integrator(std::shared_ptr<OdeSystem> ode, const std::string& stepper_name, const real &atol, const real &rtol, const bool &dense)
@@ -132,8 +144,20 @@ namespace gr2
         this->dense = dense;
         this->init_stepper(stepper_name);
         this->stepper->set_OdeSystem(ode);
-        delete this->stepcontroller;
         this->stepcontroller = new StepControllerNR(ode->get_n(), this->stepper->get_err_order(), atol, rtol, 0.95, 0.2, 10.0);
+        
+        int n = this->ode->get_n();
+
+        this->yt = new real[n];
+        this->yt2 = new real[n];
+        this->yt3 = new real[n];
+        this->dydt = new real[n];
+        this->dydt2 = new real[n];
+        this->dydt3 = new real[n];
+        this->err = new real[n];
+        this->err2 = new real[n];
+        this->err3 = new real[n];
+        this->events_modifying_values = new real[n];
     }
 
     // Integrator::Integrator(std::shared_ptr<OdeSystem> ode, const std::string& stepper_name, const real &atol, const real &rtol, const real &min_step, const real &max_step, const bool &dense = false): h_boundary(true)
@@ -167,6 +191,16 @@ namespace gr2
     {
         delete stepper;
         delete stepcontroller;
+        delete[] yt;
+        delete[] yt2;
+        delete[] yt3;
+        delete[] dydt;
+        delete[] dydt2;
+        delete[] dydt3;
+        delete[] err;
+        delete[] err2;
+        delete[] err3;
+        delete[] events_modifying_values;
     }
 
     void Integrator::integrate(const real y_start[], const real &t_start, const real &t_end, const real &h_start)
@@ -175,15 +209,6 @@ namespace gr2
         int i;
         int n = this->ode->get_n();
 
-        this->yt = new real[n];
-        this->yt2 = new real[n];
-        this->yt3 = new real[n];
-        this->dydt = new real[n];
-        this->dydt2 = new real[n];
-        this->dydt3 = new real[n];
-        this->err = new real[n];
-        this->err2 = new real[n];
-        this->err3 = new real[n];
 
         // copy values internaly
         for (int i = 0; i < n; i++)
@@ -297,10 +322,6 @@ namespace gr2
                 dydt2[i] = dydt[i];
             }
         }
-
-        // delete events
         delete[] events_modifying_values;
-        // delete other arrays
-        delete[] yt, yt2, yt3, dydt, dydt2, dydt3, err, err2, err3;
     }
 }
