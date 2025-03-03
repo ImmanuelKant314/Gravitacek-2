@@ -225,6 +225,16 @@ protected:
      */
     void poincare_section_weyl(std::string text);
 
+    /**
+     * @brief Calculate numerical expansions for Weyl spacetime.
+     * 
+     * Argument should be in form:
+     * (weyl_spacetime(weyl_spacetimes_params),E,L,(rho_min,rho_max,n_rho),(z_min,z_max,n_z),rho_start,u_rho_frac,tmax,dt,file)
+     *
+     * @param text argument for numerecal_expansions
+     */
+    void numerical_expansions_weyl(std::string text);
+
 public:
     Interface();
 

@@ -296,7 +296,7 @@ namespace gr2
             if (current_event)
                 current_event->apply(stepper, t, yt, dydt);
             
-            // data events 
+            // data events
             for (auto &event : events_data)
                 if (event->value(t, yt, dydt) == 0)
                 {
