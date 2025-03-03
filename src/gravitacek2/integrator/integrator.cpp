@@ -200,7 +200,6 @@ namespace gr2
         delete[] err;
         delete[] err2;
         delete[] err3;
-        delete[] events_modifying_values;
     }
 
     void Integrator::integrate(const real y_start[], const real &t_start, const real &t_end, const real &h_start)
