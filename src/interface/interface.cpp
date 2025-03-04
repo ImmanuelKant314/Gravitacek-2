@@ -1119,10 +1119,12 @@ void Interface::numerical_expansions_weyl(std::string text)
 
     gr2::real t_max = std::stold(args[7]);
     std::string file_name = args[8];
+    std::string file_name2 = args[9];
 
     gr2::real eps_pos = 1e-8;
 
     std::ofstream file;
+    std::ofstream file2;
     gr2::real y[19]={};
     
     // Procede in calculation
@@ -1130,6 +1132,7 @@ void Interface::numerical_expansions_weyl(std::string text)
     {
         // open file
         file.open(file_name);
+        file2.open(file_name2);
 
         if (!file.is_open())
             throw std::runtime_error("file " + file_name + "could not be opened");
@@ -1227,13 +1230,23 @@ void Interface::numerical_expansions_weyl(std::string text)
                 file << i << ";" << j << ";" << rho_min + i*delta_rho << ";" << rho_max + j*delta_z << ";" << num_expansions->data[i][j] << std::endl;
             }
 
+        for (int i = 0; i<n_rho; i++)
+            for (int j = 0; j<n_z; j++)
+            {
+                file2 << i << ";" << j << ";" << rho_min + i*delta_rho << ";" << rho_max + j*delta_z << ";" << num_expansions->time_spend_in_area[i][j] << std::endl;
+            }
+
         file.flush();
+        file2.flush();
+
         // close file
         file.close();
+        file2.close();
     }
     catch(const std::exception& e)
     {
         file.close();
+        file2.close();
         throw e;
     }
 }
@@ -1334,7 +1347,9 @@ void Interface::trajectory_weyl(std::string text)
             file << std::endl;
         }
 
+        // flush files
         file.flush();
+
         // close file
         file.close();
     }

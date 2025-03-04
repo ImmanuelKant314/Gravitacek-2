@@ -214,28 +214,34 @@ public:
     gr2::real *log_norm;
     gr2::real dt;
     gr2::real** data;
+    gr2::real** time_spend_in_area;
 
     NumericalExpansions(std::shared_ptr<gr2::Weyl> spt, gr2::real rho_min, gr2::real rho_max, int n_rho, gr2::real z_min, gr2::real z_max, int n_z, gr2::real *log_norm):gr2::Event(gr2::EventType::data, false), spt(spt), dt(dt), rho_min(rho_min), rho_max(rho_max), n_rho(n_rho), z_min(z_min), z_max(z_max), n_z(n_z), log_norm(log_norm), t_prev(0)
     {
         delta_rho = (rho_max-rho_min)/n_rho;
         delta_z = (z_max-z_min)/n_z;
         data = new gr2::real*[n_rho];
+        time_spend_in_area = new gr2::real*[n_rho];
         for(int i = 0; i < n_rho; i++)
         {
-            data[i] = new gr2::real[n_z];
-            for (int j = 0; j < n_z; j++)
-                data[i][j] = 0;
+            data[i] = new gr2::real[n_z]{};
+            time_spend_in_area[i] = new gr2::real[n_z]{};
         }
 
         // time of previsou step
         t_prev = 0;
+        t_last_step = 0;
     }
 
     ~NumericalExpansions()
     {
         for (int i = 0; i < n_rho; i++)
+        {
             delete[] data[i];
+            delete[] time_spend_in_area[i];
+        }
         delete[] data;
+        delete[] time_spend_in_area;
     }
 
     virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
@@ -343,6 +349,8 @@ public:
                 // TODO: save result to array
                 // std::cout << norm_of_sep2 << " " << *(this->log_norm) << " " << log_norm_prev << std::endl;
                 this->data[i_iter_old][j_iter_old] += log_norm_of_sep + *(this->log_norm) - log_norm_prev;
+                this->time_spend_in_area[i_iter_old][j_iter_old] += t_event - t_prev;
+                t_prev = t_event;
                 log_norm_prev = log_norm_of_sep + *(this->log_norm);
             }
 
