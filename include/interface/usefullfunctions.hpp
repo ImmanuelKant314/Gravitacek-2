@@ -357,3 +357,35 @@ public:
         t_last_step = t;
     }
 };
+
+class ConstantStepDataMonitoring : public gr2::Event
+{
+public:
+    gr2::real t;
+    gr2::real h;
+    std::vector<gr2::real> times;
+    std::vector<std::array<gr2::real, 9>> data;
+    ConstantStepDataMonitoring(gr2::real t_init, gr2::real h) : gr2::Event(gr2::EventType::data), times(), data()
+    {
+        t = t_init;
+        this->h = h;
+    }
+    virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
+    {   
+        return 0;
+    }
+    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[])
+    {
+        while (this->t<t)
+        {
+            times.push_back(this->t);
+            std::array<gr2::real, 9> y_val;
+            for (int i = 0; i<9; i++)
+            {
+                y_val[i] = y[i];
+            }
+            data.push_back(y_val);
+            this->t += h;
+        }
+    };
+};

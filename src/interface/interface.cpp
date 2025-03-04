@@ -372,6 +372,11 @@ bool Interface::try_apply_function(std::string text)
         this->numerical_expansions_weyl(rest);
         return true;
     }
+    else if (name == "trajectory_weyl")
+    {
+        this->trajectory_weyl(rest);
+        return true;
+    }
     return false;
 }
 
@@ -1109,12 +1114,11 @@ void Interface::numerical_expansions_weyl(std::string text)
     int n_z = std::stoi(range_z[2]);
     gr2::real delta_z = (z_max-z_min)/(n_z-1);
     
-    gr2::real rho_start = std::stoll(args[5]);
-    gr2::real u_rho_frac = std::stoll(args[6]);
+    gr2::real rho_start = std::stold(args[5]);
+    gr2::real u_rho_frac = std::stold(args[6]);
 
-    gr2::real t_max = std::stoll(args[7]);
-    gr2::real dt = std::stoll(args[8]);
-    std::string file_name = args[9];
+    gr2::real t_max = std::stold(args[7]);
+    std::string file_name = args[8];
 
     gr2::real eps_pos = 1e-8;
 
@@ -1222,6 +1226,113 @@ void Interface::numerical_expansions_weyl(std::string text)
             {
                 file << i << ";" << j << ";" << rho_min + i*delta_rho << ";" << rho_max + j*delta_z << ";" << num_expansions->data[i][j] << std::endl;
             }
+
+        file.flush();
+        // close file
+        file.close();
+    }
+    catch(const std::exception& e)
+    {
+        file.close();
+        throw e;
+    }
+}
+
+void Interface::trajectory_weyl(std::string text)
+{
+    // Initialize calculation
+    auto args = find_function_arguments(text);
+    int number_of_arguments = 8;
+    if (args.size() < number_of_arguments)
+        throw std::invalid_argument("too little arguments for local_expansions_Weyl");
+    else if (args.size() > number_of_arguments)
+        throw std::invalid_argument("too much arguments for local_expansions_Weyl");
+
+    std::shared_ptr<gr2::Weyl> spt = this->create_weyl_spacetime(args[0]);
+
+    gr2::real E = std::stold(args[1]);
+    gr2::real L = std::stold(args[2]);
+    
+    gr2::real rho_start = std::stold(args[3]);
+    gr2::real u_rho_frac = std::stold(args[4]);
+
+    gr2::real t_max = std::stold(args[5]);
+    gr2::real dt = std::stold(args[6]);
+    std::string file_name = args[7];
+
+    std::ofstream file;
+    gr2::real y[9]={};
+    
+    // Procede in calculation
+    try
+    {
+        // open file
+        file.open(file_name);
+
+        if (!file.is_open())
+            throw std::runtime_error("file " + file_name + "could not be opened");
+
+        gr2::Integrator integrator(spt, "DoPr853", 1e-16, 1e-16, true);
+        auto data_monitor = std::make_shared<ConstantStepDataMonitoring>(0, dt);
+        integrator.add_event(data_monitor);
+        auto too_close = std::make_shared<StopBeforeBlackHole>(0.4);
+        integrator.add_event(too_close);
+        auto errorE_too_high = std::make_shared<StopTooHighErrorE>(spt,E,1e-10);
+        integrator.add_event(errorE_too_high);
+        auto errorL_too_high = std::make_shared<StopTooHighErrorL>(spt,L,1e-10);
+        integrator.add_event(errorL_too_high);
+        auto stop_on_disk = std::make_shared<StopOnDisk>(spt, 1e-4, false);
+        integrator.add_event(stop_on_disk);
+
+        // ========== initial conditions for the first particle ==========
+        gr2::real rho = rho_start;
+        gr2::real z = 1e-3;
+        y[gr2::Weyl::RHO] = rho;
+        y[gr2::Weyl::Z] = z;
+
+        // calculate lambda 
+        spt->calculate_lambda_init(y);
+        y[gr2::Weyl::LAMBDA] = spt->get_lambda();
+
+        // calculate ut (from E)
+        spt->calculate_metric(y);
+        y[gr2::Weyl::UT] = -E/spt->get_metric()[gr2::Weyl::T][gr2::Weyl::T];
+
+        // calculate uphi (from L)
+        y[gr2::Weyl::UPHI] = L/spt->get_metric()[gr2::Weyl::PHI][gr2::Weyl::PHI];
+
+        // calculate size of rest velocity
+        gr2::real norm2 = (-1 + y[gr2::Weyl::UT]*E - y[gr2::Weyl::UPHI]*L);
+        if (norm2 < 0)
+            return;
+        gr2::real norm = sqrtl(norm2/spt->get_metric()[gr2::Weyl::RHO][gr2::Weyl::RHO]);
+
+        // calculate velocity
+        y[gr2::Weyl::URHO] = norm*u_rho_frac;
+        y[gr2::Weyl::UZ] = norm*sqrtl(1-u_rho_frac*u_rho_frac);
+
+        // calculate trajectory
+        try
+        {
+            /* code */
+            std::cout << "Integrujeme" << std::endl;
+            integrator.integrate(y, 0, t_max, 0.2);
+            std::cout << "Konec integrace" << std::endl;
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+        }
+        
+        // TODO: save data
+        std::cout << "Jdeme ukladat" << std::endl;
+        for (auto &d:data_monitor->data)
+        {
+            file << d[0];
+            for (int i = 1; i < 9; i++)
+                file << ";" << d[i];
+            file << std::endl;
+        }
 
         file.flush();
         // close file
