@@ -9,7 +9,9 @@ namespace gr2
 {
     gsl_matrix* matrix_H(GeoMotion* spt, const real *y);
 
-    gsl_matrix* time_corrected_matrix_H(GeoMotion* spt, const real *y);
+    // gsl_matrix* time_corrected_matrix_H(GeoMotion* spt, const real *y);
 
-    gsl_matrix* norm_growth(GeoMotion* spt, const real *y);
+    real expected_growth(GeoMotion* spt, const real *y);
+
+    real max_norm_growth(GeoMotion* spt, const real *y);
 }

@@ -600,9 +600,6 @@ void Interface::local_expansions_weyl(std::string text)
 
     std::ofstream file;
     gr2::real y[9]={};
-    gsl_matrix* H;
-    gsl_vector_complex *eig_vals;
-    gsl_eigen_nonsymm_workspace *work_space;
 
     // Procede in calculation
     try
@@ -613,9 +610,6 @@ void Interface::local_expansions_weyl(std::string text)
         if (!file.is_open())
             throw std::runtime_error("file " + file_name + "could not be opened");
 
-        // prepare calculation of eigenvalues
-        eig_vals = gsl_vector_complex_alloc(8);
-        work_space = gsl_eigen_nonsymm_alloc(8);
 
         // calculate eigenvalues
         for (int i = 0; i < n_rho; i++)
@@ -654,36 +648,19 @@ void Interface::local_expansions_weyl(std::string text)
                     y[gr2::Weyl::URHO] = norm_c*cosl(angle);
                     y[gr2::Weyl::UZ] = norm_c*sinl(angle);
 
-                    // calculate matrix H
-                    H = gr2::time_corrected_matrix_H(spt.get(), y);
-
-                    // calculate eigen values
-                    gsl_eigen_nonsymm(H, eig_vals, work_space);
-                    
-                    // find the greatest real part
-                    for (int i = 0; i < 8; i++)
-                        value = std::max((double)value, GSL_REAL(gsl_vector_complex_get(eig_vals, i)));
+                    // calculate value
+                    value = gr2::expected_growth(spt.get(), y);
                     method_value = std::max(value, method_value);
-
-                    // free the matrix
-                    gsl_matrix_free(H);
                 }
                 // save values to the file
                 file << i << ";" << j << ";" << rho << ";" << z << ";" << method_value << "\n";
             }
-
-            // free the work space
-            gsl_vector_complex_free(eig_vals);
-            gsl_eigen_nonsymm_free(work_space);
 
             // close file
             file.close();
     }
     catch(const std::exception& e)
     {
-        gsl_matrix_free(H);
-        gsl_vector_complex_free(eig_vals);
-        gsl_eigen_nonsymm_free(work_space);
         file.close();
         throw e;
     }
@@ -725,9 +702,6 @@ void Interface::norm_growth_weyl(std::string text)
 
     std::ofstream file;
     gr2::real y[9]={};
-    gsl_matrix *H;
-    gsl_vector *eig_vals;
-    gsl_eigen_symm_workspace *work_space;
 
     // Procede in calculation
     try
@@ -737,10 +711,6 @@ void Interface::norm_growth_weyl(std::string text)
 
         if (!file.is_open())
             throw std::runtime_error("file " + file_name + "could not be opened");
-
-        // prepare calculation of eigenvalues
-        eig_vals = gsl_vector_alloc(8);
-        work_space = gsl_eigen_symm_alloc(8);
 
         // calculate eigenvalues
         for (int i = 0; i < n_rho; i++)
@@ -779,36 +749,19 @@ void Interface::norm_growth_weyl(std::string text)
                     y[gr2::Weyl::URHO] = norm_c*cosl(angle);
                     y[gr2::Weyl::UZ] = norm_c*sinl(angle);
 
-                    // calculate matrix H
-                    H = gr2::time_corrected_matrix_H(spt.get(), y);
-
-                    // calculate eigen values
-                    gsl_eigen_symm(H, eig_vals, work_space);
-                    
-                    // find the greatest real part
-                    for (int i = 0; i < 8; i++)
-                        value = std::max((double)value, gsl_vector_get(eig_vals, i));
+                    // calculate value
+                    value = gr2::max_norm_growth(spt.get(), y);
                     method_value = std::max(value, method_value);
-
-                    // free the matrix
-                    gsl_matrix_free(H);
                 }
                 // save values to the file
                 file << i << ";" << j << ";" << rho << ";" << z << ";" << method_value << "\n";
             }
-
-            // free the work space
-            gsl_vector_free(eig_vals);
-            gsl_eigen_symm_free(work_space);
 
             // close file
             file.close();
     }
     catch(const std::exception& e)
     {
-        gsl_matrix_free(H);
-        gsl_vector_free(eig_vals);
-        gsl_eigen_symm_free(work_space);
         file.close();
         throw e;
     }
