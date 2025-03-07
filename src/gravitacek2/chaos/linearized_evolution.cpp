@@ -65,7 +65,7 @@ namespace gr2
         gsl_eigen_nonsymm(H, eig_vals, work_space);
 
         // find greates real part
-        gr2::real value, method_value;
+        gr2::real value=0;
         for (int i = 0; i < 8; i++)
             value = std::max((double)value, GSL_REAL(gsl_vector_complex_get(eig_vals, i)));
 
@@ -202,6 +202,9 @@ namespace gr2
         gsl_matrix *tmp;                // temporary matrix for multiplication
         gr2::real u_up[4]{}, u_down[4]{};
 
+        gsl_vector *eig_vals;
+        gsl_eigen_symm_workspace *work_space;
+
         try
         {
             // calculate H
@@ -292,9 +295,6 @@ namespace gr2
             gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, tmp, P, 0.0, matrix);
 
             // TODO: calculate value
-            gsl_vector *eig_vals;
-            gsl_eigen_symm_workspace *work_space;
-
             // calculate matrix H
             eig_vals = gsl_vector_alloc(8);
             work_space = gsl_eigen_symm_alloc(8);
@@ -307,11 +307,15 @@ namespace gr2
 
             // delete matrices
             gsl_matrix_free(H);
+            gsl_matrix_free(gH);
             gsl_matrix_free(g);
             gsl_matrix_free(gHT);
             gsl_matrix_free(mod_g);
             gsl_matrix_free(P);
             gsl_matrix_free(tmp);
+            gsl_matrix_free(matrix);
+            gsl_vector_free(eig_vals);
+            gsl_eigen_symm_free(work_space);
 
             // return
             return value*0.5;
@@ -325,6 +329,9 @@ namespace gr2
             gsl_matrix_free(mod_g);
             gsl_matrix_free(P);
             gsl_matrix_free(tmp);
+            gsl_matrix_free(matrix);
+            gsl_vector_free(eig_vals);
+            gsl_eigen_symm_free(work_space);
             throw e;
         }
         
