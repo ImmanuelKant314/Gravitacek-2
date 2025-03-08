@@ -58,15 +58,16 @@ namespace gr2
 
         // calculate matrix H
         H = gr2::matrix_H(spt, y);
+        gsl_matrix_transpose(H);
         eig_vals = gsl_vector_complex_alloc(8);
         work_space = gsl_eigen_nonsymm_alloc(8);
 
         // calculate eigen values
-        gsl_eigen_nonsymm(H, eig_vals, work_space);
+        int i = gsl_eigen_nonsymm(H, eig_vals, work_space);
 
         // find greates real part
         gr2::real value=0;
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < work_space->n_evals; i++)
             value = std::max((double)value, GSL_REAL(gsl_vector_complex_get(eig_vals, i)));
 
         // free the matrix
@@ -300,7 +301,7 @@ namespace gr2
             work_space = gsl_eigen_symm_alloc(8);
 
             // calculate eigen values
-            gsl_eigen_symm(matrix, eig_vals, work_space);
+            int status = gsl_eigen_symm(matrix, eig_vals, work_space);
             gr2::real value=0;
             for (int i = 0; i < 8; i++)
                 value = std::max((double)value, gsl_vector_get(eig_vals, i));
