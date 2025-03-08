@@ -390,7 +390,7 @@ public:
             std::array<gr2::real, 9> y_val;
             for (int i = 0; i<9; i++)
             {
-                y_val[i] = y[i];
+                y_val[i] = stepper->dense_out(i, this->t);
             }
             data.push_back(y_val);
             this->t += h;

@@ -1292,11 +1292,11 @@ void Interface::trajectory_weyl(std::string text)
         
         // TODO: save data
         std::cout << "Jdeme ukladat" << std::endl;
-        for (auto &d:data_monitor->data)
+        for (int k = 0; k< data_monitor->times.size(); k++)
         {
-            file << d[0];
+            file << data_monitor->times[k];
             for (int i = 1; i < 9; i++)
-                file << ";" << d[i];
+                file << ";" << data_monitor->data[k][i];
             file << std::endl;
         }
 
