@@ -1078,7 +1078,7 @@ void Interface::numerical_expansions_weyl(std::string text)
 
     std::ofstream file;
     std::ofstream file2;
-    gr2::real y[19]={};
+    gr2::real y[18]={};
     
     // Procede in calculation
     try
@@ -1159,8 +1159,7 @@ void Interface::numerical_expansions_weyl(std::string text)
         y_[gr2::Weyl::URHO] = norm*u_rho_frac;
         y_[gr2::Weyl::UZ] = norm*sqrtl(1-u_rho_frac*u_rho_frac);
 
-        // init norm
-        y[18] = 0;
+        // renormalization
 
         // calculate numerical expansions
         try
@@ -1177,11 +1176,14 @@ void Interface::numerical_expansions_weyl(std::string text)
         
         // TODO: save data
         std::cout << "Jdeme ukladat" << std::endl;
+        gr2::real sum = 0;
         for (int i = 0; i<n_rho; i++)
             for (int j = 0; j<n_z; j++)
             {
                 file << i << ";" << j << ";" << rho_min + i*delta_rho << ";" << rho_max + j*delta_z << ";" << num_expansions->data[i][j] << std::endl;
+                sum += num_expansions->data[i][j];
             }
+        std::cout << sum << std::endl;
 
         for (int i = 0; i<n_rho; i++)
             for (int j = 0; j<n_z; j++)
