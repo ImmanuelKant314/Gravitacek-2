@@ -8,9 +8,9 @@
 #include <cmath>
 
 // ========== macros ========== 
-#define MAX_ITERATIONS_HADJUST 10
-#define MAX_ITERATIONS_SOLVE_EVENT 20
-#define EVENT_PRECISION 1e-15
+#define MAX_ITERATIONS_HADJUST 50 
+#define MAX_ITERATIONS_SOLVE_EVENT 30
+#define EVENT_PRECISION 1e-9
 
 namespace gr2
 {
@@ -81,7 +81,9 @@ namespace gr2
         // ========== Secant method ==========
         for (i = 0; i < MAX_ITERATIONS_SOLVE_EVENT; i++)
         {
+            // TODO: add regularization of process
             h3 = (h_a*b-h_b*a)/(b-a); // new value of step size
+            // h3 = 0.5*(h_a+h_b);
             // copy starting value of yt to yt3
             for (int j = 0; j < this->ode->get_n(); j++)
                 yt3[j] = yt[j];
@@ -92,7 +94,7 @@ namespace gr2
             current_value_of_event = event->value(t3, yt3, dydt3);
 
             // reduce interval for h
-            if (current_value_of_event*previous_value_of_event > 0)
+            if (current_value_of_event*a > 0)
             {
                 h_a = h3;
                 a = current_value_of_event;
