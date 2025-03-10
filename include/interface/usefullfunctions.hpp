@@ -191,6 +191,7 @@ public:
 
         // Save normalization
         this->log_norm += -log(factor);
+        // std::cout << "t = " << t << ", log_norm = " << log_norm << std::endl;
         // std::cout << "log_norm " << this->log_norm << std::endl;
         // std::cout << "factor " << factor << std::endl;
     }
@@ -322,8 +323,13 @@ public:
                 for (int j = 0; j < 18; j++)
                     y_[j] = stepper->dense_out(j, t_event);
                 spt->calculate_metric(y_);
+                spt->calculate_christoffel_symbols(y_);
 
-                // TODO: paralel transport (not now)
+                // TODO: paralel transport 
+                for (int j = 0; j < 4; j++)
+                    for (int k = 0; k < 4; k++)
+                        for (int l = 0; l < 4; l++)
+                            y_[13 + j] += spt->get_christoffel_symbols()[j][k][l]*y_[4+k]*y_[9+l];
 
                 // TODO: projection
                 gr2::real u_up_indices[4]{};
