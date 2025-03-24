@@ -271,6 +271,42 @@ std::shared_ptr<gr2::Weyl> Interface::create_weyl_spacetime(std::string text)
     return spacetime;
 }
 
+std::shared_ptr<gr2::MajumdarPapapetrouWeyl> Interface::create_mp_spacetime(std::string text)
+{
+    text = strip(text);
+    std::string spacetime_name, args_text;
+    this->find_command_name(text, spacetime_name, args_text);
+    auto args = this->find_function_arguments(args_text);
+    std::shared_ptr<gr2::MajumdarPapapetrouWeyl> spacetime;
+
+    if (spacetime_name == "CombinedMP")
+    {
+        std::vector<std::shared_ptr<gr2::MajumdarPapapetrouWeyl>> sources = {};
+        for (auto &arg : args)
+        {
+            sources.push_back(this->create_mp_spacetime(arg));
+        }
+        spacetime = std::make_shared<gr2::CombinedMPW>(sources);
+    }
+    else if (spacetime_name == "ReissnerNordstrom")
+    {
+        if (args.size() != 1)
+            throw std::invalid_argument("invalid number of arguments for ReissnerNordstrom");
+        spacetime = std::make_shared<gr2::ReissnerNordstromMPW>(std::stold(args[0]));
+    }
+    else if (spacetime_name == "MajumdarPapapetrouRing")
+    {   
+        if (args.size() != 2)
+            throw std::invalid_argument("invalid number of arguments for MajumdarPapapetrouRing");
+        spacetime = std::make_shared<gr2::MajumdarPapapetrouRing>(std::stold(args[0]), std::stold(args[1]));
+    }
+    else 
+    {
+        throw std::invalid_argument("Majumdar-Papapetrou spacetime with name " + spacetime_name + " does not exist");
+    }
+    return spacetime;
+}
+
 std::vector<std::string> Interface::find_function_arguments(std::string text)
 {
     int i, counter = 0;
@@ -362,9 +398,19 @@ bool Interface::try_apply_function(std::string text)
         this->poincare_border_weyl(rest);
         return true;
     }
+    else if (name == "poincare_border_mp")
+    {
+        this->poincare_border_mp(rest);
+        return true;
+    }
     else if (name == "poincare_section_weyl")
     {
         this->poincare_section_weyl(rest);
+        return true;
+    }
+    else if (name == "poincare_section_mp")
+    {
+        this->poincare_section_mp(rest);
         return true;
     }
     else if (name == "numerical_expansions_weyl")
@@ -854,9 +900,9 @@ void Interface::poincare_border_weyl(std::string text)
     auto args = find_function_arguments(text);
     int number_of_arguments = 5;
     if (args.size() < number_of_arguments)
-        throw std::invalid_argument("too little arguments for local_expansions_Weyl");
+        throw std::invalid_argument("too little arguments for poincare_border_weyl");
     else if (args.size() > number_of_arguments)
-        throw std::invalid_argument("too much arguments for local_expansions_Weyl");
+        throw std::invalid_argument("too much arguments for poincare_border_weyl");
 
     std::shared_ptr<gr2::Weyl> spt = this->create_weyl_spacetime(args[0]);
 
@@ -924,15 +970,87 @@ void Interface::poincare_border_weyl(std::string text)
     }
 }
 
+void Interface::poincare_border_mp(std::string text)
+{
+    // Initialize calculation
+    auto args = find_function_arguments(text);
+    int number_of_arguments = 5;
+    if (args.size() < number_of_arguments)
+        throw std::invalid_argument("too little arguments for poincare_border_mp");
+    else if (args.size() > number_of_arguments)
+        throw std::invalid_argument("too much arguments for poincare_border_mp");
+
+    std::shared_ptr<gr2::MajumdarPapapetrouWeyl> spt = this->create_mp_spacetime(args[0]);
+
+    gr2::real E = std::stold(args[1]);
+    gr2::real L = std::stold(args[2]);
+    auto range_rho = find_function_arguments(args[3]);
+    if (range_rho.size() != 3)
+        throw std::invalid_argument("incorent number of arguments for range in rho");
+    gr2::real rho_min = std::stold(range_rho[0]);
+    gr2::real rho_max = std::stold(range_rho[1]);
+    int n_rho = std::stoi(range_rho[2]);
+    gr2::real delta_rho = (rho_max-rho_min)/(n_rho-1);
+
+    std::string file_name = args[4];
+
+    std::ofstream file;
+    gr2::real y[8]={};
+
+    // Procede in calculation
+    try
+    {
+        // open file
+        file.open(file_name);
+
+        if (!file.is_open())
+            throw std::runtime_error("file " + file_name + "could not be opened");
+
+        // calculate norms
+        for (int i = 0; i < n_rho; i++)
+        {
+            gr2::real rho = rho_min + i*delta_rho;
+            gr2::real z = 1e-5;
+            y[gr2::Weyl::RHO] = rho;
+            y[gr2::Weyl::Z] = z;
+
+            // calculate ut (from E)
+            spt->calculate_metric(y);
+            y[gr2::Weyl::UT] = -E/spt->get_metric()[gr2::Weyl::T][gr2::Weyl::T];
+
+            // calculate uphi (from L)
+            y[gr2::Weyl::UPHI] = L/spt->get_metric()[gr2::Weyl::PHI][gr2::Weyl::PHI];
+
+            // calculate size of rest velocity
+            gr2::real norm2 = (-1 + y[gr2::Weyl::UT]*E - y[gr2::Weyl::UPHI]*L);
+            gr2::real urho;
+            if (norm2<0)
+                urho = 0;
+            else
+                urho = sqrtl(norm2/spt->get_metric()[gr2::Weyl::RHO][gr2::Weyl::RHO]);
+        
+            // save values to the file
+            file << i << ";" << rho << ";" << urho << "\n";
+        }
+        // close file
+        file.close();
+    }
+    catch(const std::exception& e)
+    {
+        file.close();
+        throw e;
+    }
+}
+
 void Interface::poincare_section_weyl(std::string text)
 {
     // Initialize calculation
     auto args = find_function_arguments(text);
     int number_of_arguments = 7;
     if (args.size() < number_of_arguments)
-        throw std::invalid_argument("too little arguments for local_expansions_Weyl");
+        throw std::invalid_argument("too little arguments for poincare_section_weyl");
     else if (args.size() > number_of_arguments)
-        throw std::invalid_argument("too much arguments for local_expansions_Weyl");
+        throw std::invalid_argument("too much arguments for poincare_section_weyl");
 
     std::shared_ptr<gr2::Weyl> spt = this->create_weyl_spacetime(args[0]);
 
@@ -966,11 +1084,11 @@ void Interface::poincare_section_weyl(std::string text)
         gr2::Integrator integrator(spt, "DoPr853", 1e-16, 1e-16, false);
         auto too_close = std::make_shared<StopBeforeBlackHole>(0.4);
         integrator.add_event(too_close);
-        auto errorE_too_high = std::make_shared<StopTooHighErrorE>(spt,E,1e-10);
+        auto errorE_too_high = std::make_shared<StopTooHighErrorE<gr2::Weyl>>(spt,E,1e-10);
         integrator.add_event(errorE_too_high);
-        auto errorL_too_high = std::make_shared<StopTooHighErrorL>(spt,L,1e-10);
+        auto errorL_too_high = std::make_shared<StopTooHighErrorL<gr2::Weyl>>(spt,L,1e-10);
         integrator.add_event(errorL_too_high);
-        auto stop_on_disk = std::make_shared<StopOnDisk>(spt, 1e-4, true);
+        auto stop_on_disk = std::make_shared<StopOnDisk<gr2::Weyl>>(spt, 1e-4, true);
         integrator.add_event(stop_on_disk);
 
         // calculate norms
@@ -984,6 +1102,114 @@ void Interface::poincare_section_weyl(std::string text)
             // calculate lambda 
             spt->calculate_lambda_init(y);
             y[gr2::Weyl::LAMBDA] = spt->get_lambda();
+
+            // calculate ut (from E)
+            spt->calculate_metric(y);
+            y[gr2::Weyl::UT] = -E/spt->get_metric()[gr2::Weyl::T][gr2::Weyl::T];
+
+            // calculate uphi (from L)
+            y[gr2::Weyl::UPHI] = L/spt->get_metric()[gr2::Weyl::PHI][gr2::Weyl::PHI];
+
+            // calculate size of rest velocity
+            gr2::real norm2 = (-1 + y[gr2::Weyl::UT]*E - y[gr2::Weyl::UPHI]*L);
+            if (norm2 < 0)
+                continue;
+            gr2::real norm = sqrtl(norm2/spt->get_metric()[gr2::Weyl::RHO][gr2::Weyl::RHO]);
+
+            std::cout << "rho" << y[gr2::Weyl::RHO] << std::endl;
+            for (int j = 0; j < angles; j++)
+            {
+                // calculate initial conditions
+                gr2::real angle = j*delta_angle;
+                y[gr2::Weyl::URHO] = norm*sinl(angle);
+                y[gr2::Weyl::UZ] = norm*cosl(angle);
+
+                // calculate poincare section
+                try
+                {
+                    /* code */
+                    integrator.integrate(y, 0, t_max, 0.2);
+                }
+                catch(const std::exception& e)
+                {
+                    std::cerr << e.what() << '\n';
+                }
+                
+                // save data
+                for (auto& d : stop_on_disk->data)
+                    file << d[0] << ";" << d[1] << "\n";
+
+                // delete data
+                stop_on_disk->data.clear();
+                file.flush();
+            }
+        }
+        // close file
+        file.close();
+    }
+    catch(const std::exception& e)
+    {
+        file.close();
+        throw e;
+    }
+}
+
+void Interface::poincare_section_mp(std::string text)
+{
+    // Initialize calculation
+    auto args = find_function_arguments(text);
+    int number_of_arguments = 7;
+    if (args.size() < number_of_arguments)
+        throw std::invalid_argument("too little arguments for poincare_section_mp");
+    else if (args.size() > number_of_arguments)
+        throw std::invalid_argument("too much arguments for poincare_section_mp");
+
+    std::shared_ptr<gr2::MajumdarPapapetrouWeyl> spt = this->create_mp_spacetime(args[0]);
+
+    gr2::real E = std::stold(args[1]);
+    gr2::real L = std::stold(args[2]);
+    auto range_rho = find_function_arguments(args[3]);
+    if (range_rho.size() != 3)
+        throw std::invalid_argument("incorent number of arguments for range in rho");
+    gr2::real rho_min = std::stold(range_rho[0]);
+    gr2::real rho_max = std::stold(range_rho[1]);
+    int n_rho = std::stoi(range_rho[2]);
+    gr2::real delta_rho = (rho_max-rho_min)/(n_rho-1);
+
+    int angles = std::stoi(args[4]);
+    gr2::real delta_angle = gr2::pi_4/angles;
+    gr2::real t_max = std::stoll(args[5]);
+    std::string file_name = args[6];
+
+    std::ofstream file;
+    gr2::real y[8]={};
+
+    // Procede in calculation
+    try
+    {
+        // open file
+        file.open(file_name);
+
+        if (!file.is_open())
+            throw std::runtime_error("file " + file_name + "could not be opened");
+
+        gr2::Integrator integrator(spt, "DoPr853", 1e-16, 1e-16, false);
+        auto too_close = std::make_shared<StopBeforeBlackHole>(0.4);
+        integrator.add_event(too_close);
+        auto errorE_too_high = std::make_shared<StopTooHighErrorE<gr2::MajumdarPapapetrouWeyl>>(spt,E,1e-10);
+        integrator.add_event(errorE_too_high);
+        auto errorL_too_high = std::make_shared<StopTooHighErrorL<gr2::MajumdarPapapetrouWeyl>>(spt,L,1e-10);
+        integrator.add_event(errorL_too_high);
+        auto stop_on_disk = std::make_shared<StopOnDisk<gr2::MajumdarPapapetrouWeyl>>(spt, 1e-4, true);
+        integrator.add_event(stop_on_disk);
+
+        // calculate norms
+        for (int i = 0; i < n_rho; i++)
+        {
+            gr2::real rho = rho_min + i*delta_rho;
+            gr2::real z = 1e-3;
+            y[gr2::Weyl::RHO] = rho;
+            y[gr2::Weyl::Z] = z;
 
             // calculate ut (from E)
             spt->calculate_metric(y);
@@ -1093,9 +1319,9 @@ void Interface::numerical_expansions_weyl(std::string text)
         gr2::Integrator integrator(ode, "DoPr853", 1e-16, 1e-16, true);
         auto too_close = std::make_shared<StopBeforeBlackHole>(0.4);
         integrator.add_event(too_close);
-        auto errorE_too_high = std::make_shared<StopTooHighErrorE>(spt,E,1e-10);
+        auto errorE_too_high = std::make_shared<StopTooHighErrorE<gr2::Weyl>>(spt,E,1e-9);
         integrator.add_event(errorE_too_high);
-        auto errorL_too_high = std::make_shared<StopTooHighErrorL>(spt,L,1e-10);
+        auto errorL_too_high = std::make_shared<StopTooHighErrorL<gr2::Weyl>>(spt,L,1e-9);
         integrator.add_event(errorL_too_high);
         auto stop_on_disk = std::make_shared<StopOnDiskTwoParticles>(spt, 1e-4);
         integrator.add_event(stop_on_disk);
@@ -1245,11 +1471,11 @@ void Interface::trajectory_weyl(std::string text)
         integrator.add_event(data_monitor);
         auto too_close = std::make_shared<StopBeforeBlackHole>(0.4);
         integrator.add_event(too_close);
-        auto errorE_too_high = std::make_shared<StopTooHighErrorE>(spt,E,1e-10);
+        auto errorE_too_high = std::make_shared<StopTooHighErrorE<gr2::Weyl>>(spt,E,1e-10);
         integrator.add_event(errorE_too_high);
-        auto errorL_too_high = std::make_shared<StopTooHighErrorL>(spt,L,1e-10);
+        auto errorL_too_high = std::make_shared<StopTooHighErrorL<gr2::Weyl>>(spt,L,1e-10);
         integrator.add_event(errorL_too_high);
-        auto stop_on_disk = std::make_shared<StopOnDisk>(spt, 1e-4, false);
+        auto stop_on_disk = std::make_shared<StopOnDisk<gr2::Weyl>>(spt, 1e-4, false);
         integrator.add_event(stop_on_disk);
 
         // ========== initial conditions for the first particle ==========

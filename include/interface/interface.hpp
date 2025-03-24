@@ -7,6 +7,7 @@
 #include "gravitacek2/setup.hpp"
 #include "gravitacek2/geomotion/geomotion.hpp"
 #include "gravitacek2/geomotion/weyl.hpp"
+#include "gravitacek2/geomotion/majumadpapapetrouweyl.hpp"
 
 class Interface
 {
@@ -139,6 +140,14 @@ protected:
      * @return pointer to spacetime object
      */
     std::shared_ptr<gr2::Weyl> create_weyl_spacetime(std::string text);
+    
+    /**
+     * @brief Create MajumdarPapapetrouWeyl spacetime with given parameters.
+     * 
+     * @param text definition of MajumdarPapapetrouWeyl spacetime
+     * @return pointer to spacetime object
+     */
+    std::shared_ptr<gr2::MajumdarPapapetrouWeyl> create_mp_spacetime(std::string text);
 
     /**
      * @brief Create OdeSystem with given parameters.
@@ -214,6 +223,16 @@ protected:
      * @param text arguments for poincare_border_weyl
      */
     void poincare_border_weyl(std::string text);
+    
+    /**
+     * @brief Calculate maximal value of \f$u^\rho\f$ for Poincaré section.
+     * 
+     * Argument should be in form:
+     * (mp_spacetime(mp_spacetimes_params),E,L,(rho_min,rho_max,n_rho),file)
+     * 
+     * @param text arguments for poincare_border_weyl
+     */
+    void poincare_border_mp(std::string text);
 
     /**
      * @brief Calculate poincare section.
@@ -224,6 +243,16 @@ protected:
      * @param text arguments for poincare_section_weyl
      */
     void poincare_section_weyl(std::string text);
+
+    /**
+     * @brief Calculate poincare section.
+     * 
+     * Argument should be in form:
+     * (mp_spacetime(mp_spacetimes_params),E,L,(rho_min,rho_max,n_rho),angles,tmax,file)
+     * 
+     * @param text arguments for poincare_section_weyl
+     */
+    void poincare_section_mp(std::string text);
 
     /**
      * @brief Calculate numerical expansions for Weyl spacetime.

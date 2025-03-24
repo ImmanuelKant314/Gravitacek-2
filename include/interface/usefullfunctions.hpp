@@ -12,6 +12,8 @@
 #include <fstream>
 #include <array>
 #include <cmath>
+#include <chrono>
+#include <thread>
 
 class DataRecord : public gr2::Event
 {
@@ -41,15 +43,16 @@ public:
     }
 };
 
-class StopOnDisk : public gr2::Event
+template<class T>
+class StopOnDisk: public gr2::Event
 {
 protected:
-    std::shared_ptr<gr2::Weyl> spt;
+    std::shared_ptr<T> spt;
 public:
     bool poincare;
     std::vector<std::array<gr2::real, 2>> data;
     gr2::real z;
-    StopOnDisk(std::shared_ptr<gr2::Weyl> spt, gr2::real z, bool poincare=false) : gr2::Event(gr2::EventType::modyfing), z(z), poincare(poincare), data(), spt(spt)
+    StopOnDisk(std::shared_ptr<T> spt, gr2::real z, bool poincare=false) : gr2::Event(gr2::EventType::modyfing), z(z), poincare(poincare), data(), spt(spt)
     {
 
     }
@@ -111,13 +114,14 @@ public:
     }
 };
 
+template<class T>
 class StopTooHighErrorE : public gr2::Event
 {
 public:
-    std::shared_ptr<gr2::Weyl> spt;
+    std::shared_ptr<T> spt;
     gr2::real E, E_, eps;
 
-    StopTooHighErrorE(std::shared_ptr<gr2::Weyl> spt, gr2::real E, gr2::real eps):gr2::Event(gr2::EventType::data, true), spt(spt), E(E), eps(eps)
+    StopTooHighErrorE(std::shared_ptr<T> spt, gr2::real E, gr2::real eps):gr2::Event(gr2::EventType::data, true), spt(spt), E(E), eps(eps)
     {}
 
     virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
@@ -132,13 +136,14 @@ public:
     }
 };
 
+template<class T>
 class StopTooHighErrorL : public gr2::Event
 {
 public:
-    std::shared_ptr<gr2::Weyl> spt;
+    std::shared_ptr<T> spt;
     gr2::real L, L_, eps;
 
-    StopTooHighErrorL(std::shared_ptr<gr2::Weyl> spt, gr2::real L, gr2::real eps):gr2::Event(gr2::EventType::data, true), spt(spt), L(L), eps(eps)
+    StopTooHighErrorL(std::shared_ptr<T> spt, gr2::real L, gr2::real eps):gr2::Event(gr2::EventType::data, true), spt(spt), L(L), eps(eps)
     {}
 
     virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
@@ -252,6 +257,7 @@ public:
 
     virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
     {
+        // std::cout << "========== Apply ==========" << std::endl;
         // TODO: for-cycle (check if any line was crossed)
         // iterate from prev. time to current time
         // check both z and rho
@@ -329,7 +335,7 @@ public:
                 for (int j = 0; j < 4; j++)
                     for (int k = 0; k < 4; k++)
                         for (int l = 0; l < 4; l++)
-                            y_[13 + j] += spt->get_christoffel_symbols()[j][k][l]*y_[4+k]*y_[9+l];
+                            y_[13 + j] += spt->get_christoffel_symbols()[j][k][l]*y_[4+k]*(y_[9+l] - y_[l]);
 
                 // TODO: projection
                 gr2::real u_up_indices[4]{};
@@ -344,20 +350,28 @@ public:
 
                 // TODO: calculate norm of separation in space 
                 gr2::real norm_of_sep2 = 0;
+                gr2::real dyj, dyk, dvj, dvk;
                 for (int j = 0; j < 4; j++)
                     for (int k = 0; k < 4; k++)
                     {
-                        norm_of_sep2 += (spt->get_metric()[j][k]+u_down_indices[j]*u_down_indices[k])*y_[9+j]*y_[9+k];
-                        norm_of_sep2 += (spt->get_metric()[j][k]+u_down_indices[j]*u_down_indices[k])*y_[13+j]*y_[13+k];
+                        dyj = y_[9+j]-y_[j];
+                        dyk = y_[9+k]-y_[k];
+                        dvj = y_[13+j]-y_[4+j];
+                        dvk = y_[13+k]-y_[4+k];
+                        norm_of_sep2 += (spt->get_metric()[j][k]+u_down_indices[j]*u_down_indices[k])*dyj*dyk;
+                        norm_of_sep2 += (spt->get_metric()[j][k]+u_down_indices[j]*u_down_indices[k])*dvj*dvk;
                     }
                 gr2::real log_norm_of_sep = 0.5*log(norm_of_sep2);
 
                 // TODO: save result to array
                 // std::cout << norm_of_sep2 << " " << *(this->log_norm) << " " << log_norm_prev << std::endl;
                 this->data[i_iter_old][j_iter_old] += log_norm_of_sep + *(this->log_norm) - log_norm_prev;
+                // std::cout << "Brum" << std::endl;
+                // std::cout << log_norm_of_sep + *(this->log_norm) << " " << log_norm_prev << " " << (log_norm_of_sep + *(this->log_norm) - log_norm_prev) << *(this->log_norm) << std::endl;
                 this->time_spend_in_area[i_iter_old][j_iter_old] += t_event - t_prev;
                 t_prev = t_event;
                 log_norm_prev = log_norm_of_sep + *(this->log_norm);
+                // std::this_thread::sleep_for(std::chrono::milliseconds(200));
             }
 
             // new to old
