@@ -1,5 +1,6 @@
 #include <stdexcept>
 #include <cmath>
+#include <algorithm>
 
 #include "gravitacek2/geomotion/spacetimes.hpp"
 #include "gravitacek2/mymath.hpp"
@@ -95,7 +96,7 @@ namespace gr2
 
     void InvertedMorganMorganDisk::calculate_nu(const real *y)
     {
-        real rho = y[RHO], z = y[Z];
+        real rho = y[RHO], z = std::max<gr2::real>(std::abs(y[Z]),1e-5);
         real alpha = rho*rho + z*z - b*b;
         real help_term = sqrtl(alpha*alpha + 4*(z*z)*(b*b));
         real x = sqrtl(alpha + help_term)/(sqrtl(2)*b);
@@ -117,7 +118,7 @@ namespace gr2
     
     void InvertedMorganMorganDisk::calculate_nu1(const real *y)
     {
-        real rho = y[RHO], z = y[Z];
+        real rho = y[RHO], z = std::max<gr2::real>(std::abs(y[Z]),1e-5);
         real alpha = rho*rho + z*z - b*b;
         real help_term1 = sqrtl(alpha*alpha + 4*(z*z)*(b*b));
         real x = sqrtl(alpha + help_term1)/(sqrtl(2)*b);
@@ -157,12 +158,15 @@ namespace gr2
         nu *= N/help_term2;
         nu_rho *= N/help_term2;
         nu_z *= N/help_term2;
+
+        if (y[Z] <0)
+            nu_z *= -1;
     }
 
     void InvertedMorganMorganDisk::calculate_nu2(const real *y)
     {
         // Coordinates
-        real rho = y[RHO], z = y[Z];
+        real rho = y[RHO], z = std::max<gr2::real>(std::abs(y[Z]),1e-5);
 
         // Second derivatives of potential - functions
         auto nu_rho_func = [&z, this](real rho)
@@ -237,6 +241,9 @@ namespace gr2
         nu *= N/help_term2;
         nu_rho *= N/help_term2;
         nu_z *= N/help_term2;
+
+        if (y[Z] <0)
+            nu_z *= -1;
     }
 }
 

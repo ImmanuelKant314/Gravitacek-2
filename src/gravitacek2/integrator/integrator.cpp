@@ -6,6 +6,7 @@
 // ========== include - standard libraries ========== 
 #include <stdexcept>
 #include <cmath>
+// #include <iostream>
 
 // ========== macros ========== 
 #define MAX_ITERATIONS_HADJUST 50 
@@ -54,15 +55,6 @@ namespace gr2
         // prepare values
         int i;
 
-        // coppy array yt2 to yt3 and h2 to h3
-        // for (i = 0; i< this->ode->get_n(); i++)
-        // {
-        //     yt3[i] = yt2[i];
-        //     dydt3[i] = dydt2[i];
-        // }
-        // h3 = h2;
-        // t3 = t2;
-
         // calculate current value of event
         real current_value_of_event = event->value(t2, yt2, dydt2);
 
@@ -78,12 +70,16 @@ namespace gr2
         real a = previous_value_of_event, b = current_value_of_event;
         real h_a = 0, h_b = h2;
 
+        // std::cout << "==========" << std::endl;
+        // std::cout << current_value_of_event << std::endl;
+        // std::cout << h2 << std::endl;
+
         // ========== Secant method ==========
         for (i = 0; i < MAX_ITERATIONS_SOLVE_EVENT; i++)
         {
-            // TODO: add regularization of process
-            h3 = (h_a*b-h_b*a)/(b-a); // new value of step size
-            // h3 = 0.5*(h_a+h_b);
+            gr2::real avg = 0.5*(h_a+h_b);
+            h3 = avg + 0.8*((h_a*b-h_b*a)/(b-a)-avg); // new value of step size
+
             // copy starting value of yt to yt3
             for (int j = 0; j < this->ode->get_n(); j++)
                 yt3[j] = yt[j];
@@ -112,6 +108,16 @@ namespace gr2
         }
         if (i == MAX_ITERATIONS_SOLVE_EVENT)
         {
+            // for (int ii = 0; ii < 8; ii++)
+            //     std::cout << this->yt[ii] << " ";
+            // for (int ii = 0; ii < 8; ii++)
+            //     std::cout << this->yt3[ii] << " ";
+            // std::cout << std::endl;
+            // std::cout << current_value_of_event << std::endl;
+            // std::cout << h2 << std::endl;
+            // std::cout << h_a << " " << h_b << " " << h_b-h_a << std::endl;
+            // std::cout << a << " " << b << " " << b-a << std::endl;
+            // std::cin.get();
             throw std::runtime_error("precise time of event could not be found");
         }
 
