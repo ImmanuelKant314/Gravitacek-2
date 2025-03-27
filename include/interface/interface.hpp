@@ -190,9 +190,19 @@ protected:
      * Argument should be in form:
      * (weyl_spacetime(weyl_spacetimes_params),E,L,(rho_min,rho_max,n_rho),(z_min,z_max,n_z),angles,file)
      * 
-     * @param text arguments for local_expansions
+     * @param text arguments for local_expansions_weyl
      */
     void local_expansions_weyl(std::string text);
+    
+    /**
+     * @brief Calculate values of local expansion for Weyl spacetime.
+     * 
+     * Argument should be in form:
+     * (weyl_spacetime(weyl_spacetimes_params),E,L,(rho_min,rho_max,n_rho),(z_min,z_max,n_z),angles,file)
+     * 
+     * @param text arguments for local_expansions_mp
+     */
+    void local_expansions_mp(std::string text);
 
     /**
      * @brief Calculate values of normg growth for Weyl spacetime.
@@ -205,14 +215,34 @@ protected:
     void norm_growth_weyl(std::string text);
 
     /**
+     * @brief Calculate values of normg growth for Majumdar-Papapetrou spacetime.
+     *
+     * Argument should be in form: 
+     * (mp_spacetime(mp_spacetimes_params),E,L,(rho_min,rho_max,n_rho),(z_min,z_max,n_z),angles,file)
+     * 
+     * @param text arguments for norm_growth_mp
+     */
+    void norm_growth_mp(std::string text);
+
+    /**
      * @brief Calculate norm squared of velocity in plane \f$\rho z\f$.
      * 
      * Argument should be in form:
-     * (weyl_spacetime(weyl_spacetimes_params),E,L,(rho_min,rho_max,n_rho),(z_min,z_max,n_z),file)
+     * (mp_spacetime(mp_spacetimes_params),E,L,(rho_min,rho_max,n_rho),(z_min,z_max,n_z),file)
      * 
      * @param text arguments for rest_norm2_weyl
      */
     void rest_norm2_weyl(std::string text);
+
+    /**
+     * @brief Calculate norm squared of velocity in plane \f$\rho z\f$.
+     * 
+     * Argument should be in form:
+     * (mp_spacetime(mp_spacetimes_params),E,L,(rho_min,rho_max,n_rho),(z_min,z_max,n_z),file)
+     * 
+     * @param text arguments for rest_norm2_mp
+     */
+    void rest_norm2_mp(std::string text);
 
     /**
      * @brief Calculate maximal value of \f$u^\rho\f$ for Poincaré section.
