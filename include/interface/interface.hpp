@@ -290,9 +290,19 @@ protected:
      * Argument should be in form:
      * (weyl_spacetime(weyl_spacetimes_params),E,L,(rho_min,rho_max,n_rho),(z_min,z_max,n_z),rho_start,u_rho_frac,tmax,file)
      *
-     * @param text argument for numerecal_expansions_weyl
+     * @param text argument for numerical_expansions_weyl
      */
     void numerical_expansions_weyl(std::string text);
+
+    /**
+     * @brief Calculate numerical expansions for Weyl spacetime.
+     * 
+     * Argument should be in form:
+     * (mp_spacetime(mp_spacetimes_params),E,L,(rho_min,rho_max,n_rho),(z_min,z_max,n_z),rho_start,u_rho_frac,tmax,file)
+     *
+     * @param text argument for numerical_expansions_mp
+     */
+    void numerical_expansions_mp(std::string text);
 
     /**
      * @brief Calculate trajectory in Weyl spacetime.

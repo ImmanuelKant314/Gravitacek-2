@@ -73,12 +73,13 @@ public:
 class StopOnDiskTwoParticles : public gr2::Event
 {
 protected:
-    std::shared_ptr<gr2::Weyl> spt;
+    std::shared_ptr<gr2::GeoMotion> spt;
+    int n;
 public:
     gr2::real z;
-    StopOnDiskTwoParticles(std::shared_ptr<gr2::Weyl> spt, gr2::real z) : gr2::Event(gr2::EventType::modyfing), z(z), spt(spt)
+    StopOnDiskTwoParticles(std::shared_ptr<gr2::GeoMotion> spt, gr2::real z) : gr2::Event(gr2::EventType::modyfing), z(z), spt(spt)
     {
-
+        this->n = spt->get_n();
     }
     virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
     {
@@ -88,9 +89,9 @@ public:
     virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
     {
         y[gr2::Weyl::UZ]*=-1;
-        (y+9)[gr2::Weyl::UZ]*=-1;
+        (y+n)[gr2::Weyl::UZ]*=-1;
         spt->function(t, y, dydt);
-        spt->function(t, y+9, dydt+9);
+        spt->function(t, y+n, dydt+n);
     }
 };
 
@@ -162,11 +163,12 @@ class RenormalizationOfSecondParticleWeyl : public gr2::Event
 {
 protected:
     gr2::real target_norm;
-    std::shared_ptr<gr2::Weyl> spt;
+    std::shared_ptr<gr2::GeoMotion> spt;
+    int renorm_index;
 public:
     gr2::real log_norm;
 
-    RenormalizationOfSecondParticleWeyl(std::shared_ptr<gr2::Weyl> spt, gr2::real target_norm):gr2::Event(gr2::EventType::data, false), spt(spt), target_norm(target_norm), log_norm(0)
+    RenormalizationOfSecondParticleWeyl(std::shared_ptr<gr2::GeoMotion> spt, gr2::real target_norm):gr2::Event(gr2::EventType::data, false), spt(spt), target_norm(target_norm), log_norm(0)
     {}
 
     virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
@@ -177,9 +179,10 @@ public:
     virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
     {
         // Calculate normalization 
+        int n = spt->get_n();
         gr2::real norm2 = 0;
-        gr2::real *y_ = y+9;
-        for (int i = 0; i < 9; i++)
+        gr2::real *y_ = y+n;
+        for (int i = 0; i < n; i++)
         {
             gr2::real dy = y[i]-y_[i];
             norm2 += dy*dy;
@@ -188,31 +191,29 @@ public:
         gr2::real factor = target_norm/norm;
 
         // Change y (pos, vels, lambda)
-        for (int i = 0; i < 9; i++)
+        for (int i = 0; i < n; i++)
             y_[i] = (y_[i]-y[i])*factor + y[i];
 
         // Change dydt ()
-        spt->function(t, y_, dydt+9);
+        spt->function(t, y_, dydt+n);
 
         // Save normalization
         this->log_norm += -log(factor);
-        // std::cout << "t = " << t << ", log_norm = " << log_norm << std::endl;
-        // std::cout << "log_norm " << this->log_norm << std::endl;
-        // std::cout << "factor " << factor << std::endl;
     }
 };
 
+template <class T, int N>
 class NumericalExpansions : public gr2::Event
 {
 public:
-    gr2::real y_[18];
+    gr2::real y_[N];
     gr2::real t_prev;
     gr2::real log_norm_prev;
     gr2::real total_norm_prev;
 
     gr2::real t_last_step;
 
-    std::shared_ptr<gr2::Weyl> spt;
+    std::shared_ptr<T> spt;
     gr2::real rho_min, rho_max, n_rho;
     gr2::real delta_rho;
     gr2::real z_min, z_max, n_z;
@@ -222,7 +223,7 @@ public:
     gr2::real** data;
     gr2::real** time_spend_in_area;
 
-    NumericalExpansions(std::shared_ptr<gr2::Weyl> spt, gr2::real rho_min, gr2::real rho_max, int n_rho, gr2::real z_min, gr2::real z_max, int n_z, gr2::real *log_norm):gr2::Event(gr2::EventType::data, false), spt(spt), dt(dt), rho_min(rho_min), rho_max(rho_max), n_rho(n_rho), z_min(z_min), z_max(z_max), n_z(n_z), log_norm(log_norm), t_prev(0)
+    NumericalExpansions(std::shared_ptr<T> spt, gr2::real rho_min, gr2::real rho_max, int n_rho, gr2::real z_min, gr2::real z_max, int n_z, gr2::real *log_norm):gr2::Event(gr2::EventType::data, false), spt(spt), dt(dt), rho_min(rho_min), rho_max(rho_max), n_rho(n_rho), z_min(z_min), z_max(z_max), n_z(n_z), log_norm(log_norm), t_prev(0)
     {
         delta_rho = (rho_max-rho_min)/n_rho;
         delta_z = (z_max-z_min)/n_z;
@@ -264,6 +265,9 @@ public:
         // than do linear interpolation of values
         // this has to be done before renormalization
         // indices
+        int n = spt->get_n();
+        int dim = spt->get_dim();
+
         int rho_index = gr2::Weyl::RHO;
         int z_index = gr2::Weyl::Z;
         int urho_index = gr2::Weyl::URHO;
@@ -322,20 +326,20 @@ public:
             // take the last
             if (counter_of_events != 0)
             {
-                // TODO: calculate time
+                // calculate time
                 t_event = std::max(t_event_rho, t_event_z);
 
-                // TODO: get position
-                for (int j = 0; j < 18; j++)
+                // get position
+                for (int j = 0; j < spt->get_n(); j++)
                     y_[j] = stepper->dense_out(j, t_event);
                 spt->calculate_metric(y_);
                 spt->calculate_christoffel_symbols(y_);
 
                 // TODO: paralel transport 
-                for (int j = 0; j < 4; j++)
-                    for (int k = 0; k < 4; k++)
-                        for (int l = 0; l < 4; l++)
-                            y_[13 + j] += spt->get_christoffel_symbols()[j][k][l]*y_[4+k]*(y_[9+l] - y_[l]);
+                for (int j = 0; j < spt->get_dim(); j++)
+                    for (int k = 0; k < spt->get_dim(); k++)
+                        for (int l = 0; l < spt->get_dim(); l++)
+                            y_[n + dim + j] += spt->get_christoffel_symbols()[j][k][l]*y_[dim+k]*(y_[n+l] - y_[l]);
 
                 // TODO: projection
                 gr2::real u_up_indices[4]{};
@@ -354,24 +358,20 @@ public:
                 for (int j = 0; j < 4; j++)
                     for (int k = 0; k < 4; k++)
                     {
-                        dyj = y_[9+j]-y_[j];
-                        dyk = y_[9+k]-y_[k];
-                        dvj = y_[13+j]-y_[4+j];
-                        dvk = y_[13+k]-y_[4+k];
+                        dyj = y_[n+j]-y_[j];
+                        dyk = y_[n+k]-y_[k];
+                        dvj = y_[n+dim+j]-y_[dim+j];
+                        dvk = y_[n+dim+k]-y_[dim+k];
                         norm_of_sep2 += (spt->get_metric()[j][k]+u_down_indices[j]*u_down_indices[k])*dyj*dyk;
                         norm_of_sep2 += (spt->get_metric()[j][k]+u_down_indices[j]*u_down_indices[k])*dvj*dvk;
                     }
                 gr2::real log_norm_of_sep = 0.5*log(norm_of_sep2);
 
                 // TODO: save result to array
-                // std::cout << norm_of_sep2 << " " << *(this->log_norm) << " " << log_norm_prev << std::endl;
                 this->data[i_iter_old][j_iter_old] += log_norm_of_sep + *(this->log_norm) - log_norm_prev;
-                // std::cout << "Brum" << std::endl;
-                // std::cout << log_norm_of_sep + *(this->log_norm) << " " << log_norm_prev << " " << (log_norm_of_sep + *(this->log_norm) - log_norm_prev) << *(this->log_norm) << std::endl;
                 this->time_spend_in_area[i_iter_old][j_iter_old] += t_event - t_prev;
                 t_prev = t_event;
                 log_norm_prev = log_norm_of_sep + *(this->log_norm);
-                // std::this_thread::sleep_for(std::chrono::milliseconds(200));
             }
 
             // new to old

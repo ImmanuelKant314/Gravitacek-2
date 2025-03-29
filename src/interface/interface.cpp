@@ -433,6 +433,11 @@ bool Interface::try_apply_function(std::string text)
         this->numerical_expansions_weyl(rest);
         return true;
     }
+    else if (name == "numerical_expansions_mp")
+    {
+        this->numerical_expansions_mp(rest);
+        return true;
+    }
     else if (name == "trajectory_weyl")
     {
         this->trajectory_weyl(rest);
@@ -1555,9 +1560,9 @@ void Interface::numerical_expansions_weyl(std::string text)
     auto args = find_function_arguments(text);
     int number_of_arguments = 10;
     if (args.size() < number_of_arguments)
-        throw std::invalid_argument("too little arguments for local_expansions_Weyl");
+        throw std::invalid_argument("too little arguments for local_expansions_weyl");
     else if (args.size() > number_of_arguments)
-        throw std::invalid_argument("too much arguments for local_expansions_Weyl");
+        throw std::invalid_argument("too much arguments for local_expansions_weyl");
 
     std::shared_ptr<gr2::Weyl> spt = this->create_weyl_spacetime(args[0]);
     std::shared_ptr<gr2::OdeSystem> ode = std::make_shared<gr2::CombinedOdeSystem>(std::vector<std::shared_ptr<gr2::OdeSystem>>{spt, spt});
@@ -1613,7 +1618,7 @@ void Interface::numerical_expansions_weyl(std::string text)
         auto stop_on_disk = std::make_shared<StopOnDiskTwoParticles>(spt, 1e-4);
         integrator.add_event(stop_on_disk);
         auto renormalization = std::make_shared<RenormalizationOfSecondParticleWeyl>(spt, 1e-5);
-        auto num_expansions = std::make_shared<NumericalExpansions>(spt, rho_min, rho_max, n_rho, z_min, z_max, n_z, &(renormalization->log_norm));
+        auto num_expansions = std::make_shared<NumericalExpansions<gr2::Weyl,18>>(spt, rho_min, rho_max, n_rho, z_min, z_max, n_z, &(renormalization->log_norm));
         integrator.add_event(num_expansions);
         integrator.add_event(renormalization);
 
@@ -1673,6 +1678,166 @@ void Interface::numerical_expansions_weyl(std::string text)
         y_[gr2::Weyl::UZ] = norm*sqrtl(1-u_rho_frac*u_rho_frac);
 
         // renormalization
+
+        // calculate numerical expansions
+        try
+        {
+            /* code */
+            std::cout << "Integrujeme" << std::endl;
+            integrator.integrate(y, 0, t_max, 0.2);
+            std::cout << "Dointegrovano" << std::endl;
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+        }
+        
+        // TODO: save data
+        std::cout << "Jdeme ukladat" << std::endl;
+        gr2::real sum = 0;
+        for (int i = 0; i<n_rho; i++)
+            for (int j = 0; j<n_z; j++)
+            {
+                file << i << ";" << j << ";" << rho_min + i*delta_rho << ";" << rho_max + j*delta_z << ";" << num_expansions->data[i][j] << std::endl;
+                sum += num_expansions->data[i][j];
+            }
+        std::cout << sum << std::endl;
+
+        for (int i = 0; i<n_rho; i++)
+            for (int j = 0; j<n_z; j++)
+            {
+                file2 << i << ";" << j << ";" << rho_min + i*delta_rho << ";" << rho_max + j*delta_z << ";" << num_expansions->time_spend_in_area[i][j] << std::endl;
+            }
+
+        file.flush();
+        file2.flush();
+
+        // close file
+        file.close();
+        file2.close();
+    }
+    catch(const std::exception& e)
+    {
+        file.close();
+        file2.close();
+        throw e;
+    }
+}
+
+void Interface::numerical_expansions_mp(std::string text)
+{
+    // Initialize calculation
+    auto args = find_function_arguments(text);
+    int number_of_arguments = 10;
+    if (args.size() < number_of_arguments)
+        throw std::invalid_argument("too little arguments for local_expansions_mp");
+    else if (args.size() > number_of_arguments)
+        throw std::invalid_argument("too much arguments for local_expansions_mp");
+
+    std::shared_ptr<gr2::MajumdarPapapetrouWeyl> spt = this->create_mp_spacetime(args[0]);
+    std::shared_ptr<gr2::OdeSystem> ode = std::make_shared<gr2::CombinedOdeSystem>(std::vector<std::shared_ptr<gr2::OdeSystem>>{spt, spt});
+
+    gr2::real E = std::stold(args[1]);
+    gr2::real L = std::stold(args[2]);
+    auto range_rho = find_function_arguments(args[3]);
+    if (range_rho.size() != 3)
+        throw std::invalid_argument("incorent number of arguments for range in rho");
+    gr2::real rho_min = std::stold(range_rho[0]);
+    gr2::real rho_max = std::stold(range_rho[1]);
+    int n_rho = std::stoi(range_rho[2]);
+    gr2::real delta_rho = (rho_max-rho_min)/(n_rho-1);
+
+    auto range_z = find_function_arguments(args[4]);
+    if (range_z.size() != 3)
+        throw std::invalid_argument("incorent number of arguments for range in z");
+    gr2::real z_min = std::stold(range_z[0]);
+    gr2::real z_max = std::stold(range_z[1]);
+    int n_z = std::stoi(range_z[2]);
+    gr2::real delta_z = (z_max-z_min)/(n_z-1);
+    
+    gr2::real rho_start = std::stold(args[5]);
+    gr2::real u_rho_frac = std::stold(args[6]);
+
+    gr2::real t_max = std::stold(args[7]);
+    std::string file_name = args[8];
+    std::string file_name2 = args[9];
+
+    gr2::real eps_pos = 1e-8;
+
+    std::ofstream file;
+    std::ofstream file2;
+    gr2::real y[16]={};
+    
+    // Procede in calculation
+    try
+    {
+        // open file
+        file.open(file_name);
+        file2.open(file_name2);
+
+        if (!file.is_open())
+            throw std::runtime_error("file " + file_name + "could not be opened");
+
+        gr2::Integrator integrator(ode, "DoPr853", 1e-16, 1e-16, true);
+        auto too_close = std::make_shared<StopBeforeBlackHole>(0.4);
+        integrator.add_event(too_close);
+        auto errorE_too_high = std::make_shared<StopTooHighErrorE<gr2::MajumdarPapapetrouWeyl>>(spt,E,1e-9);
+        integrator.add_event(errorE_too_high);
+        auto errorL_too_high = std::make_shared<StopTooHighErrorL<gr2::MajumdarPapapetrouWeyl>>(spt,L,1e-9);
+        integrator.add_event(errorL_too_high);
+        auto stop_on_disk = std::make_shared<StopOnDiskTwoParticles>(spt, 1e-4);
+        integrator.add_event(stop_on_disk);
+        auto renormalization = std::make_shared<RenormalizationOfSecondParticleWeyl>(spt, 1e-5);
+        auto num_expansions = std::make_shared<NumericalExpansions<gr2::MajumdarPapapetrouWeyl,16>>(spt, rho_min, rho_max, n_rho, z_min, z_max, n_z, &(renormalization->log_norm));
+        integrator.add_event(num_expansions);
+        integrator.add_event(renormalization);
+
+        // ========== initial conditions for the first particle ==========
+        gr2::real rho = rho_start;
+        gr2::real z = 1e-3;
+        y[gr2::Weyl::RHO] = rho;
+        y[gr2::Weyl::Z] = z;
+
+        // calculate ut (from E)
+        spt->calculate_metric(y);
+        y[gr2::Weyl::UT] = -E/spt->get_metric()[gr2::Weyl::T][gr2::Weyl::T];
+
+        // calculate uphi (from L)
+        y[gr2::Weyl::UPHI] = L/spt->get_metric()[gr2::Weyl::PHI][gr2::Weyl::PHI];
+
+        // calculate size of rest velocity
+        gr2::real norm2 = (-1 + y[gr2::Weyl::UT]*E - y[gr2::Weyl::UPHI]*L);
+        if (norm2 < 0)
+            return;
+        gr2::real norm = sqrtl(norm2/spt->get_metric()[gr2::Weyl::RHO][gr2::Weyl::RHO]);
+
+        // calculate velocity
+        y[gr2::Weyl::URHO] = norm*u_rho_frac;
+        y[gr2::Weyl::UZ] = norm*sqrtl(1-u_rho_frac*u_rho_frac);
+
+        // ========== initial conditions for second particle ==========
+        gr2::real* y_ = y + 8;
+
+        // positions
+        for (int j = 0; j < 4; j++)
+            y_[j] = y[j] + eps_pos;
+
+        // calculate ut (from E)
+        spt->calculate_metric(y_);
+        y_[gr2::Weyl::UT] = -E/spt->get_metric()[gr2::Weyl::T][gr2::Weyl::T];
+
+        // calculate uphi (from L)
+        y_[gr2::Weyl::UPHI] = L/spt->get_metric()[gr2::Weyl::PHI][gr2::Weyl::PHI];
+
+        // calculate size of rest velocity
+        norm2 = (-1 + y_[gr2::Weyl::UT]*E - y_[gr2::Weyl::UPHI]*L);
+        if (norm2 < 0)
+            return;
+        norm = sqrtl(norm2/spt->get_metric()[gr2::Weyl::RHO][gr2::Weyl::RHO]);
+
+        // calculate velocity
+        y_[gr2::Weyl::URHO] = norm*u_rho_frac;
+        y_[gr2::Weyl::UZ] = norm*sqrtl(1-u_rho_frac*u_rho_frac);
 
         // calculate numerical expansions
         try
