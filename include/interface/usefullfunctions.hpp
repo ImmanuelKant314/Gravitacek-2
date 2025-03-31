@@ -101,8 +101,10 @@ class StopBeforeBlackHole : public gr2::Event
 {
 public:
     gr2::real rho_min;
+    bool activated;
+    gr2::real t;
 
-    StopBeforeBlackHole(gr2::real rho_min): gr2::Event(gr2::EventType::data, true), rho_min(rho_min)
+    StopBeforeBlackHole(gr2::real rho_min): gr2::Event(gr2::EventType::data, true), rho_min(rho_min), activated(false), t(0)
     {
 
     }
@@ -114,6 +116,8 @@ public:
 
     virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
     {
+        activated=true;
+        this->t = t;
     }
 };
 
@@ -123,8 +127,10 @@ class StopTooHighErrorE : public gr2::Event
 public:
     std::shared_ptr<T> spt;
     gr2::real E, E_, eps;
+    bool activated;
+    gr2::real t;
 
-    StopTooHighErrorE(std::shared_ptr<T> spt, gr2::real E, gr2::real eps):gr2::Event(gr2::EventType::data, true), spt(spt), E(E), eps(eps)
+    StopTooHighErrorE(std::shared_ptr<T> spt, gr2::real E, gr2::real eps):gr2::Event(gr2::EventType::data, true), spt(spt), E(E), eps(eps), t(0), activated(false)
     {}
 
     virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
@@ -136,6 +142,8 @@ public:
 
     virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
     {
+        activated=true;
+        this->t = t;
     }
 };
 
@@ -145,8 +153,10 @@ class StopTooHighErrorL : public gr2::Event
 public:
     std::shared_ptr<T> spt;
     gr2::real L, L_, eps;
+    bool activated;
+    gr2::real t;
 
-    StopTooHighErrorL(std::shared_ptr<T> spt, gr2::real L, gr2::real eps):gr2::Event(gr2::EventType::data, true), spt(spt), L(L), eps(eps)
+    StopTooHighErrorL(std::shared_ptr<T> spt, gr2::real L, gr2::real eps):gr2::Event(gr2::EventType::data, true), spt(spt), L(L), eps(eps), activated(false), t(0)
     {}
 
     virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
@@ -158,6 +168,8 @@ public:
 
     virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
     {
+        activated=true;
+        this->t = t;
     }
 };
 

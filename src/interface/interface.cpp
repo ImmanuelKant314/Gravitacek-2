@@ -7,6 +7,7 @@
 
 #include <stdexcept>
 #include <iostream>
+#include <iomanip>
 #include <algorithm>
 #include <fstream>
 #include <array>
@@ -1336,6 +1337,9 @@ void Interface::poincare_border_mp(std::string text)
 
 void Interface::poincare_section_weyl(std::string text)
 {
+    std::cout << std::fixed;
+    std::cout << std::setprecision(2);
+
     // Initialize calculation
     auto args = find_function_arguments(text);
     int number_of_arguments = 7;
@@ -1408,9 +1412,11 @@ void Interface::poincare_section_weyl(std::string text)
                 continue;
             gr2::real norm = sqrtl(norm2/spt->get_metric()[gr2::Weyl::RHO][gr2::Weyl::RHO]);
 
-            std::cout << "rho" << y[gr2::Weyl::RHO] << std::endl;
+            std::cout << i+1 << "/" << n_rho << ", rho = " << y[gr2::Weyl::RHO] << std::endl; 
             for (int j = 0; j < angles; j++)
             {
+                std::cout << j+1 << "/" << angles << ", reason of termination: ";
+
                 // calculate initial conditions
                 gr2::real angle = j*delta_angle;
                 y[gr2::Weyl::URHO] = norm*sinl(angle);
@@ -1434,8 +1440,30 @@ void Interface::poincare_section_weyl(std::string text)
                 // delete data
                 stop_on_disk->data.clear();
                 file.flush();
+
+                if (errorE_too_high->activated)
+                {
+                    std::cout << "Energy, t = " << errorE_too_high->t / t_max*100 << " %" << std::endl;
+                    errorE_too_high->activated = false;
+                }
+                else if (errorL_too_high->activated)
+                {
+                    std::cout << "Momentum, t = " << errorL_too_high->t / t_max*100 << " %" << std::endl;
+                    errorL_too_high->activated = false;
+                }
+                else if (too_close->activated)
+                {
+                    std::cout << "Black hole, t = " << too_close->t / t_max*100 << " %" << std::endl;
+                    too_close->activated = false;
+                }
+                else
+                {
+                    std::cout << "None, t = 100 %" << std::endl;
+                }
             }
         }
+        std::cout << std::defaultfloat;
+        std::cout << std::setprecision(6);
         // close file
         file.close();
     }
@@ -1448,6 +1476,9 @@ void Interface::poincare_section_weyl(std::string text)
 
 void Interface::poincare_section_mp(std::string text)
 {
+    std::cout << std::fixed;
+    std::cout << std::setprecision(2);
+
     // Initialize calculation
     auto args = find_function_arguments(text);
     int number_of_arguments = 7;
@@ -1516,9 +1547,11 @@ void Interface::poincare_section_mp(std::string text)
                 continue;
             gr2::real norm = sqrtl(norm2/spt->get_metric()[gr2::Weyl::RHO][gr2::Weyl::RHO]);
 
-            std::cout << "rho" << y[gr2::Weyl::RHO] << std::endl;
+            std::cout << i+1 << "/" << n_rho << ", rho = " << y[gr2::Weyl::RHO] << std::endl; 
             for (int j = 0; j < angles; j++)
             {
+                std::cout << j+1 << "/" << angles << ", reason of termination: ";
+
                 // calculate initial conditions
                 gr2::real angle = j*delta_angle;
                 y[gr2::Weyl::URHO] = norm*sinl(angle);
@@ -1542,8 +1575,30 @@ void Interface::poincare_section_mp(std::string text)
                 // delete data
                 stop_on_disk->data.clear();
                 file.flush();
+
+                if (errorE_too_high->activated)
+                {
+                    std::cout << "Energy, t = " << errorE_too_high->t / t_max*100 << " %" << std::endl;
+                    errorE_too_high->activated = false;
+                }
+                else if (errorL_too_high->activated)
+                {
+                    std::cout << "Momentum, t = " << errorL_too_high->t / t_max*100 << " %" << std::endl;
+                    errorL_too_high->activated = false;
+                }
+                else if (too_close->activated)
+                {
+                    std::cout << "Black hole, t = " << too_close->t / t_max*100 << " %" << std::endl;
+                    too_close->activated = false;
+                }
+                else
+                {
+                    std::cout << "None, t = 100 %" << std::endl;
+                }
             }
         }
+        std::cout << std::defaultfloat;
+        std::cout << std::setprecision(6);
         // close file
         file.close();
     }
