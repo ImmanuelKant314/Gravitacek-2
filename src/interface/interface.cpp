@@ -1592,7 +1592,7 @@ void Interface::numerical_expansions_weyl(std::string text)
     std::string file_name = args[8];
     std::string file_name2 = args[9];
 
-    gr2::real eps_pos = 1e-8;
+    gr2::real eps_pos = 1e-9;
 
     std::ofstream file;
     std::ofstream file2;
@@ -1617,7 +1617,7 @@ void Interface::numerical_expansions_weyl(std::string text)
         integrator.add_event(errorL_too_high);
         auto stop_on_disk = std::make_shared<StopOnDiskTwoParticles>(spt, 1e-4);
         integrator.add_event(stop_on_disk);
-        auto renormalization = std::make_shared<RenormalizationOfSecondParticleWeyl>(spt, 1e-5);
+        auto renormalization = std::make_shared<RenormalizationOfSecondParticleWeyl>(spt, 1e-7);
         auto num_expansions = std::make_shared<NumericalExpansions<gr2::Weyl,18>>(spt, rho_min, rho_max, n_rho, z_min, z_max, n_z, &(renormalization->log_norm));
         integrator.add_event(num_expansions);
         integrator.add_event(renormalization);
@@ -1702,6 +1702,7 @@ void Interface::numerical_expansions_weyl(std::string text)
                 sum += num_expansions->data[i][j];
             }
         std::cout << sum << std::endl;
+        std::cout << renormalization->log_norm << std::endl;
 
         for (int i = 0; i<n_rho; i++)
             for (int j = 0; j<n_z; j++)

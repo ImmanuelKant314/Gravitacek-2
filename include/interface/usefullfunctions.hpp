@@ -74,22 +74,24 @@ class StopOnDiskTwoParticles : public gr2::Event
 {
 protected:
     std::shared_ptr<gr2::GeoMotion> spt;
+    int sign;
     int n;
 public:
     gr2::real z;
-    StopOnDiskTwoParticles(std::shared_ptr<gr2::GeoMotion> spt, gr2::real z) : gr2::Event(gr2::EventType::modyfing), z(z), spt(spt)
+    StopOnDiskTwoParticles(std::shared_ptr<gr2::GeoMotion> spt, gr2::real z) : gr2::Event(gr2::EventType::modyfing), z(z), spt(spt), sign(1)
     {
         this->n = spt->get_n();
     }
     virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
     {
-        return y[gr2::Weyl::Z]-this->z;
+        return (sign*y[gr2::Weyl::Z]-this->z);
     }
 
     virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
     {
-        y[gr2::Weyl::UZ]*=-1;
-        (y+n)[gr2::Weyl::UZ]*=-1;
+        y[gr2::Weyl::Z] *= -1;
+        (y+n)[gr2::Weyl::Z] = 2*y[gr2::Weyl::Z] + (y+n)[gr2::Weyl::Z];
+        sign *=-1;
         spt->function(t, y, dydt);
         spt->function(t, y+n, dydt+n);
     }
@@ -182,7 +184,7 @@ public:
         int n = spt->get_n();
         gr2::real norm2 = 0;
         gr2::real *y_ = y+n;
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < 8; i++)
         {
             gr2::real dy = y[i]-y_[i];
             norm2 += dy*dy;
@@ -223,7 +225,9 @@ public:
     gr2::real** data;
     gr2::real** time_spend_in_area;
 
-    NumericalExpansions(std::shared_ptr<T> spt, gr2::real rho_min, gr2::real rho_max, int n_rho, gr2::real z_min, gr2::real z_max, int n_z, gr2::real *log_norm):gr2::Event(gr2::EventType::data, false), spt(spt), dt(dt), rho_min(rho_min), rho_max(rho_max), n_rho(n_rho), z_min(z_min), z_max(z_max), n_z(n_z), log_norm(log_norm), t_prev(0)
+    bool test;
+
+    NumericalExpansions(std::shared_ptr<T> spt, gr2::real rho_min, gr2::real rho_max, int n_rho, gr2::real z_min, gr2::real z_max, int n_z, gr2::real *log_norm):gr2::Event(gr2::EventType::data, false), spt(spt), dt(dt), rho_min(rho_min), rho_max(rho_max), n_rho(n_rho), z_min(z_min), z_max(z_max), n_z(n_z), log_norm(log_norm), t_prev(0), test(false)
     {
         delta_rho = (rho_max-rho_min)/n_rho;
         delta_z = (z_max-z_min)/n_z;
@@ -289,6 +293,7 @@ public:
 
         gr2::real t_step = (t-t_last_step)/(iters-1);
 
+        // std::cout << "Brum" << std::endl;
         for (int i = 1; i < iters; i++)
         {
             gr2::real t_now = t_last_step+t_step*i;
@@ -330,7 +335,7 @@ public:
                 t_event = std::max(t_event_rho, t_event_z);
 
                 // get position
-                for (int j = 0; j < spt->get_n(); j++)
+                for (int j = 0; j < 18; j++)
                     y_[j] = stepper->dense_out(j, t_event);
                 spt->calculate_metric(y_);
                 spt->calculate_christoffel_symbols(y_);
@@ -368,8 +373,13 @@ public:
                 gr2::real log_norm_of_sep = 0.5*log(norm_of_sep2);
 
                 // TODO: save result to array
-                this->data[i_iter_old][j_iter_old] += log_norm_of_sep + *(this->log_norm) - log_norm_prev;
-                this->time_spend_in_area[i_iter_old][j_iter_old] += t_event - t_prev;
+                // std::cout << (log_norm_of_sep + *(this->log_norm) - log_norm_prev) << std::endl;
+                if (test)
+                {
+                    this->data[i_iter_old][j_iter_old] += log_norm_of_sep + *(this->log_norm) - log_norm_prev;
+                    this->time_spend_in_area[i_iter_old][j_iter_old] += t_event - t_prev;
+                }
+                test = true;
                 t_prev = t_event;
                 log_norm_prev = log_norm_of_sep + *(this->log_norm);
             }
