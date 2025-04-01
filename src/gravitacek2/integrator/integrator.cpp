@@ -7,11 +7,13 @@
 #include <stdexcept>
 #include <cmath>
 // #include <iostream>
+// #include <iomanip>
 
 // ========== macros ========== 
 #define MAX_ITERATIONS_HADJUST 50 
 #define MAX_ITERATIONS_SOLVE_EVENT 30
-#define EVENT_PRECISION 1e-9
+#define EVENT_PRECISION 1e-8
+#define TIME_PRECISION 1e-12
 
 namespace gr2
 {
@@ -52,19 +54,24 @@ namespace gr2
 
     bool Integrator::solve_event(std::shared_ptr<Event> event, const real& previous_value_of_event)
     {
+        // std::cout << "Solve event" << std::endl;
         // prepare values
         int i;
 
         // calculate current value of event
         real current_value_of_event = event->value(t2, yt2, dydt2);
+        // std::cout << previous_value_of_event << " " << current_value_of_event << std::endl;
 
         // check if event is triggered
         // if event is not triggered return false 
         // else if current value of event is close enough, return true
         if (current_value_of_event*previous_value_of_event > 0 || previous_value_of_event == 0)
             return false;
-        else if (fabs(previous_value_of_event) < EVENT_PRECISION) 
-            return false;
+        // else if (fabs(previous_value_of_event) < EVENT_PRECISION) 
+        // {
+        //     std::cout << "Previous value of event too small" << std::endl;
+        //     return false;
+        // }
 
         // prepare values for secant method
         real a = previous_value_of_event, b = current_value_of_event;
@@ -75,6 +82,7 @@ namespace gr2
         // std::cout << h2 << std::endl;
 
         // ========== Secant method ==========
+        // std::cout << "Let us iterate" << std::endl;
         for (i = 0; i < MAX_ITERATIONS_SOLVE_EVENT; i++)
         {
             gr2::real avg = 0.5*(h_a+h_b);
@@ -88,6 +96,8 @@ namespace gr2
             this->stepper->step_err(t, yt3, h3, err3, dense, dydt, dydt3);
             t3 = t + h3;
             current_value_of_event = event->value(t3, yt3, dydt3);
+            // std::cout << std::scientific;
+            // std::cout << "current value of event = " << current_value_of_event << std::endl;
 
             // reduce interval for h
             if (current_value_of_event*a > 0)
@@ -101,13 +111,20 @@ namespace gr2
                 b = current_value_of_event;
             }
             // if new value of event is close enought, stop for-cycle
-            if( (h_b-h_a) < EVENT_PRECISION*std::max(h_a, h_b))
+            if( (h_b-h_a) < TIME_PRECISION*std::max(h_a, h_b))
+            {
+                // std::cout << "precision of time"<< std::endl;
                 return true;
+            }
             if (std::abs(current_value_of_event) < EVENT_PRECISION )
+            {
+                // std::cout << "precision of event" << std::endl;
                 return true;
+            }
         }
         if (i == MAX_ITERATIONS_SOLVE_EVENT)
         {
+            // std::cout << std::scientific;
             // for (int ii = 0; ii < 8; ii++)
             //     std::cout << this->yt[ii] << " ";
             // for (int ii = 0; ii < 8; ii++)
@@ -118,9 +135,10 @@ namespace gr2
             // std::cout << h_a << " " << h_b << " " << h_b-h_a << std::endl;
             // std::cout << a << " " << b << " " << b-a << std::endl;
             // std::cin.get();
+            // std::cout << "z = " << yt[3] << std::endl;
+            // exit(1);
             throw std::runtime_error("precise time of event could not be found");
         }
-
         return true;
     }
         
@@ -152,7 +170,7 @@ namespace gr2
         this->dense = dense;
         this->init_stepper(stepper_name);
         this->stepper->set_OdeSystem(ode);
-        this->stepcontroller = new StepControllerNR(ode->get_n(), this->stepper->get_err_order(), atol, rtol, 0.95, 0.2, 10.0);
+        this->stepcontroller = new StepControllerNR(ode->get_n(), this->stepper->get_err_order(), atol, rtol, 0.8, 0.2, 10.0);
         
         int n = this->ode->get_n();
 
@@ -247,6 +265,7 @@ namespace gr2
             current_event_terminal = false;
 
             // check modifying events
+            int current_event_index = 0;
             for (int i = 0; i < number_of_events_modifying; i++)
             {
                 if(this->solve_event(events_modifying[i], events_modifying_values[i]))
@@ -255,17 +274,26 @@ namespace gr2
                     {
                         yt2[i] = yt3[i];
                         dydt2[i] = dydt3[i];
+                        err2[i] = err3[i];
                     }
                     h2 = h3;
                     t2 = t3;
                     current_event = events_modifying[i];
                     current_event_terminal = current_event->get_terminal();
+                    current_event_index = i;
+                    // std::cout << "Event activated" << std::endl;
                 }
             }
 
             i = 0;
             if (this->stepcontroller)
             {
+                // std::cout << std::scientific;
+                // std::cout << "Lets do it" << std::endl;
+                // std::cout << "z = " << yt[3] << std::endl;
+                // std::cout << "z = " << yt2[3] << std::endl;
+                // std::cout << "err = " << err2[3] << std::endl;
+                // std::cout << "h2 = " << h2 << std::endl;
                 for (i = 0; i < MAX_ITERATIONS_HADJUST; i++)
                 {
                     if(this->stepcontroller->hadjust(this->yt2, this->err2, this->dydt2, this->h2))
@@ -274,14 +302,37 @@ namespace gr2
                         yt2[j] = yt[j];
                     this->stepper->step_err(t, yt2, h2, err2, dense, dydt, dydt2);
                     t2 = t + h2;
-                    current_event = nullptr;
-                    current_event_terminal = false;
+
+                    // check current event
+                    // std::cout << current_event << std::endl;
+                    if (current_event && (events_modifying_values[current_event_index]*current_event->value(t2, yt2, dydt2) <= 0))
+                    {
+                        // std::cout << t2 << " not delete event " << yt2[3] << std::endl;
+                        // std::cout << current_event->value(t2, yt2, dydt2) << std::endl;
+                    }
+                    else
+                    {
+                        // std::cout << t2 << " delete event " << yt2[3] << std::endl;
+                        // std::cout << events_modifying_values[0] << " " << events_modifying[0]->value(t2, yt2, dydt2) << std::endl;
+                        // if (std::abs(yt2[3]) < 1e-5)
+                        //     throw;
+                        current_event = nullptr;
+                        current_event_terminal = false;
+                    }
+
+                    // current_event = nullptr;
+                    // current_event_terminal = false;
                 }
             }
 
             // if too much iteration for hadjust, throw exception
             if (i >= MAX_ITERATIONS_HADJUST)
+            {
+                // std::cout << h2 << std::endl;
+                // std::cout << yt[3] << std::endl;
+                // exit(1);
                 throw std::runtime_error("optimal step size was not found, MAX_ITERATIONS_HADJUST reached");
+            }
 
             // "commit" to the step
             for (int i = 0; i < n; i++)

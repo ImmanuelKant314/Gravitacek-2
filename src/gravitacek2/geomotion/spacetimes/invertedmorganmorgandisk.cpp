@@ -96,7 +96,7 @@ namespace gr2
 
     void InvertedMorganMorganDisk::calculate_nu(const real *y)
     {
-        real rho = y[RHO], z = std::max<gr2::real>(std::abs(y[Z]),1e-5);
+        real rho = y[RHO], z = std::max<gr2::real>(std::abs(y[Z]),1e-8);
         real alpha = rho*rho + z*z - b*b;
         real help_term = sqrtl(alpha*alpha + 4*(z*z)*(b*b));
         real x = sqrtl(alpha + help_term)/(sqrtl(2)*b);
@@ -118,7 +118,7 @@ namespace gr2
     
     void InvertedMorganMorganDisk::calculate_nu1(const real *y)
     {
-        real rho = y[RHO], z = std::max<gr2::real>(std::abs(y[Z]),1e-5);
+        real rho = y[RHO], z = std::max<gr2::real>(std::abs(y[Z]),1e-8);
         real alpha = rho*rho + z*z - b*b;
         real help_term1 = sqrtl(alpha*alpha + 4*(z*z)*(b*b));
         real x = sqrtl(alpha + help_term1)/(sqrtl(2)*b);
@@ -166,7 +166,7 @@ namespace gr2
     void InvertedMorganMorganDisk::calculate_nu2(const real *y)
     {
         // Coordinates
-        real rho = y[RHO], z = std::max<gr2::real>(std::abs(y[Z]),1e-5);
+        real rho = y[RHO], z = std::max<gr2::real>(std::abs(y[Z]),1e-8);
 
         // Second derivatives of potential - functions
         auto nu_rho_func = [&z, this](real rho)

@@ -58,14 +58,15 @@ public:
     }
     virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
     {
-        return y[gr2::Weyl::Z]-this->z;
+        int sign = y[gr2::Weyl::UZ]>0?1:-1;
+        return (y[gr2::Weyl::Z]+sign*this->z);
     }
 
     virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
     {
         if (poincare)
             data.push_back({y[gr2::Weyl::RHO],y[gr2::Weyl::URHO]});
-        y[gr2::Weyl::UZ]*=-1;
+        y[gr2::Weyl::Z]*=-1;
         spt->function(t, y, dydt);
     }
 };
@@ -352,13 +353,13 @@ public:
                 spt->calculate_metric(y_);
                 spt->calculate_christoffel_symbols(y_);
 
-                // TODO: paralel transport 
+                // paralel transport 
                 for (int j = 0; j < spt->get_dim(); j++)
                     for (int k = 0; k < spt->get_dim(); k++)
                         for (int l = 0; l < spt->get_dim(); l++)
                             y_[n + dim + j] += spt->get_christoffel_symbols()[j][k][l]*y_[dim+k]*(y_[n+l] - y_[l]);
 
-                // TODO: projection
+                // projection
                 gr2::real u_up_indices[4]{};
                 gr2::real u_down_indices[4]{};
 
@@ -369,7 +370,7 @@ public:
                     for (int k = 0; k < 4; k++)
                         u_down_indices[j] += spt->get_metric()[j][k]*u_up_indices[k];
 
-                // TODO: calculate norm of separation in space 
+                // calculate norm of separation in space 
                 gr2::real norm_of_sep2 = 0;
                 gr2::real dyj, dyk, dvj, dvk;
                 for (int j = 0; j < 4; j++)
@@ -384,7 +385,7 @@ public:
                     }
                 gr2::real log_norm_of_sep = 0.5*log(norm_of_sep2);
 
-                // TODO: save result to array
+                // save result to array
                 // std::cout << (log_norm_of_sep + *(this->log_norm) - log_norm_prev) << std::endl;
                 if (test)
                 {

@@ -1,4 +1,5 @@
 #include <cmath>
+// #include <iostream>
 
 #include "gravitacek2/integrator/stepcontrollers.hpp"
 
@@ -21,10 +22,14 @@ namespace gr2
         for (int i = 0; i < n; i++)
         {
             scale = atol + rtol*fabs(y[i]);
+            // std::cout << "y[i] = " << y[i] << " scale = " << scale << " err[i] = " << err[i] << std::endl;
             real x = (err[i]/scale);
             this->err += x*x;
         }
+        // std::cout << "err_ = " << this->err << std::endl;
         this->err = sqrtl(this->err/n);
+        // std::cout << "err__ = " << this->err << std::endl;
+        // std::cout << "h_old = " << h << std::endl;
 
         // ========== Calculate step size ==========  
         real h_new = h*S*powl(1.0/this->err, 1.0/this->k);
@@ -33,6 +38,7 @@ namespace gr2
         else if (h_new < factor_decrease*h)
             h_new = factor_decrease*h;
         h = h_new;
+        // std::cout << "h_new = " << h << std::endl;
         
         // ========== Success of step size ========== 
         return this->err <= 1;

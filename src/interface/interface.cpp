@@ -1384,14 +1384,14 @@ void Interface::poincare_section_weyl(std::string text)
         integrator.add_event(errorE_too_high);
         auto errorL_too_high = std::make_shared<StopTooHighErrorL<gr2::Weyl>>(spt,L,1e-10);
         integrator.add_event(errorL_too_high);
-        auto stop_on_disk = std::make_shared<StopOnDisk<gr2::Weyl>>(spt, 1e-4, true);
+        auto stop_on_disk = std::make_shared<StopOnDisk<gr2::Weyl>>(spt, 1e-5, true);
         integrator.add_event(stop_on_disk);
 
         // calculate norms
         for (int i = 0; i < n_rho; i++)
         {
             gr2::real rho = rho_min + i*delta_rho;
-            gr2::real z = 1e-3;
+            gr2::real z = 1e-4;
             y[gr2::Weyl::RHO] = rho;
             y[gr2::Weyl::Z] = z;
 
@@ -1416,6 +1416,7 @@ void Interface::poincare_section_weyl(std::string text)
             for (int j = 0; j < angles; j++)
             {
                 std::cout << j+1 << "/" << angles << ", reason of termination: ";
+                std::cout.flush();
 
                 // calculate initial conditions
                 gr2::real angle = j*delta_angle;
@@ -1444,22 +1445,22 @@ void Interface::poincare_section_weyl(std::string text)
                 if (errorE_too_high->activated)
                 {
                     std::cout << "Energy, t = " << errorE_too_high->t / t_max*100 << " %" << std::endl;
-                    errorE_too_high->activated = false;
                 }
                 else if (errorL_too_high->activated)
                 {
                     std::cout << "Momentum, t = " << errorL_too_high->t / t_max*100 << " %" << std::endl;
-                    errorL_too_high->activated = false;
                 }
                 else if (too_close->activated)
                 {
                     std::cout << "Black hole, t = " << too_close->t / t_max*100 << " %" << std::endl;
-                    too_close->activated = false;
                 }
                 else
                 {
                     std::cout << "None, t = 100 %" << std::endl;
                 }
+                errorE_too_high->activated = false;
+                errorL_too_high->activated = false;
+                too_close->activated = false;
             }
         }
         std::cout << std::defaultfloat;
@@ -1579,22 +1580,22 @@ void Interface::poincare_section_mp(std::string text)
                 if (errorE_too_high->activated)
                 {
                     std::cout << "Energy, t = " << errorE_too_high->t / t_max*100 << " %" << std::endl;
-                    errorE_too_high->activated = false;
                 }
                 else if (errorL_too_high->activated)
                 {
                     std::cout << "Momentum, t = " << errorL_too_high->t / t_max*100 << " %" << std::endl;
-                    errorL_too_high->activated = false;
                 }
                 else if (too_close->activated)
                 {
                     std::cout << "Black hole, t = " << too_close->t / t_max*100 << " %" << std::endl;
-                    too_close->activated = false;
                 }
                 else
                 {
                     std::cout << "None, t = 100 %" << std::endl;
                 }
+                errorE_too_high->activated = false;
+                errorL_too_high->activated = false;
+                too_close->activated = false;
             }
         }
         std::cout << std::defaultfloat;
