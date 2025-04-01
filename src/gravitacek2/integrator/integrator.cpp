@@ -59,7 +59,7 @@ namespace gr2
         int i;
 
         // calculate current value of event
-        real current_value_of_event = event->value(t2, yt2, dydt2);
+        real current_value_of_event = event->value(t2, h2, yt2, dydt2);
         // std::cout << previous_value_of_event << " " << current_value_of_event << std::endl;
 
         // check if event is triggered
@@ -95,7 +95,7 @@ namespace gr2
             // take step and calculate new value of event
             this->stepper->step_err(t, yt3, h3, err3, dense, dydt, dydt3);
             t3 = t + h3;
-            current_value_of_event = event->value(t3, yt3, dydt3);
+            current_value_of_event = event->value(t3, h3, yt3, dydt3);
             // std::cout << std::scientific;
             // std::cout << "current value of event = " << current_value_of_event << std::endl;
 
@@ -251,7 +251,7 @@ namespace gr2
 
         // prepare values of events
         for (int i = 0; i < number_of_events_modifying; i++)
-            events_modifying_values[i] = events_modifying[i]->value(t_start, yt, dydt);
+            events_modifying_values[i] = events_modifying[i]->value(t_start, h, yt, dydt);
 
         // cycle for calculating new values of y
         while (t < t_end)
@@ -305,7 +305,7 @@ namespace gr2
 
                     // check current event
                     // std::cout << current_event << std::endl;
-                    if (current_event && (events_modifying_values[current_event_index]*current_event->value(t2, yt2, dydt2) <= 0))
+                    if (current_event && (events_modifying_values[current_event_index]*current_event->value(t2, h2, yt2, dydt2) <= 0))
                     {
                         // std::cout << t2 << " not delete event " << yt2[3] << std::endl;
                         // std::cout << current_event->value(t2, yt2, dydt2) << std::endl;
@@ -353,13 +353,13 @@ namespace gr2
 
             // apply event
             if (current_event)
-                current_event->apply(stepper, t, yt, dydt);
+                current_event->apply(stepper, t, h, yt, dydt);
             
             // data events
             for (auto &event : events_data)
-                if (event->value(t, yt, dydt) == 0)
+                if (event->value(t, h, yt, dydt) == 0)
                 {
-                    event->apply(stepper, t, yt, dydt);
+                    event->apply(stepper, t, h, yt, dydt);
                     current_event_terminal = std::max(event->get_terminal(), current_event_terminal);
                 }
 
@@ -370,7 +370,7 @@ namespace gr2
             // calculate new values of events
             for (int i = 0; i < number_of_events_modifying; i++)
             {
-                events_modifying_values[i] = events_modifying[i]->value(t, yt, dydt);
+                events_modifying_values[i] = events_modifying[i]->value(t, h, yt, dydt);
             }
 
             // propagate changes from events

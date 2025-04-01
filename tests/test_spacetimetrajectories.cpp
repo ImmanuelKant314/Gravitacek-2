@@ -23,12 +23,12 @@ public:
         this->n = n;
     }
 
-    virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
+    virtual gr2::real value(const gr2::real &t, const gr2::real &dt, const gr2::real y[], const gr2::real dydt[]) override
     {
         return 0;
     }
 
-    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
+    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real &dt, gr2::real y[], gr2::real dydt[]) override
     {
         std::vector<gr2::real> record;
         record.push_back(t);
@@ -49,12 +49,12 @@ public:
 
     }
 
-    virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
+    virtual gr2::real value(const gr2::real &t, const gr2::real &dt, const gr2::real y[], const gr2::real dydt[]) override
     {
         return y[gr2::Weyl::Z]-1e-9;
     }
 
-    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
+    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real &dt, gr2::real y[], gr2::real dydt[]) override
     {
         y[gr2::Weyl::UZ]*=-1;
         spt->function(t, y, dydt);

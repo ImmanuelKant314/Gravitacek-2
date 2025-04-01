@@ -28,12 +28,12 @@ public:
         this->n = n;
     }
 
-    virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
+    virtual gr2::real value(const gr2::real &t, const gr2::real &dt, const gr2::real y[], const gr2::real dydt[]) override
     {
         return 0;
     }
 
-    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
+    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real &dt, gr2::real y[], gr2::real dydt[]) override
     {
         std::vector<gr2::real> record;
         record.push_back(t);
@@ -56,13 +56,13 @@ public:
     {
 
     }
-    virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
+    virtual gr2::real value(const gr2::real &t, const gr2::real &dt, const gr2::real y[], const gr2::real dydt[]) override
     {
         int sign = y[gr2::Weyl::UZ]>0?1:-1;
         return (y[gr2::Weyl::Z]+sign*this->z);
     }
 
-    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
+    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real &dt, gr2::real y[], gr2::real dydt[]) override
     {
         if (poincare)
             data.push_back({y[gr2::Weyl::RHO],y[gr2::Weyl::URHO]});
@@ -83,12 +83,12 @@ public:
     {
         this->n = spt->get_n();
     }
-    virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
+    virtual gr2::real value(const gr2::real &t, const gr2::real &dt, const gr2::real y[], const gr2::real dydt[]) override
     {
         return (sign*y[gr2::Weyl::Z]-this->z);
     }
 
-    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
+    virtual void apply(gr2::StepperBase* stepper, gr2::real &dt, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
     {
         y[gr2::Weyl::Z] *= -1;
         (y+n)[gr2::Weyl::Z] = 2*y[gr2::Weyl::Z] + (y+n)[gr2::Weyl::Z];
@@ -110,12 +110,12 @@ public:
 
     }
 
-    virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
+    virtual gr2::real value(const gr2::real &t, const gr2::real &dt, const gr2::real y[], const gr2::real dydt[]) override
     {
         return y[gr2::Weyl::RHO] < rho_min?0:1;
     }
 
-    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
+    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real &dt, gr2::real y[], gr2::real dydt[]) override
     {
         activated=true;
         this->t = t;
@@ -134,14 +134,14 @@ public:
     StopTooHighErrorE(std::shared_ptr<T> spt, gr2::real E, gr2::real eps):gr2::Event(gr2::EventType::data, true), spt(spt), E(E), eps(eps), t(0), activated(false)
     {}
 
-    virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
+    virtual gr2::real value(const gr2::real &t, const gr2::real &dt, const gr2::real y[], const gr2::real dydt[]) override
     {
         spt->calculate_metric(y);
         E_ = - spt->get_metric()[gr2::Weyl::T][gr2::Weyl::T]*y[gr2::Weyl::UT];
         return abs(E_-E)/E < eps?1:0;
     }
 
-    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
+    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real &dt, gr2::real y[], gr2::real dydt[]) override
     {
         activated=true;
         this->t = t;
@@ -160,14 +160,14 @@ public:
     StopTooHighErrorL(std::shared_ptr<T> spt, gr2::real L, gr2::real eps):gr2::Event(gr2::EventType::data, true), spt(spt), L(L), eps(eps), activated(false), t(0)
     {}
 
-    virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
+    virtual gr2::real value(const gr2::real &t, const gr2::real &dt, const gr2::real y[], const gr2::real dydt[]) override
     {
         spt->calculate_metric(y);
         L_ = spt->get_metric()[gr2::Weyl::PHI][gr2::Weyl::PHI]*y[gr2::Weyl::UPHI];
         return abs(L_-L)/L < eps?1:0;
     }
 
-    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
+    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real &dt, gr2::real y[], gr2::real dydt[]) override
     {
         activated=true;
         this->t = t;
@@ -186,12 +186,12 @@ public:
     RenormalizationOfSecondParticleWeyl(std::shared_ptr<gr2::GeoMotion> spt, gr2::real target_norm):gr2::Event(gr2::EventType::data, false), spt(spt), target_norm(target_norm), log_norm(0)
     {}
 
-    virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
+    virtual gr2::real value(const gr2::real &t, const gr2::real &dt, const gr2::real y[], const gr2::real dydt[]) override
     {
         return 0;
     }
 
-    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
+    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real &dt, gr2::real y[], gr2::real dydt[]) override
     {
         // Calculate normalization 
         int n = spt->get_n();
@@ -268,12 +268,12 @@ public:
         delete[] time_spend_in_area;
     }
 
-    virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
+    virtual gr2::real value(const gr2::real &t, const gr2::real &dt, const gr2::real y[], const gr2::real dydt[]) override
     {
         return 0;
     }
 
-    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
+    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real &dt_, gr2::real y[], gr2::real dydt[]) override
     {
         // std::cout << "========== Apply ==========" << std::endl;
         // TODO: for-cycle (check if any line was crossed)
@@ -421,11 +421,11 @@ public:
         t = t_init;
         this->h = h;
     }
-    virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
+    virtual gr2::real value(const gr2::real &t, const gr2::real &dt, const gr2::real y[], const gr2::real dydt[]) override
     {   
         return 0;
     }
-    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[])
+    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real &dt, gr2::real y[], gr2::real dydt[]) override
     {
         while (this->t<t)
         {

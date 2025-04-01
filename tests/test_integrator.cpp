@@ -25,11 +25,11 @@ class Bounce : public gr2::Event
         std::shared_ptr<gr2::DampedHarmonicOscillator> osc;
     public:
         Bounce(std::shared_ptr<gr2::DampedHarmonicOscillator> osc) : gr2::Event(gr2::EventType::modyfing),osc(osc){};
-        virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
+        virtual gr2::real value(const gr2::real &t, const gr2::real &dt, const gr2::real y[], const gr2::real dydt[]) override
         {
             return y[0]-1e-11;
         }
-        virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
+        virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real &dt, gr2::real y[], gr2::real dydt[]) override
         {
             y[1] = -y[1];
             osc->function(t, y, dydt);
@@ -48,11 +48,11 @@ class DataMonitoring : public gr2::Event
             pos = std::vector<gr2::real>();
             vel = std::vector<gr2::real>();
         }
-        virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
+        virtual gr2::real value(const gr2::real &t, const gr2::real &dt, const gr2::real y[], const gr2::real dydt[]) override
         {   
             return 0;
         }
-        virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[])
+        virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real &dt, gr2::real y[], gr2::real dydt[])
         {
             times.push_back(t);
             pos.push_back(y[0]);
@@ -76,11 +76,11 @@ public:
         pos = std::vector<gr2::real>();
         vel = std::vector<gr2::real>();
     }
-    virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
+    virtual gr2::real value(const gr2::real &t, const gr2::real &dt, const gr2::real y[], const gr2::real dydt[]) override
     {   
         return 0;
     }
-    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[])
+    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real &dt, gr2::real y[], gr2::real dydt[])
     {
         while (this->t<t)
         {

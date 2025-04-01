@@ -53,13 +53,14 @@ namespace gr2
          * crosses 0.
          * 
          * @param t time variable
+         * @param dt time step
          * @param y coordinate variables
          * @param err error of current step
          * @param dydt derivate of coordinate \f$\vec{y}\f$ with respect to \f$t\f$
          * @param h step size
          * @return value of internal function
          */
-        virtual real value(const real &t, const real y[], const real dydt[]) = 0;
+        virtual real value(const real &t, const real &dt, const real y[], const real dydt[]) = 0;
 
         /**
          * @brief Apply event.
@@ -69,12 +70,13 @@ namespace gr2
          * equation.
          *  
          * @param t time variable
+         * @param dt time step
          * @param y coordinate variables
          * @param err error of current step
          * @param dydt derivate of coordinate \f$\vec{y}\f$ with respect to \f$t\f$
          * @param h step size
          * @return value of internal function
          */
-        virtual void apply(StepperBase* stepper, real &t, real y[], real dydt[]) = 0;
+        virtual void apply(StepperBase* stepper, real &t, real &dt, real y[], real dydt[]) = 0;
     };
 }

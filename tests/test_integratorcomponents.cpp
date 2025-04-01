@@ -47,11 +47,11 @@ class ZeroY : public gr2::Event
         gr2::real *last_y;
     public:
         ZeroY(gr2::real *last_y) : gr2::Event(gr2::EventType::data){this->last_y = last_y;}
-        virtual gr2::real value(const gr2::real &t, const gr2::real y[], const gr2::real dydt[]) override
+        virtual gr2::real value(const gr2::real &t, const gr2::real &dt, const gr2::real y[], const gr2::real dydt[]) override
         {
             return y[1];
         };
-        virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real y[], gr2::real dydt[])
+        virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real &dt, gr2::real y[], gr2::real dydt[])
         {
             this->last_y[0] = y[1];
         };
@@ -73,7 +73,7 @@ TEST(Event, value)
     gr2::real last_y;
     ZeroY event = ZeroY(&last_y);
 
-    EXPECT_EQ(y[1], event.value(0, y, nullptr));
+    EXPECT_EQ(y[1], event.value(0, 0, y, nullptr));
 }
 
 TEST(Event, apply)
@@ -83,7 +83,7 @@ TEST(Event, apply)
     ZeroY event = ZeroY(&last_y);
 
     gr2::real t = 0, h = 0;
-    event.apply(nullptr, t, y, nullptr);
+    event.apply(nullptr, t, h, y, nullptr);
     EXPECT_EQ(last_y, y[1]);
 }
 
