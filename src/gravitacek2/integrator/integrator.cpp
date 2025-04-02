@@ -83,6 +83,7 @@ namespace gr2
 
         // ========== Secant method ==========
         // std::cout << "Let us iterate" << std::endl;
+        // std::cout << previous_value_of_event << " " << current_value_of_event << " " << h2 << " " << h2*yt[7] << std::endl;
         for (i = 0; i < MAX_ITERATIONS_SOLVE_EVENT; i++)
         {
             gr2::real avg = 0.5*(h_a+h_b);
@@ -93,7 +94,11 @@ namespace gr2
                 yt3[j] = yt[j];
 
             // take step and calculate new value of event
+            // std::cout << "h3 = " << h3 << std::endl;
             this->stepper->step_err(t, yt3, h3, err3, dense, dydt, dydt3);
+            // for (int ii = 0; ii < 8; ii++)
+            //     std::cout << this->yt3[ii] << " ";
+            // std::cout << std::endl;
             t3 = t + h3;
             current_value_of_event = event->value(t3, h3, yt3, dydt3);
             // std::cout << std::scientific;
@@ -134,7 +139,7 @@ namespace gr2
             // std::cout << h2 << std::endl;
             // std::cout << h_a << " " << h_b << " " << h_b-h_a << std::endl;
             // std::cout << a << " " << b << " " << b-a << std::endl;
-            // std::cin.get();
+            // // std::cin.get();
             // std::cout << "z = " << yt[3] << std::endl;
             // exit(1);
             throw std::runtime_error("precise time of event could not be found");
@@ -356,12 +361,17 @@ namespace gr2
                 current_event->apply(stepper, t, h, yt, dydt);
             
             // data events
+            // std::cout << "h before = " << h << std::endl;
             for (auto &event : events_data)
                 if (event->value(t, h, yt, dydt) == 0)
                 {
                     event->apply(stepper, t, h, yt, dydt);
                     current_event_terminal = std::max(event->get_terminal(), current_event_terminal);
                 }
+
+            // std::cout << "h after = " << h << std::endl;
+            h2 = h;
+            h3 = h;
 
             // kill precise event
             if (current_event_terminal)

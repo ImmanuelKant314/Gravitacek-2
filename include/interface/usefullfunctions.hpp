@@ -83,6 +83,7 @@ public:
     {
         this->n = spt->get_n();
     }
+
     virtual gr2::real value(const gr2::real &t, const gr2::real &dt, const gr2::real y[], const gr2::real dydt[]) override
     {
         return (sign*y[gr2::Weyl::Z]-this->z);
@@ -95,6 +96,34 @@ public:
         sign *=-1;
         spt->function(t, y, dydt);
         spt->function(t, y+n, dydt+n);
+    }
+};
+
+class RegularizeApproach : public gr2::Event
+{
+public:
+    gr2::real z_min, z_app, alpha, beta;
+    RegularizeApproach(gr2::real z_min, gr2::real z_app, gr2::real alpha, gr2::real beta):gr2::Event(gr2::data, false), z_min(z_min), z_app(z_app), alpha(alpha), beta(beta)
+    {}
+
+
+    virtual gr2::real value(const gr2::real &t, const gr2::real &dt, const gr2::real y[], const gr2::real dydt[]) override
+    {
+        gr2::real zz = std::abs(std::abs(y[gr2::Weyl::Z])-z_app);
+        if (zz>z_min && std::abs(dt*y[gr2::Weyl::UZ]) > alpha*zz && y[gr2::Weyl::Z]*y[gr2::Weyl::UZ]<0) 
+            return 0;
+        else
+            return 1;
+    }
+
+    virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real &dt, gr2::real y[], gr2::real dydt[]) override
+    {
+        // std::cout << "Approach" << std::endl;
+        // std::cout << dt << " " << y[3] << " " << y[gr2::Weyl::UZ] <<std::endl;
+        gr2::real zz = std::abs(std::abs(y[gr2::Weyl::Z])-z_app);
+        dt = beta*std::abs(y[gr2::Weyl::Z]/y[gr2::Weyl::UZ]);
+        // std::cout << dt << " " << y[3] << std::endl;
+        // std::cout << "Approach end" << std::endl;
     }
 };
 

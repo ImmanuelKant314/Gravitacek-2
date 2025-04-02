@@ -1386,6 +1386,8 @@ void Interface::poincare_section_weyl(std::string text)
         integrator.add_event(errorL_too_high);
         auto stop_on_disk = std::make_shared<StopOnDisk<gr2::Weyl>>(spt, 1e-5, true);
         integrator.add_event(stop_on_disk);
+        auto disk_reg = std::make_shared<RegularizeApproach>(1e-5, 1e-5, 0.8, 0.8);
+        integrator.add_event(disk_reg);
 
         // calculate norms
         for (int i = 0; i < n_rho; i++)
@@ -1526,6 +1528,8 @@ void Interface::poincare_section_mp(std::string text)
         integrator.add_event(errorL_too_high);
         auto stop_on_disk = std::make_shared<StopOnDisk<gr2::MajumdarPapapetrouWeyl>>(spt, 1e-4, true);
         integrator.add_event(stop_on_disk);
+        auto disk_reg = std::make_shared<RegularizeApproach>(1e-5, 1e-5, 0.8, 0.8);
+        integrator.add_event(disk_reg);
 
         // calculate norms
         for (int i = 0; i < n_rho; i++)
@@ -1552,6 +1556,7 @@ void Interface::poincare_section_mp(std::string text)
             for (int j = 0; j < angles; j++)
             {
                 std::cout << j+1 << "/" << angles << ", reason of termination: ";
+                std::cout.flush();
 
                 // calculate initial conditions
                 gr2::real angle = j*delta_angle;
