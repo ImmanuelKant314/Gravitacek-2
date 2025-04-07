@@ -684,8 +684,10 @@ void Interface::local_expansions_weyl(std::string text)
             {
                 gr2::real rho = rho_min + i*delta_rho;
                 gr2::real z = z_min + j*delta_z;
+                if (std::abs(z) < 1e-3)
+                    z = z>0?1e-3:-1e-3;
                 y[gr2::Weyl::RHO] = rho;
-                y[gr2::Weyl::Z] = z;
+                y[gr2::Weyl::Z] = std::abs(z);
 
                 // calculate lambda 
                 spt->calculate_lambda_init(y);
@@ -786,8 +788,10 @@ void Interface::local_expansions_mp(std::string text)
             {
                 gr2::real rho = rho_min + i*delta_rho;
                 gr2::real z = z_min + j*delta_z;
+                if (std::abs(z) < 1e-3)
+                    z = z>0?1e-3:-1e-3;
                 y[gr2::Weyl::RHO] = rho;
-                y[gr2::Weyl::Z] = z;
+                y[gr2::Weyl::Z] = std::abs(z);
 
                 // calculate ut (from E)
                 spt->calculate_metric(y);
@@ -883,8 +887,10 @@ void Interface::norm_growth_weyl(std::string text)
             {
                 gr2::real rho = rho_min + i*delta_rho;
                 gr2::real z = z_min + j*delta_z;
+                if (std::abs(z) < 1e-3)
+                    z = z>0?1e-3:-1e-3;
                 y[gr2::Weyl::RHO] = rho;
-                y[gr2::Weyl::Z] = z;
+                y[gr2::Weyl::Z] = std::abs(z);
 
                 // calculate lambda 
                 spt->calculate_lambda_init(y);
@@ -984,8 +990,11 @@ void Interface::norm_growth_mp(std::string text)
             {
                 gr2::real rho = rho_min + i*delta_rho;
                 gr2::real z = z_min + j*delta_z;
+                if (std::abs(z) < 1e-3)
+                    z = z>0?1e-3:-1e-3;
                 y[gr2::Weyl::RHO] = rho;
-                y[gr2::Weyl::Z] = z;
+                y[gr2::Weyl::Z] = std::abs(z);
+            
 
                 // calculate ut (from E)
                 spt->calculate_metric(y);
@@ -1078,9 +1087,11 @@ void Interface::rest_norm2_weyl(std::string text)
             for (int j = 0; j < n_z; j++)
             {
                 gr2::real rho = rho_min + i*delta_rho;
-                gr2::real z = z_min + j*delta_z;
+                gr2::real z = std::abs(z_min + j*delta_z);
+                if (std::abs(z) < 1e-3)
+                    z = z>0?1e-3:-1e-3;
                 y[gr2::Weyl::RHO] = rho;
-                y[gr2::Weyl::Z] = z;
+                y[gr2::Weyl::Z] = std::abs(z);
 
                 // calculate lambda 
                 spt->calculate_lambda_init(y);
@@ -1160,8 +1171,10 @@ void Interface::rest_norm2_mp(std::string text)
             {
                 gr2::real rho = rho_min + i*delta_rho;
                 gr2::real z = z_min + j*delta_z;
+                if (std::abs(z) < 1e-3)
+                    z = z>0?1e-3:-1e-3;
                 y[gr2::Weyl::RHO] = rho;
-                y[gr2::Weyl::Z] = z;
+                y[gr2::Weyl::Z] = std::abs(z);
 
                 // calculate ut (from E)
                 spt->calculate_metric(y);
@@ -1377,16 +1390,16 @@ void Interface::poincare_section_weyl(std::string text)
         if (!file.is_open())
             throw std::runtime_error("file " + file_name + "could not be opened");
 
-        gr2::Integrator integrator(spt, "DoPr853", 1e-16, 1e-16, false);
+        gr2::Integrator integrator(spt, "DoPr853", 1e-17, 1e-17, false);
         auto too_close = std::make_shared<StopBeforeBlackHole>(0.4);
         integrator.add_event(too_close);
         auto errorE_too_high = std::make_shared<StopTooHighErrorE<gr2::Weyl>>(spt,E,1e-10);
         integrator.add_event(errorE_too_high);
         auto errorL_too_high = std::make_shared<StopTooHighErrorL<gr2::Weyl>>(spt,L,1e-10);
         integrator.add_event(errorL_too_high);
-        auto stop_on_disk = std::make_shared<StopOnDisk<gr2::Weyl>>(spt, 1e-5, true);
+        auto stop_on_disk = std::make_shared<StopOnDisk<gr2::Weyl>>(spt, 1e-4, true);
         integrator.add_event(stop_on_disk);
-        auto disk_reg = std::make_shared<RegularizeApproach>(1e-5, 1e-5, 0.8, 0.8);
+        auto disk_reg = std::make_shared<RegularizeApproach>(1e-4, 1e-4, 0.8, 0.8);
         integrator.add_event(disk_reg);
 
         // calculate norms
@@ -1619,7 +1632,7 @@ void Interface::numerical_expansions_weyl(std::string text)
 {
     // Initialize calculation
     auto args = find_function_arguments(text);
-    int number_of_arguments = 10;
+    int number_of_arguments = 11;
     if (args.size() < number_of_arguments)
         throw std::invalid_argument("too little arguments for local_expansions_weyl");
     else if (args.size() > number_of_arguments)
@@ -1652,40 +1665,36 @@ void Interface::numerical_expansions_weyl(std::string text)
     gr2::real t_max = std::stold(args[7]);
     std::string file_name = args[8];
     std::string file_name2 = args[9];
+    std::string file_name3 = args[10];
 
     gr2::real eps_pos = 1e-9;
 
-    std::ofstream file;
-    std::ofstream file2;
+    std::ofstream file, file2, file3;
     gr2::real y[18]={};
     
     // Procede in calculation
     try
     {
-        // open file
-        file.open(file_name);
-        file2.open(file_name2);
-
-        if (!file.is_open())
-            throw std::runtime_error("file " + file_name + "could not be opened");
-
         gr2::Integrator integrator(ode, "DoPr853", 1e-16, 1e-16, true);
         auto too_close = std::make_shared<StopBeforeBlackHole>(0.4);
         integrator.add_event(too_close);
-        auto errorE_too_high = std::make_shared<StopTooHighErrorE<gr2::Weyl>>(spt,E,1e-9);
+        auto errorE_too_high = std::make_shared<StopTooHighErrorE<gr2::Weyl>>(spt,E,1e-10);
         integrator.add_event(errorE_too_high);
-        auto errorL_too_high = std::make_shared<StopTooHighErrorL<gr2::Weyl>>(spt,L,1e-9);
+        auto errorL_too_high = std::make_shared<StopTooHighErrorL<gr2::Weyl>>(spt,L,1e-10);
         integrator.add_event(errorL_too_high);
-        auto stop_on_disk = std::make_shared<StopOnDiskTwoParticles>(spt, 1e-4);
+        auto stop_on_disk = std::make_shared<StopOnDiskTwoParticles>(spt, 1e-4,true);
         integrator.add_event(stop_on_disk);
         auto renormalization = std::make_shared<RenormalizationOfSecondParticleWeyl>(spt, 1e-7);
         auto num_expansions = std::make_shared<NumericalExpansions<gr2::Weyl,18>>(spt, rho_min, rho_max, n_rho, z_min, z_max, n_z, &(renormalization->log_norm));
         integrator.add_event(num_expansions);
         integrator.add_event(renormalization);
+        auto disk_reg = std::make_shared<RegularizeApproach>(1e-4, 1e-4, 0.8, 0.8);
+        integrator.add_event(disk_reg);
+
 
         // ========== initial conditions for the first particle ==========
         gr2::real rho = rho_start;
-        gr2::real z = 1e-3;
+        gr2::real z = 1e-4;
         y[gr2::Weyl::RHO] = rho;
         y[gr2::Weyl::Z] = z;
 
@@ -1755,6 +1764,20 @@ void Interface::numerical_expansions_weyl(std::string text)
         
         // TODO: save data
         std::cout << "Jdeme ukladat" << std::endl;
+        
+        // open file
+        file.open(file_name);
+        if (!file.is_open())
+            throw std::runtime_error("file " + file_name + "could not be opened");
+        
+        file2.open(file_name2);
+        if (!file.is_open())
+            throw std::runtime_error("file " + file_name2 + "could not be opened");
+
+        file3.open(file_name3);
+        if (!file.is_open())
+            throw std::runtime_error("file " + file_name3 + "could not be opened");
+
         gr2::real sum = 0;
         for (int i = 0; i<n_rho; i++)
             for (int j = 0; j<n_z; j++)
@@ -1771,17 +1794,19 @@ void Interface::numerical_expansions_weyl(std::string text)
                 file2 << i << ";" << j << ";" << rho_min + i*delta_rho << ";" << rho_max + j*delta_z << ";" << num_expansions->time_spend_in_area[i][j] << std::endl;
             }
 
-        file.flush();
-        file2.flush();
+        for (auto d:stop_on_disk->data)
+            file3 << d[0] << ";" << d[1] << "\n";
 
         // close file
         file.close();
         file2.close();
+        file3.close();
     }
     catch(const std::exception& e)
     {
         file.close();
         file2.close();
+        file3.close();
         throw e;
     }
 }
@@ -1790,7 +1815,7 @@ void Interface::numerical_expansions_mp(std::string text)
 {
     // Initialize calculation
     auto args = find_function_arguments(text);
-    int number_of_arguments = 10;
+    int number_of_arguments = 11;
     if (args.size() < number_of_arguments)
         throw std::invalid_argument("too little arguments for local_expansions_mp");
     else if (args.size() > number_of_arguments)
@@ -1823,40 +1848,35 @@ void Interface::numerical_expansions_mp(std::string text)
     gr2::real t_max = std::stold(args[7]);
     std::string file_name = args[8];
     std::string file_name2 = args[9];
+    std::string file_name3 = args[10];
 
     gr2::real eps_pos = 1e-8;
 
-    std::ofstream file;
-    std::ofstream file2;
+    std::ofstream file, file2, file3;
     gr2::real y[16]={};
     
     // Procede in calculation
     try
     {
-        // open file
-        file.open(file_name);
-        file2.open(file_name2);
-
-        if (!file.is_open())
-            throw std::runtime_error("file " + file_name + "could not be opened");
-
         gr2::Integrator integrator(ode, "DoPr853", 1e-16, 1e-16, true);
         auto too_close = std::make_shared<StopBeforeBlackHole>(0.4);
         integrator.add_event(too_close);
-        auto errorE_too_high = std::make_shared<StopTooHighErrorE<gr2::MajumdarPapapetrouWeyl>>(spt,E,1e-9);
+        auto errorE_too_high = std::make_shared<StopTooHighErrorE<gr2::MajumdarPapapetrouWeyl>>(spt,E,1e-10);
         integrator.add_event(errorE_too_high);
-        auto errorL_too_high = std::make_shared<StopTooHighErrorL<gr2::MajumdarPapapetrouWeyl>>(spt,L,1e-9);
+        auto errorL_too_high = std::make_shared<StopTooHighErrorL<gr2::MajumdarPapapetrouWeyl>>(spt,L,1e-10);
         integrator.add_event(errorL_too_high);
-        auto stop_on_disk = std::make_shared<StopOnDiskTwoParticles>(spt, 1e-4);
+        auto stop_on_disk = std::make_shared<StopOnDiskTwoParticles>(spt, 1e-4,true);
         integrator.add_event(stop_on_disk);
-        auto renormalization = std::make_shared<RenormalizationOfSecondParticleWeyl>(spt, 1e-5);
+        auto renormalization = std::make_shared<RenormalizationOfSecondParticleWeyl>(spt, 1e-7);
         auto num_expansions = std::make_shared<NumericalExpansions<gr2::MajumdarPapapetrouWeyl,16>>(spt, rho_min, rho_max, n_rho, z_min, z_max, n_z, &(renormalization->log_norm));
         integrator.add_event(num_expansions);
         integrator.add_event(renormalization);
+        auto disk_reg = std::make_shared<RegularizeApproach>(1e-4, 1e-4, 0.8, 0.8);
+        integrator.add_event(disk_reg);
 
         // ========== initial conditions for the first particle ==========
         gr2::real rho = rho_start;
-        gr2::real z = 1e-3;
+        gr2::real z = 1e-4;
         y[gr2::Weyl::RHO] = rho;
         y[gr2::Weyl::Z] = z;
 
@@ -1916,6 +1936,20 @@ void Interface::numerical_expansions_mp(std::string text)
         
         // TODO: save data
         std::cout << "Jdeme ukladat" << std::endl;
+
+        // open file
+        file.open(file_name);
+        if (!file.is_open())
+            throw std::runtime_error("file " + file_name + "could not be opened");
+        
+        file2.open(file_name2);
+        if (!file.is_open())
+            throw std::runtime_error("file " + file_name2 + "could not be opened");
+
+        file3.open(file_name3);
+        if (!file.is_open())
+            throw std::runtime_error("file " + file_name3 + "could not be opened");
+
         gr2::real sum = 0;
         for (int i = 0; i<n_rho; i++)
             for (int j = 0; j<n_z; j++)
@@ -1924,6 +1958,7 @@ void Interface::numerical_expansions_mp(std::string text)
                 sum += num_expansions->data[i][j];
             }
         std::cout << sum << std::endl;
+        std::cout << renormalization->log_norm << std::endl;
 
         for (int i = 0; i<n_rho; i++)
             for (int j = 0; j<n_z; j++)
@@ -1931,17 +1966,19 @@ void Interface::numerical_expansions_mp(std::string text)
                 file2 << i << ";" << j << ";" << rho_min + i*delta_rho << ";" << rho_max + j*delta_z << ";" << num_expansions->time_spend_in_area[i][j] << std::endl;
             }
 
-        file.flush();
-        file2.flush();
+        for (auto d:stop_on_disk->data)
+            file3 << d[0] << ";" << d[1] << "\n";
 
         // close file
         file.close();
         file2.close();
+        file3.close();
     }
     catch(const std::exception& e)
     {
         file.close();
         file2.close();
+        file3.close();
         throw e;
     }
 }

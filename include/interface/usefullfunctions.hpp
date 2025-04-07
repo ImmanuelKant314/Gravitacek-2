@@ -77,23 +77,27 @@ protected:
     std::shared_ptr<gr2::GeoMotion> spt;
     int sign;
     int n;
+    bool poincare;
 public:
+    std::vector<std::array<gr2::real, 2>> data;
     gr2::real z;
-    StopOnDiskTwoParticles(std::shared_ptr<gr2::GeoMotion> spt, gr2::real z) : gr2::Event(gr2::EventType::modyfing), z(z), spt(spt), sign(1)
+    StopOnDiskTwoParticles(std::shared_ptr<gr2::GeoMotion> spt, gr2::real z, bool poincare=false) : gr2::Event(gr2::EventType::modyfing), z(z), spt(spt), poincare(poincare)
     {
         this->n = spt->get_n();
     }
 
     virtual gr2::real value(const gr2::real &t, const gr2::real &dt, const gr2::real y[], const gr2::real dydt[]) override
     {
-        return (sign*y[gr2::Weyl::Z]-this->z);
+        int sign = y[gr2::Weyl::UZ]>0?1:-1;
+        return (y[gr2::Weyl::Z]+sign*this->z);
     }
 
     virtual void apply(gr2::StepperBase* stepper, gr2::real &dt, gr2::real &t, gr2::real y[], gr2::real dydt[]) override
     {
-        y[gr2::Weyl::Z] *= -1;
+        if (poincare)
+            data.push_back({y[gr2::Weyl::RHO],y[gr2::Weyl::URHO]});
+        y[gr2::Weyl::Z]*=-1;
         (y+n)[gr2::Weyl::Z] = 2*y[gr2::Weyl::Z] + (y+n)[gr2::Weyl::Z];
-        sign *=-1;
         spt->function(t, y, dydt);
         spt->function(t, y+n, dydt+n);
     }
@@ -105,7 +109,6 @@ public:
     gr2::real z_min, z_app, alpha, beta;
     RegularizeApproach(gr2::real z_min, gr2::real z_app, gr2::real alpha, gr2::real beta):gr2::Event(gr2::data, false), z_min(z_min), z_app(z_app), alpha(alpha), beta(beta)
     {}
-
 
     virtual gr2::real value(const gr2::real &t, const gr2::real &dt, const gr2::real y[], const gr2::real dydt[]) override
     {
@@ -377,7 +380,7 @@ public:
                 t_event = std::max(t_event_rho, t_event_z);
 
                 // get position
-                for (int j = 0; j < 18; j++)
+                for (int j = 0; j < N; j++)
                     y_[j] = stepper->dense_out(j, t_event);
                 spt->calculate_metric(y_);
                 spt->calculate_christoffel_symbols(y_);
