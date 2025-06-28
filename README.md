@@ -40,7 +40,7 @@ Now rebuild project
 cd ../build
 cmake --build .
 ```
-To run test use command `ctest`.
+To run test use command `ctest` but preferably use `ctest --timeout 10` to be sure, that if there is a problem then each test runs at most 10 seconds.
 
 ## Create documentation
 

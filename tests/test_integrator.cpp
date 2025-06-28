@@ -27,7 +27,8 @@ class Bounce : public gr2::Event
         Bounce(std::shared_ptr<gr2::DampedHarmonicOscillator> osc) : gr2::Event(gr2::EventType::modyfing),osc(osc){};
         virtual gr2::real value(const gr2::real &t, const gr2::real &dt, const gr2::real y[], const gr2::real dydt[]) override
         {
-            return y[0]-1e-11;
+            int sign = y[1]>0?1:-1;
+            return y[0]+1e-8*sign;
         }
         virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real &dt, gr2::real y[], gr2::real dydt[]) override
         {
@@ -94,13 +95,13 @@ public:
 
 TEST(Integrator, BouncingDumpedOscilatorNoStepController)
 {
-    gr2::real omega0 = 1.5, xi = 1.0;
-    gr2::real x0 = 0.5, v0 = 1.5;
+    gr2::real omega0 = 2.0, xi = 0.5;
+    gr2::real x0 = 1.5, v0 = 0.5;
     gr2::real y0[] = {x0, v0};
 
     gr2::real eps = 1e-7;
     gr2::real t_start = 0, t_end = 10;
-    gr2::real h0 = 0.01;
+    gr2::real h0 = 0.001;
 
     auto osc = std::make_shared<gr2::DampedHarmonicOscillator>(omega0, xi);
     auto data = std::make_shared<DataMonitoring>();
@@ -115,7 +116,7 @@ TEST(Integrator, BouncingDumpedOscilatorNoStepController)
     ASSERT_GE(data->times.size(), 10); // check if some data are recorded
     for (int i = 0; i < data->times.size(); i++)
     {
-        EXPECT_NEAR(data->pos[i], std::abs(exactDampedHarmonicOscillator(data->times[i], omega0, xi, x0, v0)), eps);
+        EXPECT_NEAR(data->pos[i], abs(exactDampedHarmonicOscillator(data->times[i], omega0, xi, x0, v0)), eps);
     }
 }
 

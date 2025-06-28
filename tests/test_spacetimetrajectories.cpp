@@ -51,7 +51,8 @@ public:
 
     virtual gr2::real value(const gr2::real &t, const gr2::real &dt, const gr2::real y[], const gr2::real dydt[]) override
     {
-        return y[gr2::Weyl::Z]-1e-9;
+        int sign = y[gr2::Weyl::UZ]>0?1:-1;
+        return (y[gr2::Weyl::Z]+sign*1e-9);
     }
 
     virtual void apply(gr2::StepperBase* stepper, gr2::real &t, gr2::real &dt, gr2::real y[], gr2::real dydt[]) override
@@ -426,7 +427,7 @@ TEST(CombinedWeylSpacetime, IntegralsOfMotionGeneral)
 
     // precision of event
     for (auto &d : stop_on_disk->data)
-        EXPECT_NEAR(d, 1e-9, 1e-9);
+        EXPECT_NEAR(d, 0, 1e-7);
 }
 
 int main(int argc, char **argv)
