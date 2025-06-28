@@ -308,11 +308,21 @@ protected:
      * @brief Calculate trajectory in Weyl spacetime.
      * 
      * Argument should be in form:
-     * (weyl_spacetime(weyl_spacetimes_params),E,L,rho_start,u_rho_frac,tmax,dt,file,file2)
+     * (weyl_spacetime(weyl_spacetimes_params),E,L,rho_start,u_rho_frac,tmax,dt,file)
      * 
      * @param text argument for trajectory_weyl
      */
     void trajectory_weyl(std::string text);
+
+    /**
+     * @brief Calculate trajectory in MP spacetime.
+     * 
+     * Argument should be in form:
+     * (mp_spacetime(mp_spacetimes_params),E,L,rho_start,u_rho_frac,tmax,dt,file)
+     * 
+     * @param text argument for trajectory_mp
+     */
+    void trajectory_mp(std::string text);
 
 public:
     Interface();

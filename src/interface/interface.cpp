@@ -444,6 +444,11 @@ bool Interface::try_apply_function(std::string text)
         this->trajectory_weyl(rest);
         return true;
     }
+    else if (name == "trajectory_mp")
+    {
+        this->trajectory_mp(rest);
+        return true;
+    }
     return false;
 }
 
@@ -1532,7 +1537,7 @@ void Interface::poincare_section_mp(std::string text)
         if (!file.is_open())
             throw std::runtime_error("file " + file_name + "could not be opened");
 
-        gr2::Integrator integrator(spt, "DoPr853", 1e-16, 1e-16, false);
+        gr2::Integrator integrator(spt, "DoPr853", 1e-17, 1e-17, false);
         auto too_close = std::make_shared<StopBeforeBlackHole>(0.4);
         integrator.add_event(too_close);
         auto errorE_too_high = std::make_shared<StopTooHighErrorE<gr2::MajumdarPapapetrouWeyl>>(spt,E,1e-10);
@@ -1678,9 +1683,9 @@ void Interface::numerical_expansions_weyl(std::string text)
         gr2::Integrator integrator(ode, "DoPr853", 1e-16, 1e-16, true);
         auto too_close = std::make_shared<StopBeforeBlackHole>(0.4);
         integrator.add_event(too_close);
-        auto errorE_too_high = std::make_shared<StopTooHighErrorE<gr2::Weyl>>(spt,E,1e-10);
+        auto errorE_too_high = std::make_shared<StopTooHighErrorE<gr2::Weyl>>(spt,E,1e-9);
         integrator.add_event(errorE_too_high);
-        auto errorL_too_high = std::make_shared<StopTooHighErrorL<gr2::Weyl>>(spt,L,1e-10);
+        auto errorL_too_high = std::make_shared<StopTooHighErrorL<gr2::Weyl>>(spt,L,1e-9);
         integrator.add_event(errorL_too_high);
         auto stop_on_disk = std::make_shared<StopOnDiskTwoParticles>(spt, 1e-4,true);
         integrator.add_event(stop_on_disk);
@@ -2018,7 +2023,7 @@ void Interface::trajectory_weyl(std::string text)
             throw std::runtime_error("file " + file_name + "could not be opened");
 
         gr2::Integrator integrator(spt, "DoPr853", 1e-16, 1e-16, true);
-        auto data_monitor = std::make_shared<ConstantStepDataMonitoring>(0, dt);
+        auto data_monitor = std::make_shared<ConstantStepDataMonitoring<9>>(0, dt);
         integrator.add_event(data_monitor);
         auto too_close = std::make_shared<StopBeforeBlackHole>(0.4);
         integrator.add_event(too_close);
@@ -2028,10 +2033,12 @@ void Interface::trajectory_weyl(std::string text)
         integrator.add_event(errorL_too_high);
         auto stop_on_disk = std::make_shared<StopOnDisk<gr2::Weyl>>(spt, 1e-4, false);
         integrator.add_event(stop_on_disk);
+        auto disk_reg = std::make_shared<RegularizeApproach>(1e-4, 1e-4, 0.8, 0.8);
+        integrator.add_event(disk_reg);
 
         // ========== initial conditions for the first particle ==========
         gr2::real rho = rho_start;
-        gr2::real z = 1e-3;
+        gr2::real z = 1e-4;
         y[gr2::Weyl::RHO] = rho;
         y[gr2::Weyl::Z] = z;
 
@@ -2079,7 +2086,114 @@ void Interface::trajectory_weyl(std::string text)
             file << std::endl;
         }
 
-        // flush files
+        // flush file
+        file.flush();
+
+        // close file
+        file.close();
+    }
+    catch(const std::exception& e)
+    {
+        file.close();
+        throw e;
+    }
+}
+
+void Interface::trajectory_mp(std::string text)
+{
+    // Initialize calculation
+    auto args = find_function_arguments(text);
+    int number_of_arguments = 8;
+    if (args.size() < number_of_arguments)
+        throw std::invalid_argument("too little arguments for trajectory_mp");
+    else if (args.size() > number_of_arguments)
+        throw std::invalid_argument("too much arguments for trajectory_mp");
+
+    std::shared_ptr<gr2::MajumdarPapapetrouWeyl> spt = this->create_mp_spacetime(args[0]);
+
+    gr2::real E = std::stold(args[1]);
+    gr2::real L = std::stold(args[2]);
+    
+    gr2::real rho_start = std::stold(args[3]);
+    gr2::real u_rho_frac = std::stold(args[4]);
+
+    gr2::real t_max = std::stold(args[5]);
+    gr2::real dt = std::stold(args[6]);
+    std::string file_name = args[7];
+
+    std::ofstream file;
+    gr2::real y[8]={};
+    
+    // Procede in calculation
+    try
+    {
+        // open file
+        file.open(file_name);
+
+        if (!file.is_open())
+            throw std::runtime_error("file " + file_name + "could not be opened");
+
+        gr2::Integrator integrator(spt, "DoPr853", 1e-16, 1e-16, true);
+        auto data_monitor = std::make_shared<ConstantStepDataMonitoring<8>>(0, dt);
+        integrator.add_event(data_monitor);
+        auto too_close = std::make_shared<StopBeforeBlackHole>(0.4);
+        integrator.add_event(too_close);
+        auto errorE_too_high = std::make_shared<StopTooHighErrorE<gr2::MajumdarPapapetrouWeyl>>(spt,E,1e-9);
+        integrator.add_event(errorE_too_high);
+        auto errorL_too_high = std::make_shared<StopTooHighErrorL<gr2::MajumdarPapapetrouWeyl>>(spt,L,1e-9);
+        integrator.add_event(errorL_too_high);
+        auto stop_on_disk = std::make_shared<StopOnDisk<gr2::MajumdarPapapetrouWeyl>>(spt, 1e-4, false);
+        integrator.add_event(stop_on_disk);
+        auto disk_reg = std::make_shared<RegularizeApproach>(1e-4, 1e-4, 0.8, 0.8);
+        integrator.add_event(disk_reg);
+
+        // ========== initial conditions for the first particle ==========
+        gr2::real rho = rho_start;
+        gr2::real z = 1e-4;
+        y[gr2::Weyl::RHO] = rho;
+        y[gr2::Weyl::Z] = z;
+
+        // calculate ut (from E)
+        spt->calculate_metric(y);
+        y[gr2::Weyl::UT] = -E/spt->get_metric()[gr2::Weyl::T][gr2::Weyl::T];
+
+        // calculate uphi (from L)
+        y[gr2::Weyl::UPHI] = L/spt->get_metric()[gr2::Weyl::PHI][gr2::Weyl::PHI];
+
+        // calculate size of rest velocity
+        gr2::real norm2 = (-1 + y[gr2::Weyl::UT]*E - y[gr2::Weyl::UPHI]*L);
+        if (norm2 < 0)
+            return;
+        gr2::real norm = sqrtl(norm2/spt->get_metric()[gr2::Weyl::RHO][gr2::Weyl::RHO]);
+
+        // calculate velocity
+        y[gr2::Weyl::URHO] = norm*u_rho_frac;
+        y[gr2::Weyl::UZ] = norm*sqrtl(1-u_rho_frac*u_rho_frac);
+
+        // calculate trajectory
+        try
+        {
+            /* code */
+            std::cout << "Integrujeme" << std::endl;
+            integrator.integrate(y, 0, t_max, 0.2);
+            std::cout << "Konec integrace" << std::endl;
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+        }
+        
+        // TODO: save data
+        std::cout << "Jdeme ukladat" << std::endl;
+        for (int k = 0; k< data_monitor->times.size(); k++)
+        {
+            file << data_monitor->times[k];
+            for (int i = 1; i < 8; i++)
+                file << ";" << data_monitor->data[k][i];
+            file << std::endl;
+        }
+
+        // flush file
         file.flush();
 
         // close file

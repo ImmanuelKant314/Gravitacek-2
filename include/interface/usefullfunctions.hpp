@@ -441,13 +441,14 @@ public:
     }
 };
 
+template <int N>
 class ConstantStepDataMonitoring : public gr2::Event
 {
 public:
     gr2::real t;
     gr2::real h;
     std::vector<gr2::real> times;
-    std::vector<std::array<gr2::real, 9>> data;
+    std::vector<std::array<gr2::real, N>> data;
     ConstantStepDataMonitoring(gr2::real t_init, gr2::real h) : gr2::Event(gr2::EventType::data), times(), data()
     {
         t = t_init;
@@ -462,8 +463,8 @@ public:
         while (this->t<t)
         {
             times.push_back(this->t);
-            std::array<gr2::real, 9> y_val;
-            for (int i = 0; i<9; i++)
+            std::array<gr2::real, N> y_val;
+            for (int i = 0; i<N; i++)
             {
                 y_val[i] = stepper->dense_out(i, this->t);
             }
