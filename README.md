@@ -1,58 +1,75 @@
 # About Gravitáček 2
 
-Gravitáček 2 is a program focused on studying geodesic dynamics around black holes 
-with rings or discs. The program is basicaly integrator with some build-in 
-equations of motion and methods to study chaos.
+Gravitáček 2 is a program for studying chaos in geodesic dynamics in different 
+spacetimes. The software enables integration of geodesic motion and some 
+techniques for studying chaos.
 
-As number 2 suggest, this program is continuation of the program *Gravitáček* by Miroslav Žáček.
-There were two reasons to write new software. First, old program is 
-over 20 years old,
-and therefore in some ways is little bit outdated. Secondly, some parts of 
-numerical side were not writen optimally and it could be improved. The result
-is this software.
+This software was written for my master's thesis and was heavily based on the 
+software written for my bachelor's thesis. The whole project is then inspired by
+program *Gravitáček* by Miroslav Žáček.
 
 # Setting up
 
-## Downloading and building
+## Prerequisites
 
-First create folder, for example `gravitacek2`. To this folder download/save code 
-from this project. To build a project, make new directory `build` and build 
-the project there using [CMake](https://cmake.org/).
+To get the full support for this code the following is assumed:
+- usage of Linux operating system (for Windows you can use
+[WSL](https://github.com/microsoft/WSL))
+- [CMake](https://cmake.org/) for building the software
+- [Google Test Framework](https://github.com/google/googletest) for testing the
+software
+- [GSL](https://www.gnu.org/software/gsl/) for matrix operations
+- [doxygen](https://doxygen.nl/) for creating documentation
+- [LaTeX](https://en.wikipedia.org/wiki/LaTeX) for creating pdf documentation
+(packages [amsmath](https://ctan.org/pkg/amsmath),
+[physics](https://ctan.org/pkg/physics) and
+[tensor](https://ctan.org/pkg/tensor))
+
+## Downloading, building and testing the project
+
+First create a folder, for example `gravitacek2` and download/save the
+code from this project inside the folder. You can do this as
 ```bash
-mkdir build
-cd build
-cmake ..
-cmake --build .
+git clone https://github.com/ImmanuelKant314/Gravitacek-2
 ```
 
-## Testing
+Before compiling the project you have to install
+[GSL](https://www.gnu.org/software/gsl/) and [CMake](https://cmake.org/). 
+After installing those you can download [Google Test
+Framework](https://github.com/google/googletest) into folder `external` as follows:
+```bash
+mkdir external                                                  # make directory
+cd external                                                     # go to the directory
+git clone https://github.com/google/googletest.git -b v1.15.2   # download code
+cd ..                                                           # go back
+```
 
-For testing [Google Test Framework](https://github.com/google/googletest) is used. 
-To test code yourself first build directory `external` and to this directory 
-download *Google testing framework*.
+To build a project, make new directory `build` and build the project there using
+[CMake](https://cmake.org/).
 ```bash
-mkdir external
-cd external
-git clone https://github.com/google/googletest.git -b v1.15.2
+mkdir build     # create directory
+cd build        # go to the directory
+cmake ..        # prepare build
+cmake --build . # build
 ```
-Now rebuild project
-```bash
-cd ../build
-cmake --build .
-```
-To run test use command `ctest` but preferably use `ctest --timeout 10` to be sure, that if there is a problem then each test runs at most 10 seconds.
+
+To check if the code actually runs you can do a test using [Google Test
+Framework](https://github.com/google/googletest). To run the test use command
+`ctest`, but preferably use `ctest --timeout 10` to make sure that if there is a
+problem, then each test runs 10 seconds at most.
 
 ## Create documentation
 
-Documentation can be made generated using [doxygen](https://doxygen.nl/). 
-First you need to install *doxygen*, this can be done using [tutorial](https://doxygen.nl/manual/install.html). 
-After that go to folder `docs` and build documentation using *doxygen* and Doxyfile.
+Documentation can be generated using [doxygen](https://doxygen.nl/). First
+you need to install *doxygen*, this can be done using
+[tutorial](https://doxygen.nl/manual/install.html). After that go to folder
+`docs` and build documentation using *doxygen* and Doxyfile.
 ```bash
 cd docs
 doxygen Doxyfile
 ```
-If you want to build pdf version of documentation, go to folder `latex` and there
-build pdf-document.
+To build the pdf version (which is encouraged) you can use
+[LaTeX](https://en.wikipedia.org/wiki/LaTeX). This can be done as follows:
 ```bash
 cd latex
 make
@@ -62,12 +79,11 @@ make
 
 ## Basic idea
 
-Gravitáček is very simple program in which we cand do two things. The first one 
-is defining macros. The second one is then running implemented functions. We will
-discuss both concepts in this document. But the most important thing to mention,
-if we want to exit the program, just type `end` or `END` or `exit`.
+Gravitáček is a very simple program in which you can do two things: the first
+one is defining macros and the second one is running implemented functions. Both
+concepts are discussed in this document. The most important thing to mention is
+how to exist the program - just type `end` or `END` or `exit`.
 
 ## Macros
 
 ## Using functions
-
