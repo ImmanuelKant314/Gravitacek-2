@@ -1,14 +1,18 @@
 #pragma once
 
+/**
+ * @brief Functions and object for Gravitacek 2.
+ * 
+*/
 namespace gr2
 {
-// ==================== Types ==================== 
+// ========== Types ========== 
 
 typedef long double real;               //!<default type for real numbers
 typedef real (*realfunction)(real);     //!<type of real function
 
 
-// ==================== Constants ==================== 
+// ========== Constants ========== 
 
 const real pi   = 3.1415926535897932385;    //!<value of \f$\pi\f$
 const real pi_2 = 1.5707963267948966192;    //!<value of \f$\pi/2\f$

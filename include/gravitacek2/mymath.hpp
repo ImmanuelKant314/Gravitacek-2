@@ -1,3 +1,11 @@
+/**
+ * @file mymath.hpp
+ * @author Karel Kraus
+ * @brief Mathematical functions.
+ * 
+ * @copyright Copyright (c) 2026
+ */
+
 #pragma once
 #include "gravitacek2/setup.hpp"
 
@@ -20,10 +28,14 @@ namespace gr2
      * E(k) \equiv \int_0^{\pi/2} \sqrt{1 - k^2\sin^2{\phi}}\dd \phi
      * \f]
      * 
+     * For the calculation algorithm described in article <a
+     * href="https://link.springer.com/article/10.1007/BF02198293">Carlson
+     * (1996)</a>  is used.
+     * 
      * @param k argument of elliptic integrals
      * @param K value of \f$K(k)\f$
      * @param E value of \f$E(k)\f$
-     * @param eps precision
+     * @param eps relative precision
      */
     void elliptic_KE(const real& k, real &K, real &E, const real &eps = 1e-15);
 
@@ -31,15 +43,25 @@ namespace gr2
     /**
      * @brief Integrate function using Romberg's integration.
      * 
-     * @tparam K order of Romberg's method
+     * As a baseline the algoritm uses trapezoidal rule:
+     * \f[
+     * \int_a^b f(x) \dd x = \sum_{j=0}^{N-1} f(a + hj) - \frac{1}{2}\left(f(a)
+     * + f(b)\right) + \mathcal{O}\left(h^2\right),
+     * \f]
+     * where \f$h = \frac{b-a}{N-1}\f$. Using Richardson extrapolation function
+     * generate higher order estimates of integral with error of order 
+     * \f$\mathcal{O}\left(h^{2K}\right)\f$. Algorithm generates sequence of 
+     * these estimates until the relative error is smaller than \f$\varepsilon\f$.
+     * 
+     * @tparam K order of Romberg's method (1 - trapezoidal rule, 2 - Simpson's rule, ...)
      * @param func function to be integrated
      * @param a lower bound of integration
      * @param b upper bound of integration
-     * @param eps presision of integration
-     * @return value of integral
+     * @param eps relative error of the integral
+     * @return value of the integral
      */
     template<int K, class T>
-    real romb(T func, const real &a, const real &b, const real &eps = 10e-10)
+    real romb(T func, const real &a, const real &b, const real &eps = 1e-10)
     {
         const int JMIN = 5, JMAX = 20;
         int m;
@@ -65,11 +87,20 @@ namespace gr2
                 if (fabsl(R[K - 1][j] - R[K - 1][j - 1]) < eps * (fabsl(R[K - 1][j - 1]) + 1))
                     return R[K - 1][j];
         }
+        // ========== Throw error ==========
         throw std::runtime_error("Too much iterations in routine romb");
     }
     
     /**
-     * @brief Calculate n Legendre polynomials.
+     * @brief Calculate \f$n\f$ Legendre polynomials.
+     * 
+     * Calculate Legendre polynomials from \f$P_0(x)\f$ to \f$P_{n-1}(x)\f$. To
+     * calculate Legendre Polynomials function is using reccurent expression:
+     * \f{align*}
+     * P_0(x) &= 1,\\
+     * P_1(x) &= x, \\
+     * P_{n+1}(x) &= \frac{1}{2n+1} \left((2n+1)xP_n(x) - nP_{n-1}(x)\right).
+     * \f}
      * 
      * @param x argument for Legendre polynomials
      * @param n number of calculated Legendre polynomials
@@ -78,12 +109,27 @@ namespace gr2
     void legendre_polynomials(const real& x, const int& n, real* p);
 
     /**
-    * @brief Calculate n Legendre polynomials with first derivatives.
-    * 
-    * @param x argument for Legendre polynomials
-    * @param n number of calculated Legendre polynomials
-    * @param p0 array for saving Legendre polynomials
-    * @param p1 array for saving first derivatives of Legendre polynomials
+     * @brief Calculate \f$n\f$ Legendre polynomials.
+     * 
+     * Calculate Legendre polynomials from \f$P_0(x)\f$ to \f$P_{n-1}(x)\f$ and 
+     * their derivatives from \f$P_0'(x)\f$ to \f$P_{n-1}'(x)\f$. To
+     * calculate Legendre Polynomials function is using reccurent expression:
+     * \f{align*}
+     * P_0(x) &= 1,\\
+     * P_1(x) &= x, \\
+     * P_{n+1}(x) &= \frac{1}{2n+1} \left((2n+1)xP_n(x) - nP_{n-1}(x)\right).
+     * \f}
+     * To calculate derivatives the function uses reccurent expression:
+     * \f{align*}
+     * P_0'(x) &= 0,\\
+     * P_1'(x) &= 1, \\
+     * P_{n+1}'(x) &= \frac{1}{2n+1} \left((2n+1)\left(P_n(x) + x P_n'(x)\right) - nP_{n-1}'(x)\right).
+     * \f}
+     * 
+     * @param x argument for Legendre polynomials
+     * @param n number of calculated Legendre polynomials
+     * @param p0 array for saving Legendre polynomials
+     * @param p1 array for saving first derivatives of Legendre polynomials
     */
     void legendre_polynomials1(const real& x, const int& n, real* p0, real* p1);
 
@@ -96,11 +142,13 @@ namespace gr2
      * \mathcal{Q}_n(x) \equiv i Q_n(ix).
      * \f]
      * 
-     * Important note, the definition of \f$Q_n\f$ is not typically used one, we use
+     * In this function we define \f$Q_n(ix)\f$ to be
      * \f[
      * Q_n(ix) = -i P_{2n}(ix) \left(\frac{\pi}{2} - \atan{x}\right)
      * - \sum_{j=1}^{2n}\frac{1}{j} P_{j-1}(ix) P_{2n-j}(ix).
      * \f]
+     * Important note, this definition may disagree with typically used
+     * definitions.
      * 
      * @param x argument for special function
      * @param n number of calculated values
@@ -117,11 +165,13 @@ namespace gr2
      * \mathcal{Q}_n(x) \equiv i Q_n(ix).
      * \f]
      * 
-     * Important note, the definition of \f$Q_n\f$ is not typically used one, we use
+     * In this function we define \f$Q_n(ix)\f$ to be
      * \f[
      * Q_n(ix) = -i P_{2n}(ix) \left(\frac{\pi}{2} - \atan{x}\right)
      * - \sum_{j=1}^{2n}\frac{1}{j} P_{j-1}(ix) P_{2n-j}(ix).
      * \f]
+     * Important note, this definition may disagree with typically used
+     * definitions.
      * 
      * @param x argument for special function
      * @param n number of calculated values
@@ -131,7 +181,16 @@ namespace gr2
     void special_function_Q2n1(const real& x, const int& n, real* q0, real* q1);
 
     /**
-     * @brief Numerically differentiate function using Richardson's extrapolation.
+     * @brief Numerically differentiate function. 
+     * 
+     * For the differentiation the function uses Richardson extrapolation. We
+     * start with estimate
+     * \f[
+     * f'(x) = \frac{f(x+h)-f(x-h)}{2h} + \mathcal{O}\left(h^2\right).
+     * \f]
+     * Using Richardson extrapolation we construct extimate with error of order 
+     * \f$\mathcal{O}(h^{2K})\f$. The algorithm generates estimates until the
+     * relative change is smaller than \f$\varepsilon\f$.
      * 
      * @tparam K order of extrapolation
      * @param func function to be differentiated
@@ -141,7 +200,7 @@ namespace gr2
      * @return value of derivative
      */
     template<int K, class T>
-    real richder(T func, const real& x, const real& h0, const real &eps = 10e-10)
+    real richder(T func, const real& x, const real& h0, const real &eps = 1e-10)
     {
         const int JMIN = 5, JMAX = 20;
         int m;
@@ -168,8 +227,16 @@ namespace gr2
     }
 
     /**
-     * @brief Numerically calculate second derivative of the function using 
-     * Richardson's extrapolation.
+     * @brief Numerically calculate second derivative of the function.
+     * 
+     * For the differentiation the function uses Richardson extrapolation. We
+     * start with estimate
+     * \f[
+     * f''(x) = \frac{f(x+h)-2f(x) + f(x-h)}{2h}+\mathcal{O}\left(h^2\right).
+     * \f]
+     * Using Richardson extrapolation we construct extimate with error of order 
+     * \f$\mathcal{O}(h^{2K})\f$. The algorithm generates estimates until the
+     * relative change is smaller than \f$\varepsilon\f$.
      * 
      * @tparam K order of extrapolation
      * @param func function to be differentiated
@@ -179,7 +246,7 @@ namespace gr2
      * @return value of second derivative
      */
     template<int K, class T>
-    real richder2(T func, const real& x, const real& h0, const real &eps = 10e-10)
+    real richder2(T func, const real& x, const real& h0, const real &eps = 1e-10)
     {
         const int JMIN = 5, JMAX = 20;
         int m;
@@ -206,4 +273,3 @@ namespace gr2
         throw std::runtime_error("Too much iterations in routine richder2");
     }
 }
-
