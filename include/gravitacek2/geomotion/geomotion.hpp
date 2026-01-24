@@ -20,7 +20,7 @@ namespace gr2
     class GeoMotion : public OdeSystem
     {
     protected:
-        int dim;                        //!<dimension of space
+        int dim;                        //!<dimension of space(-time)
 
         //TODO: should be converted to 1D arrays
         real **metric;                  //!<metric tensor \f$g_{\mu\nu}\f$
@@ -107,7 +107,7 @@ namespace gr2
         /**
          * @brief Get spatial dimensions of space(-time).
          * 
-         * @return int dimension
+         * @return dimension
          */
         int get_dim() const;
 
@@ -116,7 +116,7 @@ namespace gr2
          * 
          * Metric tensor is in form \f$g_{\mu\nu}\f$.
          * 
-         * @return real** metric tensor
+         * @return metric tensor
          */
         real **get_metric() const;
 
@@ -125,7 +125,7 @@ namespace gr2
          * 
          * Christoffel symbols are in form \f$\tensor{\Gamma}{^\mu_\nu_\kappa}\f$.
          * 
-         * @return real*** Christoffel symbols
+         * @return Christoffel symbols
          */
         real ***get_christoffel_symbols() const;
 
@@ -134,7 +134,7 @@ namespace gr2
          * 
          * Riemann tensor is in form of \f$\tensor{R}{^\mu_\nu_\kappa_\lambda}\f$.
          * 
-         * @return real**** Riemann tensor
+         * @return Riemann tensor
          */
         real ****get_riemann_tensor() const;
 

@@ -28,9 +28,9 @@ namespace gr2
      * 0 & 0 & 0 & N^{-2}
      * \end{pmatrix}
      * \f]
-     * \f$t\f$ is time coordinate and \f$\rho\f$, \f$\phi\f$, \f$z\f$ are coordinates
-     * fo cylindrical type. \f$N\f$ is lapse function and depends on \f$\rho\f$ and
-     * \f$z\f$.
+     * \f$t\f$ is time coordinate and \f$\rho\f$, \f$\phi\f$, \f$z\f$ are
+     * coordinates of cylindrical type. \f$N\f$ is lapse function and depends on
+     * \f$\rho\f$ and \f$z\f$.
      */
     class MajumdarPapapetrouWeyl : public GeoMotion
     {
@@ -79,7 +79,8 @@ namespace gr2
         virtual void calculate_N_inv1(const real* y) = 0;
 
         /**
-         * @brief Calculate value of \f$N^{-1}\f$ and its first and second derivatives.
+         * @brief Calculate value of \f$N^{-1}\f$ and its first and second
+         * derivatives.
          * 
          * @param y coordiante values
          */
