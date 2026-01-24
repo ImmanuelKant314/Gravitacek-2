@@ -1,17 +1,28 @@
+/**
+ * @file geomotion.hpp
+ * @author Karel Kraus
+ * @brief Class for representing ODE for geodesic motion in general space(-time).
+ * 
+ * @copyright Copyright (c) 2026
+ */
+
 #pragma once
 #include "gravitacek2/integrator/odesystem.hpp"
 
 namespace gr2
 {
     /**
-     * @brief Class GeoMotion represents ODE for geodesic motion.
+     * @brief General representation for ODEs describing geodesic motion.
      * 
+     * Class has also additional functionality to calculate metric, Christoffel
+     * symbols and Riemann tensor.
      */
     class GeoMotion : public OdeSystem
     {
     protected:
         int dim;                        //!<dimension of space
 
+        //TODO: should be converted to 1D arrays
         real **metric;                  //!<metric tensor \f$g_{\mu\nu}\f$
         real ***christoffel_symbols;    //!<Christoffel symbols \f$\Gamma^{\mu}_{\kappa\lambda}\f$
         real ****riemann_tensor;        //!<Riemann tensor \f$R^{\mu}_{\nu\kappa\lambda}\f$
@@ -21,7 +32,7 @@ namespace gr2
         real *y_r;                      //!<position where `riemann_tensor`is calculated
 
         /**
-         * @brief Check if calculation in this point is necessary.
+         * @brief Check if calculation in given space(-time) point is necessary.
          * 
          * @param y current coordinate variables
          * @param y_save coordinate variables, where caclulation was done previously
@@ -35,7 +46,7 @@ namespace gr2
         /**
          * @brief Construct a new GeoMotion object.
          * 
-         * @param dim dimension of space
+         * @param dim dimension of space(-time)
          * @param n number of differential equations, typically 2*`dim`
          */
         GeoMotion(const int &dim, const int &n);
@@ -51,7 +62,7 @@ namespace gr2
         /**
          * @brief Calculate metric.
          * 
-         * Metric is calculated is form
+         * Metric is calculated is the form
          * \f$
          * g_{\mu\nu}.
          * \f$
@@ -63,10 +74,13 @@ namespace gr2
         /**
          * @brief Calculate Christoffel symbols.
          * 
-         * Christoffel symbols are calculated in form
-         * \f$
-         * \Gamma^{\mu}_{\nu\lambda}.
-         * \f$
+         * Christoffel symbols are calculated in the form
+         * \f[
+         * \tensor{\Gamma}{^\mu_\kappa_\lambda} = 
+         * \frac{1}{2}g^{\mu\sigma}\left(
+         * g_{\sigma\kappa,\lambda} + g_{\lambda\sigma,\kappa} - g_{\kappa\lambda,\sigma}
+         * \right).
+         * \f]
          * 
          * @param y coordinate variables
          */
@@ -75,10 +89,14 @@ namespace gr2
         /**
          * @brief Calculate Riemann tensor.
          * 
-         * Riemann tensor is calculated in form
-         * \f$
-         * R^{\mu}_{\nu\kappa\lambda}.
-         * \f$
+         * Riemann tensor is calculated in the form
+         * \f[
+         * \tensor{R}{^\mu_\nu_\kappa_\lambda} = 
+         * \tensor{\Gamma}{^\mu_\nu_\lambda_{,\kappa}} -
+         * \tensor{\Gamma}{^\mu_\nu_\kappa_{,\lambda}} +
+         * \tensor{\Gamma}{^\mu_\rho_\kappa} \tensor{\Gamma}{^\rho_\nu_\lambda} -
+         * \tensor{\Gamma}{^\mu_\rho_\lambda} \tensor{\Gamma}{^\rho_\nu_\kappa}.
+         * \f]
          * 
          * @param y coordinate variables
          */
@@ -87,7 +105,7 @@ namespace gr2
         // ========== Getters ========== 
 
         /**
-         * @brief Get spatial dimensions of spacetime.
+         * @brief Get spatial dimensions of space(-time).
          * 
          * @return int dimension
          */
@@ -105,7 +123,7 @@ namespace gr2
         /**
          * @brief Get Christoffel symbols.
          * 
-         * Christoffel symbols are in form \f$\Gamma^{\mu}_{\nu\kappa}\f$.
+         * Christoffel symbols are in form \f$\tensor{\Gamma}{^\mu_\nu_\kappa}\f$.
          * 
          * @return real*** Christoffel symbols
          */
@@ -114,7 +132,7 @@ namespace gr2
         /**
          * @brief Get Riemann tensor.
          * 
-         * Riemann tensor is in form of \f$R^{\mu}_{\nu\kappa\lambda}\f$.
+         * Riemann tensor is in form of \f$\tensor{R}{^\mu_\nu_\kappa_\lambda}\f$.
          * 
          * @return real**** Riemann tensor
          */

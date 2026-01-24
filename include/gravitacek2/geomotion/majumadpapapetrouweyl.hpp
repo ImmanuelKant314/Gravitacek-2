@@ -1,3 +1,12 @@
+/**
+ * @file majumadpapapetrouweyl.hpp
+ * @author Karel Kraus
+ * @brief Class representing general Majumdar-Papapetrou spacetime in Weyl
+ * coordinates.
+ * 
+ * @copyright Copyright (c) 2026
+ */
+
 #pragma once
 #include "gravitacek2/geomotion/geomotion.hpp"
 #include <vector>
@@ -6,8 +15,8 @@
 namespace gr2
 {
     /**
-     * @brief Class representing geodesic motion in axially symmetric 
-     * Majumdar-Papapetrou spacetime. 
+     * @brief GeoMotion class for general axially symmetric Majumdar-Papapetrou
+     * space-time in Weyl coordiantes.
      * 
      * Spacetime is described in cylindrical coordinates by metric
      * \f[
@@ -20,7 +29,7 @@ namespace gr2
      * \end{pmatrix}
      * \f]
      * \f$t\f$ is time coordinate and \f$\rho\f$, \f$\phi\f$, \f$z\f$ are coordinates
-     * fo cylindrical type. \f$N\f$ is lapsa function and depends on \f$\rho\f$ and
+     * fo cylindrical type. \f$N\f$ is lapse function and depends on \f$\rho\f$ and
      * \f$z\f$.
      */
     class MajumdarPapapetrouWeyl : public GeoMotion
@@ -79,42 +88,42 @@ namespace gr2
         /**
          * @brief Get value of \f$N^{-1}\f$.
          * 
-         * @return real value of \f$N^{-1}\f$
+         * @return value of \f$N^{-1}\f$
          */
         real get_N_inv() const;
 
         /**
          * @brief Get value of \f$(N^{-1})_{,\rho}\f$.
          * 
-         * @return real value of \f$(N^{-1})_{,\rho}\f$
+         * @return value of \f$(N^{-1})_{,\rho}\f$
          */
         real get_N_inv_rho() const;
 
         /**
-         * @brief Get value of \f$(N^{-1}_{,z}\f$.
+         * @brief Get value of \f$(N^{-1})_{,z}\f$.
          * 
-         * @return real value of \f$(N^{-1})_{,z}\f$
+         * @return value of \f$(N^{-1})_{,z}\f$
          */
         real get_N_inv_z() const;
 
         /**
          * @brief Get value of \f$(N^{-1})_{,\rho\rho}\f$.
          * 
-         * @return real value of \f$(N^{-1})_{,\rho\rho}\f$
+         * @return value of \f$(N^{-1})_{,\rho\rho}\f$
          */
         real get_N_inv_rhorho() const;
 
         /**
          * @brief Get value of \f$(N^{-1})_{,\rho z}\f$.
          * 
-         * @return real value of \f$(N^{-1})_{,\rho z}\f$
+         * @return value of \f$(N^{-1})_{,\rho z}\f$
          */
         real get_N_inv_rhoz() const;
 
         /**
          * @brief Get value of \f$(N^{-1})_{,zz}\f$.
          * 
-         * @return real value of \f$(N^{-1})_{,zz}\f$
+         * @return value of \f$(N^{-1})_{,zz}\f$
          */
         real get_N_inv_zz() const;
 
@@ -125,11 +134,27 @@ namespace gr2
         virtual void calculate_riemann_tensor(const real *y) override;
     };
 
+    /**
+     * @brief GeoMotion class for superposition of axially symmetric
+     * Majumdar-Papapetrou space-times in Weyl coordinates.
+     * 
+     * For lapse function \f$N\f$ of \f$n\f$ individual Majumdar-Papapetrou
+     * space-times it holds that
+     * \f[
+     * \frac{1}{N} = \sum_{i=1}^n \frac{1}{N_i} - n + 1,
+     * \f]
+     * where $N_i$ are lapse functions for individual space-times.
+     */
     class CombinedMPW : public MajumdarPapapetrouWeyl
     {
     protected:
-        std::vector<std::shared_ptr<MajumdarPapapetrouWeyl>> sources;
+        std::vector<std::shared_ptr<MajumdarPapapetrouWeyl>> sources;   //!<vector of individual spacetimes
     public:
+        /**
+         * @brief Construct a new CombinedMPW object.
+         * 
+         * @param sources vector of individual sources
+         */
         CombinedMPW(std::vector<std::shared_ptr<MajumdarPapapetrouWeyl>> sources);
         ~CombinedMPW();
 

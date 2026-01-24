@@ -1,23 +1,32 @@
+/**
+ * @file weyl.hpp
+ * @author Karel Kraus
+ * @brief Class representing general Weyl space-time(s) in Weyl coordinates.
+ * 
+ * @copyright Copyright (c) 2026
+ */
+
 #pragma once
 #include <vector>
 #include <memory>
-
 #include "gravitacek2/geomotion/geomotion.hpp"
 
 namespace gr2
 {
+    /**
+     * @brief Ways to calculate metric function \f$\lambda\f$.
+     * 
+     */
     enum LambdaEvaluation
     {
-        exact,
-        diff,
-        integral,
-        custom1,
-        custom2,
-        custom3
+        exact,      //!<calculate lambda exactly (not always available)
+        diff,       //!<calculate lambda by differentiation
+        integral,   //!<calculate lambda by integral
+        custom,     //!<calculate lambda by used defined special method (awailable if you implement it)
     };
 
     /**
-     * @brief Class representing geodesic motion in general Weyl spacetime.
+     * @brief GeoMotion class for general Weyl spacetime in Weyl coordiantes.
      * 
      * Spacetime is described by metric
      * \f[
@@ -29,21 +38,18 @@ namespace gr2
      * 0 & 0 & 0 & e^{2\lambda - 2\nu}
      * \end{pmatrix}.
      * \f]
-     * \f$t\f$ is time coordinate and \f$\rho\f$, \f$\phi\f$, \f$z\f$ are coordinates
-     * of cylindrical type. \f$\nu\f$ and \f$\lambda\f$ are  metric functions 
-     * dependent on \f$\rho\f$ and \f$z\f$.
+     * \f$t\f$ is time coordinate and \f$\rho\f$, \f$\phi\f$, \f$z\f$ are spatial coordinates of cylindrical type. \f$\nu\f$ and \f$\lambda\f$ are metric functions dependent on \f$\rho\f$ and \f$z\f$.
      * 
-     * Metric function \f$\nu\f$ satisfies Laplace equation in form of
+     * Metric function \f$\nu\f$ satisfies Laplace equation in the form of
      * \f[
      * \Delta \nu = \frac{1}{\rho}\nu_{,\rho} + \nu_{,\rho\rho} + \nu_{,zz} = 0.
      * \f]
-     * Metric function \f$\lambda\f$ can be described using derivatives
-     * \f[
-     * \begin{align*}
+     * Metric function \f$\lambda\f$ can be described using derivatives of
+     * metric function $\nu$ as
+     * \f{align*}
      * \lambda_{,\rho} &= \rho \left[ (\nu_{,\rho})^2 - (\nu_{,z})^2\right],\\
      * \lambda_{,z} &= 2\rho \nu_{,\rho}\nu_{,z}.
-     * \end{align*}
-     * \f]
+     * \f}
      */
     class Weyl : public GeoMotion
     {
@@ -51,7 +57,7 @@ namespace gr2
         LambdaEvaluation lambda_eval_init;   //!<type of calculation of \f$\lambda\f$ when initializing
         LambdaEvaluation lambda_eval_run;    //!<type of calculation of \f$\lambda\f$ when running simulation
         
-        int lambda_index;               //!<index where value of \f$\lambda\f$ should be stored
+        int lambda_index;   //!<index where value of \f$\lambda\f$ should be stored
 
         real nu;            //!<value of \f$\nu\f$
         real nu_rho;        //!<value of \f$\nu_{,\rho}\f$
@@ -68,17 +74,28 @@ namespace gr2
         real lambda_zz;     //!<value of \f$\lambda_{,zz}\f$
 
         /**
-         * @brief Calculate value of \f$\lambda\f$ by integrating from \f$z = \inf\f$ to \f$z = z_0\f$.
+         * @brief Calculate value of \f$\lambda\f$ by integrating from \f$z =
+         * \infty\f$ to \f$z = z_0\f$.
          * 
-         * Integration is done by Romberg's algorithm with K=5. Function integrated
-         * is
+         * Integration is done by Romberg's algorithm with \f$K=5\f$. Integrated
+         * function is
          * \f[
-         * \lambda(\rho, z) = -\int_{0}^{\frac{1}{1+|z|}} \frac{1}{t^2}\lambda_{,z}\left(\rho, \frac{1}{t} - 1\right) \dd t.
+         * \lambda(\rho, z) = -\int_{0}^{\frac{1}{1+|z|}} 
+         * \frac{1}{t^2}\lambda_{,z}\left(\rho, \frac{1}{t} - 1\right) \dd t.
          * \f]
          * 
          * @param y coordinate values
          */
         void calculate_lambda_from_inf_to_z(const real* y, const real& eps=1e-10);
+
+        /**
+         * @brief Calculate metric function \f$\lambda\f$ using differential
+         * equation.
+         * 
+         * This way the value can be calculated only during integration of ODE.
+         * 
+         * @param y coordinate values
+         */
         void calculate_lambda_diff(const real* y);
 
     public:
@@ -95,8 +112,9 @@ namespace gr2
         /**
          * @brief Construct a new Weyl object.
          * 
-         * @param lambda_exact true if value of \f$\lambda\f$ should be calculated exaxtly
-         */
+         * @param init way to calculate \f$\lambda\f$ for initialization
+         * @param run way to calculate \f$\lambda\f$ for integration of ODE
+        */
         Weyl(LambdaEvaluation init, LambdaEvaluation run);
 
         /**
@@ -120,7 +138,8 @@ namespace gr2
         virtual void calculate_nu1(const real *y) = 0;
 
         /**
-         * @brief Calculate value of \f$\nu\f$ and its first and second derivatives.
+         * @brief Calculate value of \f$\nu\f$ and its first and second
+         * derivatives.
          * 
          * @param y coordinate values
          */
@@ -129,77 +148,68 @@ namespace gr2
         /**
          * @brief Get value of \f$\nu\f$.
          * 
-         * @return real value of \f$\nu\f$
+         * @return value of \f$\nu\f$
          */
         real get_nu() const;
 
         /**
          * @brief Get value of \f$\nu_{,\rho}\f$.
          * 
-         * @return real value of \f$\nu_{,\rho}\f$
+         * @return value of \f$\nu_{,\rho}\f$
          */
         real get_nu_rho() const;
 
         /**
          * @brief Get value of \f$\nu_{,z}\f$.
          * 
-         * @return real value of \f$\nu_{,z}\f$
+         * @return value of \f$\nu_{,z}\f$
          */
         real get_nu_z() const;
 
         /**
          * @brief Get value of \f$\nu_{,\rho\rho}\f$.
          * 
-         * @return real value of \f$\nu_{,\rho\rho}\f$
+         * @return value of \f$\nu_{,\rho\rho}\f$
          */
         real get_nu_rhorho() const;
 
         /**
          * @brief Get value of \f$\nu_{,\rho z}\f$.
          * 
-         * @return real value of \f$\nu_{,\rho z}\f$
+         * @return value of \f$\nu_{,\rho z}\f$
          */
         real get_nu_rhoz() const;
 
         /**
          * @brief Get value of \f$\nu_{,zz}\f$.
          * 
-         * @return real value of \f$\nu_{,zz}\f$
+         * @return value of \f$\nu_{,zz}\f$
          */
         real get_nu_zz() const;
 
         /**
-         * @brief Calculate value of \f$\lambda\f$.
-         * 
-         * Value of \f$\lambda\f$ is usually calculated by integral or exactly if
-         * formula is known.
+         * @brief Calculate value of \f$\lambda\f$ for initialization.
          * 
          * @param y coordinate variables
          */
         virtual void calculate_lambda_init(const real* y) = 0;
 
         /**
-         * @brief Calculate value of \f$\lambda\f$ optimally.
+         * @brief Calculate value of \f$\lambda\f$ for integration of ODE.
          * 
-         * If `lambda_exact = true` then value is calculated exactly, else
-         * value is extracted from `y`.
-         * 
-         * @param y  coordinate variables (may include value of \f$\lambda\f$)
+         * @param y coordinate variables
          */
         virtual void calculate_lambda_run(const real* y) = 0;
 
         /**
-         * @brief Get value of \f$\lambda\f$
+         * @brief Get value of \f$\lambda\f$.
          * 
-         * @return real value of \f$\lambda\f$
+         * @return value of \f$\lambda\f$
          */
         real get_lambda() const;
 
         /**
          * @brief Set index, where value of \f$\lambda\f$ is saved.
-         * 
-         * When calculating with `y` and `lambda_exact = false`, value of 
-         * \f$\lambda\f$ has to be given using `y[lambda_index]`.
          * 
          * @param lambda_index index of value \f$\lambda\f$
          */
@@ -207,9 +217,6 @@ namespace gr2
 
         /**
          * @brief Get index, where value of \f$\lambda\f$ is saved.
-         * 
-         * When calculating with `y` and `lambda_exact = false`, value of 
-         * \f$\lambda\f$ has to be given using `y[lambda_index]`.
          * 
          * @return value of lambda_index 
          */
@@ -226,17 +233,30 @@ namespace gr2
     };
 
     /**
-     * @brief Class representing combinations of sources in Weyl spacetimes.
+     * @brief GeoMotion class for superposition Weyl space-times in Weyl
+     * coordinates.
      * 
-     * For the combination we assume that sources are on the equatorial plane
+     * For the combination we assume that sources are on the equatorial plane,
+     * because this enable us to calculate metric function \f$\lambda\f$ 
+     * simpler.
      * 
+     * Metric function \f$\nu\f$ of \f$n\f$ individual sources is gives as 
+     * \f[
+     * \nu = \sum_{i=1}{n} \nu_i,
+     * \f]
+     * where \f$\nu_i\f$ are potentials for each individual source.
      */
     class CombinedWeyl : public Weyl
     {
     protected:
-        std::vector<std::shared_ptr<Weyl>> sources;
+        std::vector<std::shared_ptr<Weyl>> sources; //!<vector of individual sources
         virtual void calculate_lambda_integral(const real* y);
     public:
+        /**
+         * @brief Construct a new CombinedWeyl object.
+         * 
+         * @param sources vector of individual sources (lying on equatorial plane)
+         */
         CombinedWeyl(std::vector<std::shared_ptr<Weyl>> sources);
         ~CombinedWeyl();
 
