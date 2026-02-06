@@ -1,3 +1,11 @@
+/**
+ * @file integrator.hpp
+ * @author Karel Kraus
+ * @brief Integrator for solving ODEs.
+ * 
+ * @copyright Copyright (c) 2026
+ */
+
 #pragma once
 
 #include "gravitacek2/setup.hpp"
@@ -11,21 +19,27 @@
 
 namespace gr2
 {
+    /**
+     * @brief Integrator for solving ODEs.
+     * 
+     * Integrator includes stepping algorithm, step-size controller and 
+     * handling events.
+     */
     class Integrator
     {
     protected:
-        // ========== Components of itnegrator ========== 
-        std::shared_ptr<OdeSystem> ode;     //!<solved system of ordinary differential equations
-        StepperBase *stepper;               //!<stepper used for integrating
+        // ========== Components of integrator ========== 
+        std::shared_ptr<OdeSystem> ode;     //!<solved system of ODEs
+        StepperBase *stepper;               //!<stepper used for integration
         StepControllerBase *stepcontroller; //!<step controller
 
         // ========== Events ========== 
-        std::vector<std::shared_ptr<Event>>events_data;        //!<vector of data events
-        std::vector<std::shared_ptr<Event>> events_modifying;   //!<vector of modyfying events
+        std::vector<std::shared_ptr<Event>> events_data;        //!<vector of data events
+        std::vector<std::shared_ptr<Event>> events_modifying;   //!<vector of modifying events
         
         // ========== Current event ==========
-        std::shared_ptr<Event> current_event;           //!<event, which is being proceeded
-        bool current_event_terminal;    //!<is the current event terminal?
+        std::shared_ptr<Event> current_event;   //!<event, which is being proceeded
+        bool current_event_terminal;            //!<is the current event terminal?
 
         // ========== Values of events ========== 
         real* events_modifying_values;  //!<tracked values of modifying events
@@ -36,12 +50,12 @@ namespace gr2
         // ========== Step size ========== 
         real h;     //!<current value of time step
         real h2;    //!<value of time step for trying new step
-        real h3;    //!<value of time step for events
+        real h3;    //!<value of time step for event
 
         // ========== Time variable ========== 
         real t;     //!<current value of time
         real t2;    //!<value of time for new time step
-        real t3;    //!<value of time for events
+        real t3;    //!<value of time for event
 
         // ========== Coordinate variables ========== 
         real *yt;   //!<array for storing current value of \f$\vec{y}\f$
@@ -59,20 +73,30 @@ namespace gr2
         real *err3;     //!<array for calculating error in event
 
         // ========== Other variables ==========
-        bool dense;
+        bool dense; //!<true if dense output should be used
 
         /**
-         * @brief Initializing basic variables.
+         * @brief Initializing basic variables. 
          * 
+         * This means creating new vectors and setting pointers to nullptr.
          */
         void basic_setup();
 
         /**
          * @brief Ininialize stepper based on its name.
          * 
-         * @param stepper_name Name of stepper
+         * @param stepper_name name of stepper
          */
         void init_stepper(const std::string& stepper_name);
+        //TODO: This should be done using enum
+
+        /**
+         * @brief Try to trigger the event.
+         * 
+         * @param event event that we study
+         * @param previous_value_of_event previous value of given event
+         * @return true if event is triggered, else false
+         */
         bool solve_event(std::shared_ptr<Event> event, const real& previous_value_of_event);
 
     public:
@@ -81,7 +105,7 @@ namespace gr2
          * 
          * This constructor assumes constant steps in time.
          * 
-         * @param ode set of ordinary differential equations to be solved
+         * @param ode ODEs to be solved
          * @param stepper_name name of stepper
          */
         Integrator(std::shared_ptr<OdeSystem> ode, const std::string& stepper_name, const bool &dense=false);
@@ -91,12 +115,12 @@ namespace gr2
          * 
          * This constructor assumes StandardStepController.
          * 
-         * @param ode set of ordinary differential equations to be solved
+         * @param ode ODEs to be solved
          * @param stepper_name name of stepper
          * @param eps_abs expected absolute error
          * @param eps_rel expected relative error
-         * @param a_y coefficient 
-         * @param a_dydt coefficient
+         * @param a_y coefficient for StandardStepController
+         * @param a_dydt coefficient for StandardStepController
          */
         Integrator(std::shared_ptr<OdeSystem> ode, const std::string& stepper_name, const real &atol, const real &rtol, const bool &dense = false);
 
@@ -107,19 +131,19 @@ namespace gr2
         ~Integrator();
 
         /**
-         * @brief Add event to simulation.
+         * @brief Add event for integration.
          * 
-         * @param event 
+         * @param event event for integration
          */
         void add_event(std::shared_ptr<Event> event);
 
         /**
          * @brief Integrate ordinary differential equation
          * 
-         * @param y_start 
-         * @param t_start 
-         * @param t_end 
-         * @param h_start 
+         * @param y_start initial coordinate values
+         * @param t_start intial time
+         * @param t_end final time
+         * @param h_start initial time step
          */
         void integrate(const real y_start[], const real &t_start, const real &t_end, const real &h_start);
     };
